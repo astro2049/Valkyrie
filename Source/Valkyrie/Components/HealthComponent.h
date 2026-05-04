@@ -1,0 +1,58 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
+#include "HealthComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+	FHealthChanged,
+	float, aCurrentHealth,
+	float, aMaxHealth
+);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDeath);
+
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class VALKYRIE_API UHealthComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+public:
+	UHealthComponent();
+
+	UFUNCTION(BlueprintCallable, Category="Health")
+	void ApplyDamage(float DamageAmount);
+
+	UFUNCTION(BlueprintCallable, Category="Health")
+	void ResetHealth();
+
+	UFUNCTION(BlueprintPure, Category="Health")
+	float GetHealth() const { return myHealth; }
+
+	UFUNCTION(BlueprintPure, Category="Health")
+	float GetMaxHealth() const { return myMaxHealth; }
+
+	UFUNCTION(BlueprintPure, Category="Health")
+	bool IsDead() const { return myIsDead; }
+
+	UPROPERTY(BlueprintAssignable, Category="Health")
+	FHealthChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="Health")
+	FDeath OnDeath;
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health", meta=(AllowPrivateAccess="true"))
+	float myMaxHealth{100.f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
+	float myHealth{100.f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
+	bool myIsDead{false};
+};

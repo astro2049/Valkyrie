@@ -3,6 +3,10 @@
 
 #include "WeaponComponent.h"
 
+#include "DrawDebugHelpers.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
+#include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -88,6 +92,10 @@ void UWeaponComponent::Fire()
 
 	if (bHit) {
 		if (AActor* hitActor = hitResult.GetActor()) {
+			if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
+				health->ApplyDamage(myDamage);
+			}
+
 			myOnHitActor.Broadcast(hitActor, myDamage);
 		}
 	}

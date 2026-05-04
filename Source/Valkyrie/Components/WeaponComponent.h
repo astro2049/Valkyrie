@@ -8,8 +8,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FWeaponHitActor,
-	AActor*, HitActor,
-	float, Damage
+	AActor*, aHitActor,
+	float, aDamage
 );
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
