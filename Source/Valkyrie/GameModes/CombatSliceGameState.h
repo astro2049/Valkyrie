@@ -29,13 +29,10 @@ class VALKYRIE_API ACombatSliceGameState : public AGameStateBase
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void SetCombatSliceState(ECombatSliceState aCombatSliceState);
 
-	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void SetObjectiveText(const FText& anObjectiveText);
 
-	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer);
 
 	UFUNCTION(BlueprintPure, Category="Combat Slice")

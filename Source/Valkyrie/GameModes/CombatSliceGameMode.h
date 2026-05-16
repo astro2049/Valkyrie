@@ -24,6 +24,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void CompleteExtraction();
 
+	UFUNCTION(BlueprintImplementableEvent, Category="Combat Slice")
+	void OnDefenseCompleted();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Combat Slice")
+	void OnExtractionCompleted();
+
 	UFUNCTION(BlueprintPure, Category="Combat Slice")
 	float GetDefenseTimeRemaining() const { return myDefenseTimeRemaining; }
 

@@ -53,6 +53,7 @@ void ACombatSliceGameMode::CompleteDefense()
 	SetDefenseTimer(0.f, false);
 
 	GetWorldTimerManager().ClearTimer(myDefenseTimerHandle);
+	OnDefenseCompleted();
 }
 
 void ACombatSliceGameMode::CompleteExtraction()
@@ -64,6 +65,7 @@ void ACombatSliceGameMode::CompleteExtraction()
 		FText::FromString(TEXT("Extraction Complete"))
 	);
 	SetDefenseTimer(0.f, false);
+	OnExtractionCompleted();
 }
 
 void ACombatSliceGameMode::TickDefenseTimer()
