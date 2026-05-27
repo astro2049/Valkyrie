@@ -23,23 +23,19 @@ public:
 	UHealthComponent();
 
 	UFUNCTION(BlueprintCallable, Category="Health")
-	void ApplyDamage(float DamageAmount);
-
+	void ApplyDamage(float aDamage);
 	UFUNCTION(BlueprintCallable, Category="Health")
 	void ResetHealth();
 
 	UFUNCTION(BlueprintPure, Category="Health")
 	float GetHealth() const { return myHealth; }
-
 	UFUNCTION(BlueprintPure, Category="Health")
 	float GetMaxHealth() const { return myMaxHealth; }
-
 	UFUNCTION(BlueprintPure, Category="Health")
 	bool IsDead() const { return myIsDead; }
 
 	UPROPERTY(BlueprintAssignable, Category="Health")
 	FHealthChanged OnHealthChanged;
-
 	UPROPERTY(BlueprintAssignable, Category="Health")
 	FDeath OnDeath;
 
@@ -49,10 +45,8 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health", meta=(AllowPrivateAccess="true"))
 	float myMaxHealth{100.f};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
 	float myHealth{100.f};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
 	bool myIsDead{false};
 };

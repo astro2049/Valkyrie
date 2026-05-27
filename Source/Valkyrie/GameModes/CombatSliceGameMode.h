@@ -17,16 +17,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void StartGenerator();
-
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void CompleteDefense();
-
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void CompleteExtraction();
 
 	UFUNCTION(BlueprintImplementableEvent, Category="Combat Slice")
 	void OnDefenseCompleted();
-
 	UFUNCTION(BlueprintImplementableEvent, Category="Combat Slice")
 	void OnExtractionCompleted();
 
@@ -38,14 +35,11 @@ protected:
 
 private:
 	void TickDefenseTimer();
-
 	void SetCombatSliceState(ECombatSliceState aNewState, const FText& anObjectiveText) const;
-
 	void SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
 	float myDefenseDuration{60.f};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
 	float myDefenseTimeRemaining{60.f};
 
