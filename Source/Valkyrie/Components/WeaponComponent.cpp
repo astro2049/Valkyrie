@@ -25,15 +25,19 @@ void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-
+	myMagazineSize = FMath::Max(1, myMagazineSize);
+	myAmmoInMag = FMath::Clamp(myAmmoInMag, 0, myMagazineSize);
+	myReserveAmmo = FMath::Max(0, myReserveAmmo);
+	myReloadDuration = FMath::Max(0.f, myReloadDuration);
+	myIsReloading = false;
+	BroadcastWeaponStateChanged();
 }
 
 
 // Called every frame
-void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UWeaponComponent::TickComponent(float aDeltaTime, ELevelTick aTickType, FActorComponentTickFunction* aThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(aDeltaTime, aTickType, aThisTickFunction);
 
 	// ...
 }
@@ -42,12 +46,12 @@ void UWeaponComponent::Fire()
 {
 	UWorld* world = GetWorld();
 	APawn* ownerPawn = Cast<APawn>(GetOwner());
-	if (!world || !ownerPawn) {
+	if (!world || !ownerPawn || myIsReloading) {
 		return;
 	}
 
-	APlayerController* playerController = Cast<APlayerController>(ownerPawn->GetController());
-	if (!playerController || !playerController->PlayerCameraManager) {
+	if (myAmmoInMag <= 0) {
+		BroadcastWeaponStateChanged();
 		return;
 	}
 
@@ -57,7 +61,14 @@ void UWeaponComponent::Fire()
 		return;
 	}
 
+	APlayerController* playerController = Cast<APlayerController>(ownerPawn->GetController());
+	if (!playerController || !playerController->PlayerCameraManager) {
+		return;
+	}
+
 	myLastFiredTime = now;
+	myAmmoInMag = FMath::Max(0, myAmmoInMag - 1);
+	BroadcastWeaponStateChanged();
 
 	const FVector start = playerController->PlayerCameraManager->GetCameraLocation();
 	const FVector direction = playerController->PlayerCameraManager->GetActorForwardVector();
@@ -99,4 +110,62 @@ void UWeaponComponent::Fire()
 			myOnHitActor.Broadcast(hitActor, myDamage);
 		}
 	}
+}
+
+void UWeaponComponent::StartReload()
+{
+	UWorld* world = GetWorld();
+	if (!world || myIsReloading || myAmmoInMag >= myMagazineSize || myReserveAmmo <= 0) {
+		return;
+	}
+
+	myIsReloading = true;
+	BroadcastWeaponStateChanged();
+
+	if (myReloadDuration <= 0.f) {
+		FinishReload();
+		return;
+	}
+
+	world->GetTimerManager().SetTimer(
+		myReloadTimerHandle,
+		this,
+		&UWeaponComponent::FinishReload,
+		myReloadDuration,
+		false
+	);
+}
+
+void UWeaponComponent::CancelReload()
+{
+	UWorld* world = GetWorld();
+	if (world) {
+		world->GetTimerManager().ClearTimer(myReloadTimerHandle);
+	}
+
+	if (myIsReloading) {
+		myIsReloading = false;
+		BroadcastWeaponStateChanged();
+	}
+}
+
+void UWeaponComponent::FinishReload()
+{
+	if (!myIsReloading) {
+		return;
+	}
+
+	const int ammoNeeded = FMath::Max(0, myMagazineSize - myAmmoInMag);
+	const int ammoToLoad = FMath::Min(ammoNeeded, myReserveAmmo);
+
+	myAmmoInMag += ammoToLoad;
+	myReserveAmmo -= ammoToLoad;
+	myIsReloading = false;
+
+	BroadcastWeaponStateChanged();
+}
+
+void UWeaponComponent::BroadcastWeaponStateChanged()
+{
+	myOnWeaponStateChanged.Broadcast();
 }
