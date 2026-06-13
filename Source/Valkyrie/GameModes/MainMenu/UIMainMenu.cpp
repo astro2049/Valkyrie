@@ -2,8 +2,8 @@
 
 #include "UIMainMenu.h"
 
-#include "UIMainMenuPanel.h"
-#include "MapList/UIMapListPanel.h"
+#include "MainMenuPanel/UIMainMenuPanel.h"
+#include "MapListPanel//UIMapListPanel.h"
 
 void UUIMainMenu::ShowMainMenu()
 {

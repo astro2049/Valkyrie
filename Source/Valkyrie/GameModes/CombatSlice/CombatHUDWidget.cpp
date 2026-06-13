@@ -4,7 +4,7 @@
 
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
-#include "PlayerCombatViewModel.h"
+#include "Valkyrie/Player/PlayerCombatViewModel.h"
 
 void UCombatHUDWidget::SetViewModel(UPlayerCombatViewModel* aViewModel)
 {

@@ -2,7 +2,7 @@
 
 #include "PlayerCombatViewModel.h"
 
-#include "Valkyrie//Components/WeaponComponent.h"
+#include "Valkyrie/Components/WeaponComponent.h"
 
 void UPlayerCombatViewModel::BindToWeapon(UWeaponComponent* aWeaponComponent)
 {
