@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameStateBase.h"
-#include "CombatSliceTypes.h"
-#include "CombatSliceGameState.generated.h"
+#include "Valkyrie/GameModes/ValkGameState.h"
+#include "ExtractionTypes.h"
+#include "ExtractionGameState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 	FCombatSliceStateChanged,
@@ -24,7 +24,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 );
 
 UCLASS()
-class VALKYRIE_API ACombatSliceGameState : public AGameStateBase
+class VALKYRIE_API AExtractionGameState : public AValkGameState
 {
 	GENERATED_BODY()
 

@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
-#include "CombatSliceTypes.h"
-#include "CombatSliceGameMode.generated.h"
+#include "Valkyrie/GameModes/ValkGameMode.h"
+#include "ExtractionTypes.h"
+#include "ExtractionGameMode.generated.h"
 
 UCLASS()
-class VALKYRIE_API ACombatSliceGameMode : public AGameModeBase
+class VALKYRIE_API AExtractionGameMode : public AValkGameMode
 {
 	GENERATED_BODY()
 
 public:
-	ACombatSliceGameMode();
+	AExtractionGameMode();
 
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void StartGenerator();

@@ -1,0 +1,153 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "ExtractionPlayerController.h"
+
+#include "UIExtractionHUD.h"
+#include "ExtractionGameState.h"
+#include "Blueprint/UserWidget.h"
+#include "Valkyrie/Components/HealthComponent.h"
+#include "Valkyrie/Components/WeaponComponent.h"
+#include "ExtractionHUDViewModel.h"
+
+void AExtractionPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetInputGameOnly();
+	AddInputMappingContext();
+	CreateHUDAndViewModel();
+	BindHUDToPawn();
+	BindHUDToGameState();
+}
+
+void AExtractionPlayerController::OnPossess(APawn* aPawn)
+{
+	Super::OnPossess(aPawn);
+	BindHUDToPawn();
+}
+
+void AExtractionPlayerController::AcknowledgePossession(APawn* aPawn)
+{
+	Super::AcknowledgePossession(aPawn);
+	BindHUDToPawn();
+}
+
+void AExtractionPlayerController::CreateHUDAndViewModel()
+{
+	if (!IsLocalController()) {
+		return;
+	}
+
+	if (!myHUDViewModel) {
+		myHUDViewModel = NewObject<UExtractionHUDViewModel>(this);
+	}
+
+	if (!myHUDWidget && myHUDWidgetClass) {
+		myHUDWidget = CreateWidget<UUIExtractionHUD>(this, myHUDWidgetClass);
+		if (myHUDWidget) {
+			myHUDWidget->SetViewModel(myHUDViewModel);
+			myHUDWidget->AddToViewport();
+		}
+	}
+}
+
+void AExtractionPlayerController::BindHUDToPawn()
+{
+	if (!IsLocalController() || !myHUDViewModel) {
+		return;
+	}
+
+	APawn* controlledPawn = GetPawn();
+	UWeaponComponent* weaponComponent = controlledPawn
+		? controlledPawn->FindComponentByClass<UWeaponComponent>()
+		: nullptr;
+	myHUDViewModel->BindToWeapon(weaponComponent);
+
+	UHealthComponent* healthComponent = controlledPawn
+		? controlledPawn->FindComponentByClass<UHealthComponent>()
+		: nullptr;
+	myHUDViewModel->BindToHealth(healthComponent);
+
+	if (myBoundHealthComponent != healthComponent) {
+		if (myBoundHealthComponent) {
+			myBoundHealthComponent->OnDeath.RemoveDynamic(
+				this,
+				&AExtractionPlayerController::HandlePlayerDeath
+			);
+		}
+
+		myBoundHealthComponent = healthComponent;
+		if (myBoundHealthComponent) {
+			myBoundHealthComponent->OnDeath.AddUniqueDynamic(
+				this,
+				&AExtractionPlayerController::HandlePlayerDeath
+			);
+		}
+	}
+}
+
+void AExtractionPlayerController::BindHUDToGameState()
+{
+	if (!IsLocalController() || !myHUDViewModel || !GetWorld()) {
+		return;
+	}
+
+	AExtractionGameState* combatSliceGameState = GetWorld()->GetGameState<AExtractionGameState>();
+	myHUDViewModel->BindToExtractionGameState(combatSliceGameState);
+
+	if (myBoundCombatSliceGameState != combatSliceGameState) {
+		if (myBoundCombatSliceGameState) {
+			myBoundCombatSliceGameState->OnCombatSliceStateChanged.RemoveDynamic(
+				this,
+				&AExtractionPlayerController::HandleCombatSliceStateChanged
+			);
+		}
+
+		myBoundCombatSliceGameState = combatSliceGameState;
+		if (myBoundCombatSliceGameState) {
+			myBoundCombatSliceGameState->OnCombatSliceStateChanged.AddUniqueDynamic(
+				this,
+				&AExtractionPlayerController::HandleCombatSliceStateChanged
+			);
+			HandleCombatSliceStateChanged(myBoundCombatSliceGameState->GetCombatSliceState());
+		}
+	}
+}
+
+void AExtractionPlayerController::ShowDeathMenu()
+{
+	if (!IsLocalController() || myDeathMenuWidget || !myDeathMenuWidgetClass) {
+		return;
+	}
+
+	myDeathMenuWidget = CreateWidget<UUserWidget>(this, myDeathMenuWidgetClass);
+	if (myDeathMenuWidget) {
+		myDeathMenuWidget->AddToViewport();
+		SetInputUIOnly(myDeathMenuWidget);
+	}
+}
+
+void AExtractionPlayerController::ShowVictoryMenu()
+{
+	if (!IsLocalController() || myVictoryMenuWidget || !myVictoryMenuWidgetClass) {
+		return;
+	}
+
+	myVictoryMenuWidget = CreateWidget<UUserWidget>(this, myVictoryMenuWidgetClass);
+	if (myVictoryMenuWidget) {
+		myVictoryMenuWidget->AddToViewport();
+		SetInputUIOnly(myVictoryMenuWidget);
+	}
+}
+
+void AExtractionPlayerController::HandlePlayerDeath()
+{
+	ShowDeathMenu();
+}
+
+void AExtractionPlayerController::HandleCombatSliceStateChanged(ECombatSliceState aCombatSliceState)
+{
+	if (aCombatSliceState == ECombatSliceState::Completed) {
+		ShowVictoryMenu();
+	}
+}

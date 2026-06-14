@@ -155,8 +155,8 @@ void UWeaponComponent::FinishReload()
 		return;
 	}
 
-	const int ammoNeeded = FMath::Max(0, myMagazineSize - myAmmoInMag);
-	const int ammoToLoad = FMath::Min(ammoNeeded, myReserveAmmo);
+	const int32 ammoNeeded = FMath::Max(0, myMagazineSize - myAmmoInMag);
+	const int32 ammoToLoad = FMath::Min(ammoNeeded, myReserveAmmo);
 
 	myAmmoInMag += ammoToLoad;
 	myReserveAmmo -= ammoToLoad;

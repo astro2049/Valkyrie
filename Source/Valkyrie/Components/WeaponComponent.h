@@ -37,11 +37,11 @@ public:
 	void CancelReload();
 
 	UFUNCTION(BlueprintPure, Category="Weapon|Ammo")
-	int GetAmmoInMag() const { return myAmmoInMag; }
+	int32 GetAmmoInMag() const { return myAmmoInMag; }
 	UFUNCTION(BlueprintPure, Category="Weapon|Ammo")
-	int GetReserveAmmo() const { return myReserveAmmo; }
+	int32 GetReserveAmmo() const { return myReserveAmmo; }
 	UFUNCTION(BlueprintPure, Category="Weapon|Ammo")
-	int GetMagazineSize() const { return myMagazineSize; }
+	int32 GetMagazineSize() const { return myMagazineSize; }
 	UFUNCTION(BlueprintPure, Category="Weapon")
 	bool IsReloading() const { return myIsReloading; }
 
@@ -69,11 +69,11 @@ private:
 	bool myDrawDebugTrace{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Ammo", meta=(AllowPrivateAccess="true"))
-	int myMagazineSize{30};
+	int32 myMagazineSize{30};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Ammo", meta=(AllowPrivateAccess="true"))
-	int myAmmoInMag{30};
+	int32 myAmmoInMag{30};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Ammo", meta=(AllowPrivateAccess="true"))
-	int myReserveAmmo{90};
+	int32 myReserveAmmo{90};
 
 	float myLastFiredTime = -1.f;
 

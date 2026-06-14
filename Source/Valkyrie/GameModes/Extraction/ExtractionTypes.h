@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CombatSliceTypes.generated.h"
+#include "ExtractionTypes.generated.h"
 
 UENUM(BlueprintType)
 enum class ECombatSliceState : uint8
