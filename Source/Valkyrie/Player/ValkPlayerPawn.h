@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Pawn.h"
+#include "Valkyrie/Components/InteractionComponent.h"
 #include "ValkPlayerPawn.generated.h"
 
 struct FInputActionValue;
@@ -25,10 +27,13 @@ protected:
 	TObjectPtr<UInputAction> myMoveAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie|Input")
 	TObjectPtr<UInputAction> myLookAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie|Input")
+	TObjectPtr<UInputAction> myInteractAction{nullptr};
 
 private:
 	void HandleMove(const FInputActionValue& anInputValue);
 	void HandleLook(const FInputActionValue& anInputValue);
+	void HandleInteract();
 
 	UFUNCTION(Server, Unreliable)
 	void Server_SyncLocation(FVector aLocation);
@@ -37,4 +42,9 @@ private:
 
 	bool myShouldSyncLocationThisTick{false};
 	bool myShouldSyncRotationThisTick{false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie|Interaction", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UInteractionComponent> myInteractionComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie|Interaction", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<USphereComponent> mySphereComponent;
 };

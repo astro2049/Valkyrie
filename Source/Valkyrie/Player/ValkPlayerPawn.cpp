@@ -11,6 +11,19 @@ AValkPlayerPawn::AValkPlayerPawn()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	SetReplicateMovement(true);
+
+	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
+	mySphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("mySphereComponent"));
+	mySphereComponent->SetupAttachment(RootComponent);
+	mySphereComponent->SetGenerateOverlapEvents(true);
+	mySphereComponent->OnComponentBeginOverlap.AddDynamic(
+		myInteractionComponent.Get(),
+		&UInteractionComponent::HandleBeginOverlap
+	);
+	mySphereComponent->OnComponentEndOverlap.AddDynamic(
+		myInteractionComponent.Get(),
+		&UInteractionComponent::HandleEndOverlap
+	);
 }
 
 void AValkPlayerPawn::Tick(float aDeltaSeconds)
@@ -33,7 +46,7 @@ void AValkPlayerPawn::Tick(float aDeltaSeconds)
 void AValkPlayerPawn::SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(aPlayerInputComponent);
-	
+
 	if (UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(aPlayerInputComponent)) {
 		// move input
 		if (myMoveAction) {
@@ -51,6 +64,15 @@ void AValkPlayerPawn::SetupPlayerInputComponent(UInputComponent* aPlayerInputCom
 				ETriggerEvent::Triggered,
 				this,
 				&AValkPlayerPawn::HandleLook
+			);
+		}
+		// interact
+		if (myInteractAction) {
+			enhancedInputComponent->BindAction(
+				myInteractAction,
+				ETriggerEvent::Started,
+				this,
+				&AValkPlayerPawn::HandleInteract
 			);
 		}
 	}
@@ -74,6 +96,11 @@ void AValkPlayerPawn::HandleLook(const FInputActionValue& anInputValue)
 	}
 }
 
+void AValkPlayerPawn::HandleInteract()
+{
+	myInteractionComponent->TryInteract();
+}
+
 void AValkPlayerPawn::Server_SyncLocation_Implementation(FVector aLocation)
 {
 	SetActorLocation(aLocation, true);
@@ -83,4 +110,3 @@ void AValkPlayerPawn::Server_SyncRotation_Implementation(FRotator aRotation)
 {
 	SetActorRotation(aRotation);
 }
-
