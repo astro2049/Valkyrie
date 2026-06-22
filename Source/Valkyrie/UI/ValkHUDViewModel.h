@@ -15,12 +15,8 @@ class VALKYRIE_API UValkHUDViewModel : public UValkViewModel
 	GENERATED_BODY()
 
 public:
-	void BindToWeapon(UWeaponComponent* aWeaponComponent);
-	void UnbindWeapon();
-	void RefreshFromWeapon();
-	void BindToHealth(UHealthComponent* aHealthComponent);
-	void UnbindHealth();
-	void RefreshFromHealth();
+	void BindToWeaponComponent(UWeaponComponent* aWeaponComponent);
+	void BindToHealthComponent(UHealthComponent* aHealthComponent);
 
 	int32 GetAmmoInMag() const { return myAmmoInMag; }
 	int32 GetReserveAmmo() const { return myReserveAmmo; }
@@ -31,14 +27,14 @@ public:
 	float GetHealthRatio() const;
 	bool ShowHealth() const { return myShowHealth; }
 	bool IsDead() const { return myIsDead; }
+	bool GetShowInteractPrompt() const { return myShowInteractPrompt; }
+	void SetShowInteractPrompt(bool aShowInteractPrompt);
 
 private:
 	UFUNCTION()
 	void HandleWeaponStateChanged();
 	UFUNCTION()
 	void HandleHealthChanged(float aHealth, float aMaxHealth);
-	UFUNCTION()
-	void HandleDeath();
 
 	UPROPERTY()
 	TObjectPtr<UWeaponComponent> myWeaponComponent{nullptr};
@@ -53,4 +49,5 @@ private:
 	float myMaxHealth{0.f};
 	bool myShowHealth{false};
 	bool myIsDead{false};
+	bool myShowInteractPrompt{false};
 };

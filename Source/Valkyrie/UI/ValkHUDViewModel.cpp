@@ -5,44 +5,39 @@
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
 
-void UValkHUDViewModel::BindToWeapon(UWeaponComponent* aWeaponComponent)
+void UValkHUDViewModel::BindToWeaponComponent(UWeaponComponent* aWeaponComponent)
 {
-	if (myWeaponComponent == aWeaponComponent) {
-		RefreshFromWeapon();
-		return;
-	}
-
-	UnbindWeapon();
-
 	myWeaponComponent = aWeaponComponent;
 	if (myWeaponComponent) {
 		myWeaponComponent->myOnWeaponStateChanged.AddUniqueDynamic(
 			this,
 			&UValkHUDViewModel::HandleWeaponStateChanged
 		);
+		HandleWeaponStateChanged();
 	}
-
-	RefreshFromWeapon();
 }
 
-void UValkHUDViewModel::UnbindWeapon()
+void UValkHUDViewModel::BindToHealthComponent(UHealthComponent* aHealthComponent)
 {
-	if (myWeaponComponent) {
-		myWeaponComponent->myOnWeaponStateChanged.RemoveDynamic(
+	myHealthComponent = aHealthComponent;
+	if (myHealthComponent) {
+		myHealthComponent->OnHealthChanged.AddUniqueDynamic(
 			this,
-			&UValkHUDViewModel::HandleWeaponStateChanged
+			&UValkHUDViewModel::HandleHealthChanged
+		);
+		HandleHealthChanged(
+			myHealthComponent->GetHealth(),
+			myHealthComponent->GetMaxHealth()
 		);
 	}
-
-	myWeaponComponent = nullptr;
-	myAmmoInMag = 0;
-	myReserveAmmo = 0;
-	myShowAmmo = false;
-	myIsReloading = false;
-	BroadcastViewModelChanged();
 }
 
-void UValkHUDViewModel::RefreshFromWeapon()
+float UValkHUDViewModel::GetHealthRatio() const
+{
+	return myMaxHealth > 0.f ? myHealth / myMaxHealth : 0.f;
+}
+
+void UValkHUDViewModel::HandleWeaponStateChanged()
 {
 	if (!myWeaponComponent) {
 		myAmmoInMag = 0;
@@ -60,79 +55,6 @@ void UValkHUDViewModel::RefreshFromWeapon()
 	BroadcastViewModelChanged();
 }
 
-void UValkHUDViewModel::BindToHealth(UHealthComponent* aHealthComponent)
-{
-	if (myHealthComponent == aHealthComponent) {
-		RefreshFromHealth();
-		return;
-	}
-
-	UnbindHealth();
-
-	myHealthComponent = aHealthComponent;
-	if (myHealthComponent) {
-		myHealthComponent->OnHealthChanged.AddUniqueDynamic(
-			this,
-			&UValkHUDViewModel::HandleHealthChanged
-		);
-		myHealthComponent->OnDeath.AddUniqueDynamic(
-			this,
-			&UValkHUDViewModel::HandleDeath
-		);
-	}
-
-	RefreshFromHealth();
-}
-
-void UValkHUDViewModel::UnbindHealth()
-{
-	if (myHealthComponent) {
-		myHealthComponent->OnHealthChanged.RemoveDynamic(
-			this,
-			&UValkHUDViewModel::HandleHealthChanged
-		);
-		myHealthComponent->OnDeath.RemoveDynamic(
-			this,
-			&UValkHUDViewModel::HandleDeath
-		);
-	}
-
-	myHealthComponent = nullptr;
-	myHealth = 0.f;
-	myMaxHealth = 0.f;
-	myShowHealth = false;
-	myIsDead = false;
-	BroadcastViewModelChanged();
-}
-
-void UValkHUDViewModel::RefreshFromHealth()
-{
-	if (!myHealthComponent) {
-		myHealth = 0.f;
-		myMaxHealth = 0.f;
-		myShowHealth = false;
-		myIsDead = false;
-		BroadcastViewModelChanged();
-		return;
-	}
-
-	myHealth = myHealthComponent->GetHealth();
-	myMaxHealth = myHealthComponent->GetMaxHealth();
-	myShowHealth = true;
-	myIsDead = myHealthComponent->IsDead();
-	BroadcastViewModelChanged();
-}
-
-float UValkHUDViewModel::GetHealthRatio() const
-{
-	return myMaxHealth > 0.f ? myHealth / myMaxHealth : 0.f;
-}
-
-void UValkHUDViewModel::HandleWeaponStateChanged()
-{
-	RefreshFromWeapon();
-}
-
 void UValkHUDViewModel::HandleHealthChanged(float aHealth, float aMaxHealth)
 {
 	myHealth = aHealth;
@@ -142,9 +64,8 @@ void UValkHUDViewModel::HandleHealthChanged(float aHealth, float aMaxHealth)
 	BroadcastViewModelChanged();
 }
 
-void UValkHUDViewModel::HandleDeath()
+void UValkHUDViewModel::SetShowInteractPrompt(bool aShowInteractPrompt)
 {
-	myHealth = 0.f;
-	myIsDead = true;
+	myShowInteractPrompt = aShowInteractPrompt;
 	BroadcastViewModelChanged();
 }

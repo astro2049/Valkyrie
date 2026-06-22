@@ -38,6 +38,8 @@ protected:
 	TObjectPtr<UTextBlock> myObjectiveText{nullptr};
 	UPROPERTY(meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> myDefenseTimerText{nullptr};
+	UPROPERTY(meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> myInteractPrompt{nullptr};
 
 private:
 	void HandleViewModelChanged();

@@ -7,6 +7,8 @@
 #include "ExtractionTypes.h"
 #include "ExtractionGameMode.generated.h"
 
+class AExtractionZone;
+
 UCLASS()
 class VALKYRIE_API AExtractionGameMode : public AValkGameMode
 {
@@ -22,8 +24,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void CompleteExtraction();
 
-	UFUNCTION(BlueprintImplementableEvent, Category="Combat Slice")
-	void OnDefenseCompleted();
 	UFUNCTION(BlueprintImplementableEvent, Category="Combat Slice")
 	void OnExtractionCompleted();
 
@@ -43,5 +43,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
 	float myDefenseTimeRemaining{60.f};
 
+	TWeakObjectPtr<AExtractionZone> myExtractionZone;
 	FTimerHandle myDefenseTimerHandle;
 };

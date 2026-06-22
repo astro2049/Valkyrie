@@ -2,7 +2,9 @@
 
 #include "ExtractionGameMode.h"
 
+#include "Actors/ExtractionZone.h"
 #include "ExtractionGameState.h"
+#include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 
 AExtractionGameMode::AExtractionGameMode()
@@ -13,6 +15,10 @@ AExtractionGameMode::AExtractionGameMode()
 void AExtractionGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	myExtractionZone = Cast<AExtractionZone>(
+		UGameplayStatics::GetActorOfClass(this, AExtractionZone::StaticClass())
+	);
 
 	myDefenseTimeRemaining = myDefenseDuration;
 	SetCombatSliceState(
@@ -53,7 +59,9 @@ void AExtractionGameMode::CompleteDefense()
 	SetDefenseTimer(0.f, false);
 
 	GetWorldTimerManager().ClearTimer(myDefenseTimerHandle);
-	OnDefenseCompleted();
+	if (AExtractionZone* extractionZone = myExtractionZone.Get()) {
+		extractionZone->Activate();
+	}
 }
 
 void AExtractionGameMode::CompleteExtraction()

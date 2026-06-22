@@ -2,7 +2,7 @@
 
 #include "ValkViewModel.h"
 
-void UValkViewModel::BroadcastViewModelChanged()
+void UValkViewModel::BroadcastViewModelChanged() const
 {
 	myOnViewModelChanged.Broadcast();
 }

@@ -61,12 +61,12 @@ void AExtractionPlayerController::BindHUDToPawn()
 	UWeaponComponent* weaponComponent = controlledPawn
 		? controlledPawn->FindComponentByClass<UWeaponComponent>()
 		: nullptr;
-	myHUDViewModel->BindToWeapon(weaponComponent);
+	myHUDViewModel->BindToWeaponComponent(weaponComponent);
 
 	UHealthComponent* healthComponent = controlledPawn
 		? controlledPawn->FindComponentByClass<UHealthComponent>()
 		: nullptr;
-	myHUDViewModel->BindToHealth(healthComponent);
+	myHUDViewModel->BindToHealthComponent(healthComponent);
 
 	if (myBoundHealthComponent != healthComponent) {
 		if (myBoundHealthComponent) {

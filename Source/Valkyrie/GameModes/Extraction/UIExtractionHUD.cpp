@@ -77,6 +77,10 @@ void UUIExtractionHUD::UpdateFromViewModel()
 			? FText::AsNumber(FMath::CeilToInt(myViewModel->GetDefenseTimeRemaining()))
 			: FText::GetEmpty());
 	}
+
+	if (myInteractPrompt) {
+		myInteractPrompt->SetVisibility(myViewModel->GetShowInteractPrompt() ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	}
 }
 
 void UUIExtractionHUD::NativeDestruct()
