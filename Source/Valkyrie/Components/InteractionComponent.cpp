@@ -12,9 +12,10 @@ UInteractionComponent::UInteractionComponent()
 void UInteractionComponent::SetInteractable(AActor* anInteractableActor)
 {
 	if (anInteractableActor) {
-		if (UInteractableComponent* interactable =
-			anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
+		if (UInteractableComponent* interactable = anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
+			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::SetInteractable"));
 			myInteractableComponent = interactable;
+			OnInteractableChanged.Broadcast(true);
 		}
 	}
 }
@@ -22,9 +23,10 @@ void UInteractionComponent::SetInteractable(AActor* anInteractableActor)
 void UInteractionComponent::ClearInteractable(AActor* anInteractableActor)
 {
 	if (anInteractableActor) {
-		if (myInteractableComponent.Get() ==
-			anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
+		if (myInteractableComponent.Get() == anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
+			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::ClearInteractable"));
 			myInteractableComponent.Reset();
+			OnInteractableChanged.Broadcast(false);
 		}
 	}
 }
@@ -32,6 +34,7 @@ void UInteractionComponent::ClearInteractable(AActor* anInteractableActor)
 void UInteractionComponent::TryInteract() const
 {
 	if (UInteractableComponent* interactable = myInteractableComponent.Get()) {
+		UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::TryInteract"));
 		interactable->Interact();
 	}
 }

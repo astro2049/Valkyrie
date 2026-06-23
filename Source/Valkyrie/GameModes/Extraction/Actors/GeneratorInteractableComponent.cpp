@@ -8,6 +8,7 @@
 void UGeneratorInteractableComponent::Interact()
 {
 	if (AExtractionGameMode* extractionGameMode = GetWorld()->GetAuthGameMode<AExtractionGameMode>()) {
+		UE_LOG(LogTemp, Log, TEXT("UGeneratorInteractableComponent::Interact"));
 		extractionGameMode->StartGenerator();
 	}
 }

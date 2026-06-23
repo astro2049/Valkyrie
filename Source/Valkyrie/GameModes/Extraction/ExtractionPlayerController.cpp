@@ -6,6 +6,7 @@
 #include "ExtractionGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "Valkyrie/Components/HealthComponent.h"
+#include "Valkyrie/Components/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
 #include "ExtractionHUDViewModel.h"
 
@@ -67,6 +68,14 @@ void AExtractionPlayerController::BindHUDToPawn()
 		? controlledPawn->FindComponentByClass<UHealthComponent>()
 		: nullptr;
 	myHUDViewModel->BindToHealthComponent(healthComponent);
+	
+	if (UInteractionComponent* interactionComponent = controlledPawn ? controlledPawn->FindComponentByClass<UInteractionComponent>() : nullptr) {
+		interactionComponent->OnInteractableChanged.AddUniqueDynamic(
+			this,
+			&AExtractionPlayerController::HandleInteractableChanged
+		);
+		HandleInteractableChanged(interactionComponent->HasInteractable());
+	}
 
 	if (myBoundHealthComponent != healthComponent) {
 		if (myBoundHealthComponent) {
@@ -149,5 +158,12 @@ void AExtractionPlayerController::HandleCombatSliceStateChanged(ECombatSliceStat
 {
 	if (aCombatSliceState == ECombatSliceState::Completed) {
 		ShowVictoryMenu();
+	}
+}
+
+void AExtractionPlayerController::HandleInteractableChanged(bool aHasInteractable)
+{
+	if (myHUDViewModel) {
+		myHUDViewModel->SetShowInteractPrompt(aHasInteractable);
 	}
 }
