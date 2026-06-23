@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SphereComponent.h"
 #include "GameFramework/Pawn.h"
 #include "Valkyrie/Components/InteractionComponent.h"
 #include "ValkPlayerPawn.generated.h"
@@ -45,6 +44,4 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie|Interaction", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInteractionComponent> myInteractionComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie|Interaction", meta=(AllowPrivateAccess="true"))
-	TObjectPtr<USphereComponent> mySphereComponent;
 };

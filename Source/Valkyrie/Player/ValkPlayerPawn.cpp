@@ -13,17 +13,6 @@ AValkPlayerPawn::AValkPlayerPawn()
 	SetReplicateMovement(true);
 
 	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
-	mySphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("mySphereComponent"));
-	mySphereComponent->SetupAttachment(RootComponent);
-	mySphereComponent->SetGenerateOverlapEvents(true);
-	mySphereComponent->OnComponentBeginOverlap.AddDynamic(
-		myInteractionComponent.Get(),
-		&UInteractionComponent::HandleBeginOverlap
-	);
-	mySphereComponent->OnComponentEndOverlap.AddDynamic(
-		myInteractionComponent.Get(),
-		&UInteractionComponent::HandleEndOverlap
-	);
 }
 
 void AValkPlayerPawn::Tick(float aDeltaSeconds)

@@ -14,26 +14,14 @@ class VALKYRIE_API UInteractionComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UInteractionComponent();
 
-	UFUNCTION()
-	void HandleBeginOverlap(UPrimitiveComponent* anOverlappedComponent,
-	                        AActor* anOtherActor,
-	                        UPrimitiveComponent* anOtherComponent,
-	                        int32 anOtherBodyIndex,
-	                        bool aFromSweep,
-	                        const FHitResult& aSweepResult);
-	UFUNCTION()
-	void HandleEndOverlap(UPrimitiveComponent* anOverlappedComponent,
-	                      AActor* anOtherActor,
-	                      UPrimitiveComponent* anOtherComponent,
-	                      int32 anOtherBodyIndex);
-	void TryInteract() const;
+	UFUNCTION(BlueprintCallable, Category="Valkyrie|Interaction")
+	void SetInteractable(AActor* anInteractableActor);
+	UFUNCTION(BlueprintCallable, Category="Valkyrie|Interaction")
+	void ClearInteractable(AActor* anInteractableActor);
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+	void TryInteract() const;
 
 private:
 	TWeakObjectPtr<UInteractableComponent> myInteractableComponent;

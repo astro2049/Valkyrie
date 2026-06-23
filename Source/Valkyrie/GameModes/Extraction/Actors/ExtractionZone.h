@@ -6,8 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "ExtractionZone.generated.h"
 
-class UBoxComponent;
-
 UCLASS(Blueprintable)
 class VALKYRIE_API AExtractionZone : public AActor
 {
@@ -16,22 +14,9 @@ class VALKYRIE_API AExtractionZone : public AActor
 public:
 	AExtractionZone();
 
+	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie|Extraction")
 	void Activate();
 
-protected:
-	virtual void BeginPlay() override;
-
-private:
-	UFUNCTION()
-	void HandleBeginOverlap(
-		UPrimitiveComponent* anOverlappedComponent,
-		AActor* anOtherActor,
-		UPrimitiveComponent* anOtherComponent,
-		int32 anOtherBodyIndex,
-		bool aFromSweep,
-		const FHitResult& aSweepResult
-	);
-
-	UPROPERTY(Transient)
-	TObjectPtr<UBoxComponent> myBoxComponent;
+	UFUNCTION(BlueprintCallable, Category="Valkyrie|Extraction")
+	void HandlePlayerEntered(AActor* anOtherActor);
 };

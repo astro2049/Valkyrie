@@ -27,29 +27,31 @@ void UUIExtractionHUD::SetViewModel(UExtractionHUDViewModel* aViewModel)
 	UpdateFromViewModel();
 }
 
-void UUIExtractionHUD::UpdateFromViewModel()
+void UUIExtractionHUD::UpdateFromViewModel() const
 {
-	const bool showAmmo = myViewModel && myViewModel->ShowAmmo();
-
+	if (!myViewModel) {
+		return;
+	}
+	
+	// weapon
+	const bool showAmmo = myViewModel->ShowAmmo();
 	if (myAmmoText) {
 		myAmmoText->SetText(showAmmo ? FText::AsNumber(myViewModel->GetAmmoInMag()) : FText::GetEmpty());
 	}
-
 	if (myReserveAmmoText) {
 		myReserveAmmoText->SetText(showAmmo ? FText::AsNumber(myViewModel->GetReserveAmmo()) : FText::GetEmpty());
 	}
-
 	if (myReloadingIndicator) {
 		const bool isReloading = myViewModel && myViewModel->IsReloading();
 		myReloadingIndicator->SetVisibility(isReloading ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
 
+	// health
 	const bool showHealth = myViewModel && myViewModel->ShowHealth();
 	if (myHealthBar) {
 		myHealthBar->SetVisibility(showHealth ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 		myHealthBar->SetPercent(showHealth ? myViewModel->GetHealthRatio() : 0.f);
 	}
-
 	if (myHealthText) {
 		myHealthText->SetVisibility(showHealth ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 		if (showHealth) {
@@ -65,11 +67,11 @@ void UUIExtractionHUD::UpdateFromViewModel()
 		}
 	}
 
+	// objective, defense timer
 	if (myObjectiveText) {
 		const FText objectiveText = myViewModel ? myViewModel->GetObjectiveText() : FText::GetEmpty();
 		myObjectiveText->SetText(objectiveText);
 	}
-
 	if (myDefenseTimerText) {
 		const bool showDefenseTimer = myViewModel && myViewModel->ShouldShowDefenseTimer();
 		myDefenseTimerText->SetVisibility(showDefenseTimer ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
@@ -78,15 +80,10 @@ void UUIExtractionHUD::UpdateFromViewModel()
 			: FText::GetEmpty());
 	}
 
+	// interact prompt
 	if (myInteractPrompt) {
 		myInteractPrompt->SetVisibility(myViewModel->GetShowInteractPrompt() ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
-}
-
-void UUIExtractionHUD::NativeDestruct()
-{
-	SetViewModel(nullptr);
-	Super::NativeDestruct();
 }
 
 void UUIExtractionHUD::HandleViewModelChanged()

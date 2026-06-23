@@ -7,41 +7,23 @@
 UInteractionComponent::UInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
-	// ...
 }
 
-// Called when the game starts
-void UInteractionComponent::BeginPlay()
+void UInteractionComponent::SetInteractable(AActor* anInteractableActor)
 {
-	Super::BeginPlay();
-
-	// ...
-
-}
-
-
-void UInteractionComponent::HandleBeginOverlap(UPrimitiveComponent* anOverlappedComponent,
-                                               AActor* anOtherActor,
-                                               UPrimitiveComponent* anOtherComponent,
-                                               int32 anOtherBodyIndex,
-                                               bool aFromSweep,
-                                               const FHitResult& aSweepResult)
-{
-	if (anOtherActor) {
-		if (UInteractableComponent* interactable = anOtherActor->GetComponentByClass<UInteractableComponent>()) {
+	if (anInteractableActor) {
+		if (UInteractableComponent* interactable =
+			anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 			myInteractableComponent = interactable;
 		}
 	}
 }
 
-void UInteractionComponent::HandleEndOverlap(UPrimitiveComponent* anOverlappedComponent,
-                                             AActor* anOtherActor,
-                                             UPrimitiveComponent* anOtherComponent,
-                                             int32 anOtherBodyIndex)
+void UInteractionComponent::ClearInteractable(AActor* anInteractableActor)
 {
-	if (anOtherActor) {
-		if (myInteractableComponent.Get() == anOtherActor->GetComponentByClass<UInteractableComponent>()) {
+	if (anInteractableActor) {
+		if (myInteractableComponent.Get() ==
+			anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 			myInteractableComponent.Reset();
 		}
 	}

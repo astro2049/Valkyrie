@@ -18,12 +18,9 @@ class VALKYRIE_API UUIExtractionHUD : public UUserWidget
 
 public:
 	void SetViewModel(UExtractionHUDViewModel* aViewModel);
-
-	void UpdateFromViewModel();
+	void UpdateFromViewModel() const;
 
 protected:
-	virtual void NativeDestruct() override;
-
 	UPROPERTY(meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> myAmmoText{nullptr};
 	UPROPERTY(meta=(BindWidgetOptional))
