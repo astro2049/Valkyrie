@@ -34,20 +34,21 @@ void UUIExtractionHUD::UpdateFromViewModel() const
 	}
 	
 	// weapon
-	const bool showAmmo = myViewModel->ShowAmmo();
+	const FValkWeaponHUDData& weaponHUDData = myViewModel->GetWeaponHUDData();
+	const bool showAmmo = weaponHUDData.myShowAmmo;
 	if (myAmmoText) {
-		myAmmoText->SetText(showAmmo ? FText::AsNumber(myViewModel->GetAmmoInMag()) : FText::GetEmpty());
+		myAmmoText->SetText(showAmmo ? FText::AsNumber(weaponHUDData.myAmmoInMag) : FText::GetEmpty());
 	}
 	if (myReserveAmmoText) {
-		myReserveAmmoText->SetText(showAmmo ? FText::AsNumber(myViewModel->GetReserveAmmo()) : FText::GetEmpty());
+		myReserveAmmoText->SetText(showAmmo ? FText::AsNumber(weaponHUDData.myReserveAmmo) : FText::GetEmpty());
 	}
 	if (myReloadingIndicator) {
-		const bool isReloading = myViewModel && myViewModel->IsReloading();
-		myReloadingIndicator->SetVisibility(isReloading ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		myReloadingIndicator->SetVisibility(weaponHUDData.myIsReloading ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
 
 	// health
-	const bool showHealth = myViewModel && myViewModel->ShowHealth();
+	const FValkHealthHUDData& healthHUDData = myViewModel->GetHealthHUDData();
+	const bool showHealth = healthHUDData.myShowHealth;
 	if (myHealthBar) {
 		myHealthBar->SetVisibility(showHealth ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 		myHealthBar->SetPercent(showHealth ? myViewModel->GetHealthRatio() : 0.f);
@@ -55,8 +56,8 @@ void UUIExtractionHUD::UpdateFromViewModel() const
 	if (myHealthText) {
 		myHealthText->SetVisibility(showHealth ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 		if (showHealth) {
-			const int32 health = FMath::CeilToInt(myViewModel->GetHealth());
-			const int32 maxHealth = FMath::CeilToInt(myViewModel->GetMaxHealth());
+			const int32 health = FMath::CeilToInt(healthHUDData.myHealth);
+			const int32 maxHealth = FMath::CeilToInt(healthHUDData.myMaxHealth);
 			myHealthText->SetText(FText::Format(
 				NSLOCTEXT("CombatHUD", "HealthFormat", "{0} / {1}"),
 				FText::AsNumber(health),

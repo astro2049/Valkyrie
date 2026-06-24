@@ -9,6 +9,22 @@
 class UHealthComponent;
 class UWeaponComponent;
 
+struct FValkWeaponHUDData
+{
+	int32 myAmmoInMag{0};
+	int32 myReserveAmmo{0};
+	bool myShowAmmo{false};
+	bool myIsReloading{false};
+};
+
+struct FValkHealthHUDData
+{
+	float myHealth{0.f};
+	float myMaxHealth{0.f};
+	bool myShowHealth{false};
+	bool myIsDead{false};
+};
+
 UCLASS()
 class VALKYRIE_API UValkHUDViewModel : public UValkViewModel
 {
@@ -18,15 +34,9 @@ public:
 	void BindToWeaponComponent(UWeaponComponent* aWeaponComponent);
 	void BindToHealthComponent(UHealthComponent* aHealthComponent);
 
-	int32 GetAmmoInMag() const { return myAmmoInMag; }
-	int32 GetReserveAmmo() const { return myReserveAmmo; }
-	bool ShowAmmo() const { return myShowAmmo; }
-	bool IsReloading() const { return myIsReloading; }
-	float GetHealth() const { return myHealth; }
-	float GetMaxHealth() const { return myMaxHealth; }
+	const FValkWeaponHUDData& GetWeaponHUDData() const { return myWeaponHUDData; }
+	const FValkHealthHUDData& GetHealthHUDData() const { return myHealthHUDData; }
 	float GetHealthRatio() const;
-	bool ShowHealth() const { return myShowHealth; }
-	bool IsDead() const { return myIsDead; }
 	bool GetShowInteractPrompt() const { return myShowInteractPrompt; }
 	void SetShowInteractPrompt(bool aShowInteractPrompt);
 
@@ -41,13 +51,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UHealthComponent> myHealthComponent{nullptr};
 
-	int32 myAmmoInMag{0};
-	int32 myReserveAmmo{0};
-	bool myShowAmmo{false};
-	bool myIsReloading{false};
-	float myHealth{0.f};
-	float myMaxHealth{0.f};
-	bool myShowHealth{false};
-	bool myIsDead{false};
+	FValkWeaponHUDData myWeaponHUDData;
+	FValkHealthHUDData myHealthHUDData;
 	bool myShowInteractPrompt{false};
 };

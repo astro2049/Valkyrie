@@ -34,33 +34,30 @@ void UValkHUDViewModel::BindToHealthComponent(UHealthComponent* aHealthComponent
 
 float UValkHUDViewModel::GetHealthRatio() const
 {
-	return myMaxHealth > 0.f ? myHealth / myMaxHealth : 0.f;
+	return myHealthHUDData.myMaxHealth > 0.f ? myHealthHUDData.myHealth / myHealthHUDData.myMaxHealth : 0.f;
 }
 
 void UValkHUDViewModel::HandleWeaponStateChanged()
 {
 	if (!myWeaponComponent) {
-		myAmmoInMag = 0;
-		myReserveAmmo = 0;
-		myShowAmmo = false;
-		myIsReloading = false;
+		myWeaponHUDData = FValkWeaponHUDData{};
 		BroadcastViewModelChanged();
 		return;
 	}
 
-	myAmmoInMag = myWeaponComponent->GetAmmoInMag();
-	myReserveAmmo = myWeaponComponent->GetReserveAmmo();
-	myIsReloading = myWeaponComponent->IsReloading();
-	myShowAmmo = true;
+	myWeaponHUDData.myAmmoInMag = myWeaponComponent->GetAmmoInMag();
+	myWeaponHUDData.myReserveAmmo = myWeaponComponent->GetReserveAmmo();
+	myWeaponHUDData.myIsReloading = myWeaponComponent->IsReloading();
+	myWeaponHUDData.myShowAmmo = true;
 	BroadcastViewModelChanged();
 }
 
 void UValkHUDViewModel::HandleHealthChanged(float aHealth, float aMaxHealth)
 {
-	myHealth = aHealth;
-	myMaxHealth = aMaxHealth;
-	myShowHealth = true;
-	myIsDead = myHealth <= 0.f;
+	myHealthHUDData.myHealth = aHealth;
+	myHealthHUDData.myMaxHealth = aMaxHealth;
+	myHealthHUDData.myShowHealth = true;
+	myHealthHUDData.myIsDead = myHealthHUDData.myHealth <= 0.f;
 	BroadcastViewModelChanged();
 }
 
