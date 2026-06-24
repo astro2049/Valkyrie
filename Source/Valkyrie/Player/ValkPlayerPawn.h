@@ -38,6 +38,8 @@ private:
 	void Server_SyncLocation(FVector aLocation);
 	UFUNCTION(Server, Unreliable)
 	void Server_SyncRotation(FRotator aRotation);
+	UFUNCTION(Server, Reliable)
+	void Server_TryInteract();
 
 	bool myShouldSyncLocationThisTick{false};
 	bool myShouldSyncRotationThisTick{false};

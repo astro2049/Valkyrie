@@ -22,6 +22,8 @@ class VALKYRIE_API UHealthComponent : public UActorComponent
 public:
 	UHealthComponent();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UFUNCTION(BlueprintCallable, Category="Health")
 	void ApplyDamage(float aDamage);
 	UFUNCTION(BlueprintCallable, Category="Health")
@@ -43,10 +45,15 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UFUNCTION()
+	void OnRep_Health();
+	UFUNCTION()
+	void OnRep_IsDead();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health", meta=(AllowPrivateAccess="true"))
 	float myMaxHealth{100.f};
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
 	float myHealth{100.f};
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_IsDead, VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
 	bool myIsDead{false};
 };

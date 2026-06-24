@@ -23,6 +23,8 @@ class VALKYRIE_API UWeaponComponent : public UActorComponent
 public:
 	UWeaponComponent();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -52,6 +54,12 @@ public:
 	FWeaponStateChanged myOnWeaponStateChanged;
 
 private:
+	void TryFire(FVector aTraceStart, FVector aTraceDirection);
+	UFUNCTION(Server, Reliable)
+	void Server_TryFire(FVector aTraceStart, FVector aTraceDirection);
+	UFUNCTION()
+	void OnRep_WeaponState();
+
 	void FinishReload();
 	void BroadcastWeaponStateChanged();
 
@@ -70,14 +78,14 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Ammo", meta=(AllowPrivateAccess="true"))
 	int32 myMagazineSize{30};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Ammo", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_WeaponState, EditAnywhere, BlueprintReadWrite, Category="Weapon|Ammo", meta=(AllowPrivateAccess="true"))
 	int32 myAmmoInMag{30};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon|Ammo", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_WeaponState, EditAnywhere, BlueprintReadWrite, Category="Weapon|Ammo", meta=(AllowPrivateAccess="true"))
 	int32 myReserveAmmo{90};
 
 	float myLastFiredTime = -1.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_WeaponState, VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
 	bool myIsReloading{false};
 
 	FTimerHandle myReloadTimerHandle;

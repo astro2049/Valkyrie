@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()
@@ -15,8 +16,18 @@ UWeaponComponent::UWeaponComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
 
 	// ...
+}
+
+void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UWeaponComponent, myAmmoInMag);
+	DOREPLIFETIME(UWeaponComponent, myReserveAmmo);
+	DOREPLIFETIME(UWeaponComponent, myIsReloading);
 }
 
 
@@ -44,6 +55,28 @@ void UWeaponComponent::TickComponent(float aDeltaTime, ELevelTick aTickType, FAc
 
 void UWeaponComponent::Fire()
 {
+	APawn* ownerPawn = Cast<APawn>(GetOwner());
+	if (!ownerPawn) {
+		return;
+	}
+
+	APlayerController* playerController = Cast<APlayerController>(ownerPawn->GetController());
+	if (!playerController || !playerController->PlayerCameraManager) {
+		return;
+	}
+
+	const FVector traceStart = playerController->PlayerCameraManager->GetCameraLocation();
+	const FVector traceDirection = playerController->PlayerCameraManager->GetActorForwardVector();
+
+	if (AActor* owner = GetOwner(); owner && owner->HasAuthority()) {
+		TryFire(traceStart, traceDirection);
+	} else {
+		Server_TryFire(traceStart, traceDirection);
+	}
+}
+
+void UWeaponComponent::TryFire(FVector aTraceStart, FVector aTraceDirection)
+{
 	UWorld* world = GetWorld();
 	APawn* ownerPawn = Cast<APawn>(GetOwner());
 	if (!world || !ownerPawn || myIsReloading) {
@@ -61,8 +94,7 @@ void UWeaponComponent::Fire()
 		return;
 	}
 
-	APlayerController* playerController = Cast<APlayerController>(ownerPawn->GetController());
-	if (!playerController || !playerController->PlayerCameraManager) {
+	if (aTraceDirection.IsNearlyZero()) {
 		return;
 	}
 
@@ -70,8 +102,8 @@ void UWeaponComponent::Fire()
 	myAmmoInMag = FMath::Max(0, myAmmoInMag - 1);
 	BroadcastWeaponStateChanged();
 
-	const FVector start = playerController->PlayerCameraManager->GetCameraLocation();
-	const FVector direction = playerController->PlayerCameraManager->GetActorForwardVector();
+	const FVector start = aTraceStart;
+	const FVector direction = aTraceDirection.GetSafeNormal();
 	const FVector end = start + direction * myTraceDistance;
 	FHitResult hitResult;
 	FCollisionQueryParams params;
@@ -110,6 +142,16 @@ void UWeaponComponent::Fire()
 			myOnHitActor.Broadcast(hitActor, myDamage);
 		}
 	}
+}
+
+void UWeaponComponent::Server_TryFire_Implementation(FVector aTraceStart, FVector aTraceDirection)
+{
+	TryFire(aTraceStart, aTraceDirection);
+}
+
+void UWeaponComponent::OnRep_WeaponState()
+{
+	BroadcastWeaponStateChanged();
 }
 
 void UWeaponComponent::StartReload()

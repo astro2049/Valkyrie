@@ -87,7 +87,15 @@ void AValkPlayerPawn::HandleLook(const FInputActionValue& anInputValue)
 
 void AValkPlayerPawn::HandleInteract()
 {
-	myInteractionComponent->TryInteract();
+	if (!myInteractionComponent) {
+		return;
+	}
+
+	if (HasAuthority()) {
+		myInteractionComponent->TryInteract();
+	} else {
+		Server_TryInteract();
+	}
 }
 
 void AValkPlayerPawn::Server_SyncLocation_Implementation(FVector aLocation)
@@ -98,4 +106,11 @@ void AValkPlayerPawn::Server_SyncLocation_Implementation(FVector aLocation)
 void AValkPlayerPawn::Server_SyncRotation_Implementation(FRotator aRotation)
 {
 	SetActorRotation(aRotation);
+}
+
+void AValkPlayerPawn::Server_TryInteract_Implementation()
+{
+	if (myInteractionComponent) {
+		myInteractionComponent->TryInteract();
+	}
 }
