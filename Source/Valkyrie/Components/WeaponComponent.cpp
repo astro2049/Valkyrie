@@ -156,6 +156,15 @@ void UWeaponComponent::OnRep_WeaponState()
 
 void UWeaponComponent::StartReload()
 {
+	if (AActor* owner = GetOwner(); owner && owner->HasAuthority()) {
+		TryStartReload();
+	} else {
+		Server_TryStartReload();
+	}
+}
+
+void UWeaponComponent::TryStartReload()
+{
 	UWorld* world = GetWorld();
 	if (!world || myIsReloading || myAmmoInMag >= myMagazineSize || myReserveAmmo <= 0) {
 		return;
@@ -176,6 +185,11 @@ void UWeaponComponent::StartReload()
 		myReloadDuration,
 		false
 	);
+}
+
+void UWeaponComponent::Server_TryStartReload_Implementation()
+{
+	TryStartReload();
 }
 
 void UWeaponComponent::CancelReload()

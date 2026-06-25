@@ -57,6 +57,9 @@ private:
 	void TryFire(FVector aTraceStart, FVector aTraceDirection);
 	UFUNCTION(Server, Reliable)
 	void Server_TryFire(FVector aTraceStart, FVector aTraceDirection);
+	void TryStartReload();
+	UFUNCTION(Server, Reliable)
+	void Server_TryStartReload();
 	UFUNCTION()
 	void OnRep_WeaponState();
 
