@@ -14,9 +14,20 @@ class VALKYRIE_API AExtractionZone : public AActor
 public:
 	AExtractionZone();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void ActivateForAll();
+
 	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie|Extraction")
 	void Activate();
 
 	UFUNCTION(BlueprintCallable, Category="Valkyrie|Extraction")
 	void HandlePlayerEntered(AActor* anOtherActor);
+
+private:
+	UFUNCTION()
+	void OnRep_IsActive();
+
+	UPROPERTY(ReplicatedUsing=OnRep_IsActive)
+	bool myIsActive{false};
 };
