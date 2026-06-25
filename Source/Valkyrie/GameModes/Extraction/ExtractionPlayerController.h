@@ -30,13 +30,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Combat Slice|UI")
 	TSubclassOf<UUserWidget> myDeathMenuWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Combat Slice|UI")
+	TSubclassOf<UUserWidget> myDeadOverlayWidgetClass;
+	UPROPERTY(EditDefaultsOnly, Category="Combat Slice|UI")
 	TSubclassOf<UUserWidget> myVictoryMenuWidgetClass;
 
 private:
 	void CreateHUDAndViewModel();
 	void BindHUDToPawn();
 	void BindHUDToGameState();
-	void ShowDeathMenu();
+	void ShowDeadOverlay();
+	void ShowFailureMenu();
 	void ShowVictoryMenu();
 
 	UFUNCTION()
@@ -52,6 +55,8 @@ private:
 	TObjectPtr<UUIExtractionHUD> myHUDWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myDeathMenuWidget{nullptr};
+	UPROPERTY()
+	TObjectPtr<UUserWidget> myDeadOverlayWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myVictoryMenuWidget{nullptr};
 	UPROPERTY()

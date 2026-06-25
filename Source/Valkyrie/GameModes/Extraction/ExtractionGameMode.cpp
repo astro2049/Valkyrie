@@ -4,8 +4,11 @@
 
 #include "Actors/ExtractionZone.h"
 #include "ExtractionGameState.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "Valkyrie/Components/HealthComponent.h"
 
 AExtractionGameMode::AExtractionGameMode()
 {
@@ -26,6 +29,12 @@ void AExtractionGameMode::BeginPlay()
 		FText::FromString(TEXT("Objective: Start the generator"))
 	);
 	SetDefenseTimer(0.f, false);
+}
+
+void AExtractionGameMode::RestartPlayer(AController* aNewPlayer)
+{
+	Super::RestartPlayer(aNewPlayer);
+	BindPlayerDeath(aNewPlayer);
 }
 
 void AExtractionGameMode::StartGenerator()
@@ -76,6 +85,13 @@ void AExtractionGameMode::CompleteExtraction()
 	OnExtractionCompleted();
 }
 
+void AExtractionGameMode::HandlePlayerDeath()
+{
+	if (AreAllPlayersDead()) {
+		FailExtraction();
+	}
+}
+
 void AExtractionGameMode::TickDefenseTimer()
 {
 	myDefenseTimeRemaining = FMath::Max(0.f, myDefenseTimeRemaining - 1.f);
@@ -83,6 +99,53 @@ void AExtractionGameMode::TickDefenseTimer()
 
 	if (myDefenseTimeRemaining <= 0.f) {
 		CompleteDefense();
+	}
+}
+
+void AExtractionGameMode::BindPlayerDeath(AController* aController)
+{
+	APawn* pawn = aController ? aController->GetPawn() : nullptr;
+	UHealthComponent* healthComponent = pawn ? pawn->FindComponentByClass<UHealthComponent>() : nullptr;
+	if (healthComponent) {
+		healthComponent->OnDeath.AddUniqueDynamic(
+			this,
+			&AExtractionGameMode::HandlePlayerDeath
+		);
+	}
+}
+
+bool AExtractionGameMode::AreAllPlayersDead() const
+{
+	bool hasPlayer = false;
+	for (FConstPlayerControllerIterator playerControllerIterator = GetWorld()->GetPlayerControllerIterator(); playerControllerIterator; ++playerControllerIterator) {
+		const APlayerController* playerController = playerControllerIterator->Get();
+		const APawn* pawn = playerController ? playerController->GetPawn() : nullptr;
+		const UHealthComponent* healthComponent = pawn ? pawn->FindComponentByClass<UHealthComponent>() : nullptr;
+		if (healthComponent) {
+			hasPlayer = true;
+			if (!healthComponent->IsDead()) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	return hasPlayer;
+}
+
+void AExtractionGameMode::FailExtraction()
+{
+	const AExtractionGameState* combatSliceGameState = GetGameState<AExtractionGameState>();
+	if (combatSliceGameState
+		&& combatSliceGameState->GetCombatSliceState() != ECombatSliceState::Completed
+		&& combatSliceGameState->GetCombatSliceState() != ECombatSliceState::Failed) {
+		SetCombatSliceState(
+			ECombatSliceState::Failed,
+			FText::FromString(TEXT("Mission Failed"))
+		);
+		SetDefenseTimer(0.f, false);
+		GetWorldTimerManager().ClearTimer(myDefenseTimerHandle);
 	}
 }
 

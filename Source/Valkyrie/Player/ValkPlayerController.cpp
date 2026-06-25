@@ -43,7 +43,5 @@ void AValkPlayerController::AddInputMappingContext() const
 
 void AValkPlayerController::RestartCurrentLevel_Implementation()
 {
-	if (const FString currentLevelName = UGameplayStatics::GetCurrentLevelName(this, true); !currentLevelName.IsEmpty()) {
-		UGameplayStatics::OpenLevel(this, FName(*currentLevelName));
-	}
+	UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/MainMenu/MainMenu")));
 }

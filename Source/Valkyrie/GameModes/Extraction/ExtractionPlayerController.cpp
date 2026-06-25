@@ -123,16 +123,24 @@ void AExtractionPlayerController::BindHUDToGameState()
 	}
 }
 
-void AExtractionPlayerController::ShowDeathMenu()
+void AExtractionPlayerController::ShowDeadOverlay()
 {
-	if (!IsLocalController() || myDeathMenuWidget || !myDeathMenuWidgetClass) {
-		return;
+	if (IsLocalController() && !myDeadOverlayWidget && myDeadOverlayWidgetClass) {
+		myDeadOverlayWidget = CreateWidget<UUserWidget>(this, myDeadOverlayWidgetClass);
+		if (myDeadOverlayWidget) {
+			myDeadOverlayWidget->AddToViewport();
+		}
 	}
+}
 
-	myDeathMenuWidget = CreateWidget<UUserWidget>(this, myDeathMenuWidgetClass);
-	if (myDeathMenuWidget) {
-		myDeathMenuWidget->AddToViewport();
-		SetInputUIOnly(myDeathMenuWidget);
+void AExtractionPlayerController::ShowFailureMenu()
+{
+	if (IsLocalController() && !myDeathMenuWidget && myDeathMenuWidgetClass) {
+		myDeathMenuWidget = CreateWidget<UUserWidget>(this, myDeathMenuWidgetClass);
+		if (myDeathMenuWidget) {
+			myDeathMenuWidget->AddToViewport();
+			SetInputUIOnly(myDeathMenuWidget);
+		}
 	}
 }
 
@@ -151,13 +159,20 @@ void AExtractionPlayerController::ShowVictoryMenu()
 
 void AExtractionPlayerController::HandlePlayerDeath()
 {
-	ShowDeathMenu();
+	ShowDeadOverlay();
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
+	if (APawn* controlledPawn = GetPawn()) {
+		controlledPawn->DisableInput(this);
+	}
 }
 
 void AExtractionPlayerController::HandleCombatSliceStateChanged(ECombatSliceState aCombatSliceState)
 {
 	if (aCombatSliceState == ECombatSliceState::Completed) {
 		ShowVictoryMenu();
+	} else if (aCombatSliceState == ECombatSliceState::Failed) {
+		ShowFailureMenu();
 	}
 }
 

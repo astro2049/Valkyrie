@@ -17,6 +17,8 @@ class VALKYRIE_API AExtractionGameMode : public AValkGameMode
 public:
 	AExtractionGameMode();
 
+	virtual void RestartPlayer(AController* aNewPlayer) override;
+
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")
 	void StartGenerator();
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")
@@ -34,7 +36,13 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UFUNCTION()
+	void HandlePlayerDeath();
+
 	void TickDefenseTimer();
+	void BindPlayerDeath(AController* aController);
+	bool AreAllPlayersDead() const;
+	void FailExtraction();
 	void SetCombatSliceState(ECombatSliceState aNewState, const FText& anObjectiveText) const;
 	void SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer) const;
 
