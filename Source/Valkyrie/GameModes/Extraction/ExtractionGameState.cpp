@@ -17,33 +17,33 @@ void AExtractionGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 void AExtractionGameState::SetCombatSliceState(ECombatSliceState aCombatSliceState)
 {
 	myCombatSliceState = aCombatSliceState;
-	OnCombatSliceStateChanged.Broadcast(myCombatSliceState);
+	myOnExtractionStateChanged.Broadcast();
 }
 
 void AExtractionGameState::SetObjectiveText(const FText& anObjectiveText)
 {
 	myObjectiveText = anObjectiveText;
-	OnObjectiveChanged.Broadcast(myObjectiveText);
+	myOnExtractionStateChanged.Broadcast();
 }
 
 void AExtractionGameState::SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer)
 {
 	myDefenseTimeRemaining = aDefenseTimeRemaining;
 	myShowDefenseTimer = aShowDefenseTimer;
-	OnDefenseTimerChanged.Broadcast(myDefenseTimeRemaining, myShowDefenseTimer);
+	myOnExtractionStateChanged.Broadcast();
 }
 
 void AExtractionGameState::OnRep_CombatSliceState()
 {
-	OnCombatSliceStateChanged.Broadcast(myCombatSliceState);
+	myOnExtractionStateChanged.Broadcast();
 }
 
 void AExtractionGameState::OnRep_ObjectiveText()
 {
-	OnObjectiveChanged.Broadcast(myObjectiveText);
+	myOnExtractionStateChanged.Broadcast();
 }
 
 void AExtractionGameState::OnRep_DefenseTimer()
 {
-	OnDefenseTimerChanged.Broadcast(myDefenseTimeRemaining, myShowDefenseTimer);
+	myOnExtractionStateChanged.Broadcast();
 }

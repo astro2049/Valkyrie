@@ -36,10 +36,15 @@ void UHealthComponent::ApplyDamage(float aDamage)
 	}
 
 	myHealth = FMath::Clamp(myHealth - aDamage, 0.f, myMaxHealth);
-	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
 
 	if (myHealth <= 0.f) {
 		myIsDead = true;
+	}
+
+	myOnHealthStateChanged.Broadcast();
+	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
+
+	if (myIsDead) {
 		OnDeath.Broadcast();
 	}
 }
@@ -48,16 +53,20 @@ void UHealthComponent::ResetHealth()
 {
 	myIsDead = false;
 	myHealth = myMaxHealth;
+	myOnHealthStateChanged.Broadcast();
 	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
 }
 
 void UHealthComponent::OnRep_Health()
 {
+	myOnHealthStateChanged.Broadcast();
 	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
 }
 
 void UHealthComponent::OnRep_IsDead()
 {
+	myOnHealthStateChanged.Broadcast();
+
 	if (myIsDead) {
 		OnDeath.Broadcast();
 	}

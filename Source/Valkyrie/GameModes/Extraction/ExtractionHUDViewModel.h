@@ -8,30 +8,28 @@
 
 class AExtractionGameState;
 
+struct FExtractionHUDData
+{
+	FText myObjectiveText;
+	float myDefenseTimeRemaining{0.f};
+	bool myShowDefenseTimer{false};
+};
+
 UCLASS()
 class VALKYRIE_API UExtractionHUDViewModel : public UValkHUDViewModel
 {
 	GENERATED_BODY()
 
 public:
-	void BindToExtractionGameState(AExtractionGameState* aGameState);
-	void UnbindExtractionGameState();
+	void BindToGameState(AExtractionGameState* aGameState);
 	void RefreshFromExtractionGameState();
 
-	FText GetObjectiveText() const { return myObjectiveText; }
-	float GetDefenseTimeRemaining() const { return myDefenseTimeRemaining; }
-	bool ShouldShowDefenseTimer() const { return myShowDefenseTimer; }
+	const FExtractionHUDData& GetExtractionHUDData() const { return myExtractionHUDData; }
 
 private:
-	UFUNCTION()
-	void HandleObjectiveChanged(FText anObjectiveText);
-	UFUNCTION()
-	void HandleDefenseTimerChanged(float aDefenseTimeRemaining, bool aShowDefenseTimer);
+	void HandleExtractionStateChanged();
 
-	UPROPERTY()
-	TObjectPtr<AExtractionGameState> myExtractionGameState{nullptr};
+	TWeakObjectPtr<AExtractionGameState> myExtractionGameState;
 
-	FText myObjectiveText;
-	float myDefenseTimeRemaining{0.f};
-	bool myShowDefenseTimer{false};
+	FExtractionHUDData myExtractionHUDData;
 };

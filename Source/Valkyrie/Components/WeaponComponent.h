@@ -13,7 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	float, aDamage
 );
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FWeaponStateChanged);
+DECLARE_MULTICAST_DELEGATE(FWeaponStateChanged);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class VALKYRIE_API UWeaponComponent : public UActorComponent
@@ -50,7 +50,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Weapon")
 	FWeaponHitActor myOnHitActor;
 
-	UPROPERTY(BlueprintAssignable, Category="Weapon")
 	FWeaponStateChanged myOnWeaponStateChanged;
 
 private:

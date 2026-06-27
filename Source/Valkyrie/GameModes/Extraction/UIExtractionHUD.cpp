@@ -69,15 +69,15 @@ void UUIExtractionHUD::UpdateFromViewModel() const
 	}
 
 	// objective, defense timer
+	const FExtractionHUDData& extractionHUDData = myViewModel->GetExtractionHUDData();
 	if (myObjectiveText) {
-		const FText objectiveText = myViewModel ? myViewModel->GetObjectiveText() : FText::GetEmpty();
-		myObjectiveText->SetText(objectiveText);
+		myObjectiveText->SetText(extractionHUDData.myObjectiveText);
 	}
 	if (myDefenseTimerText) {
-		const bool showDefenseTimer = myViewModel && myViewModel->ShouldShowDefenseTimer();
+		const bool showDefenseTimer = extractionHUDData.myShowDefenseTimer;
 		myDefenseTimerText->SetVisibility(showDefenseTimer ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 		myDefenseTimerText->SetText(showDefenseTimer
-			? FText::AsNumber(FMath::CeilToInt(myViewModel->GetDefenseTimeRemaining()))
+			? FText::AsNumber(FMath::CeilToInt(extractionHUDData.myDefenseTimeRemaining))
 			: FText::GetEmpty());
 	}
 

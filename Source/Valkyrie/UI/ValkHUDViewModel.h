@@ -6,8 +6,7 @@
 #include "ValkViewModel.h"
 #include "ValkHUDViewModel.generated.h"
 
-class UHealthComponent;
-class UWeaponComponent;
+class AValkPlayerPawn;
 
 struct FValkWeaponHUDData
 {
@@ -31,25 +30,24 @@ class VALKYRIE_API UValkHUDViewModel : public UValkViewModel
 	GENERATED_BODY()
 
 public:
-	void BindToWeaponComponent(UWeaponComponent* aWeaponComponent);
-	void BindToHealthComponent(UHealthComponent* aHealthComponent);
+	void BindToPawn(AValkPlayerPawn* aPlayerPawn);
 
 	const FValkWeaponHUDData& GetWeaponHUDData() const { return myWeaponHUDData; }
 	const FValkHealthHUDData& GetHealthHUDData() const { return myHealthHUDData; }
 	float GetHealthRatio() const;
 	bool GetShowInteractPrompt() const { return myShowInteractPrompt; }
-	void SetShowInteractPrompt(bool aShowInteractPrompt);
 
 private:
-	UFUNCTION()
-	void HandleWeaponStateChanged();
-	UFUNCTION()
-	void HandleHealthChanged(float aHealth, float aMaxHealth);
+	void RefreshFromPawn();
+	void RefreshWeaponHUDData();
+	void RefreshHealthHUDData();
+	void RefreshInteractionHUDData();
 
-	UPROPERTY()
-	TObjectPtr<UWeaponComponent> myWeaponComponent{nullptr};
-	UPROPERTY()
-	TObjectPtr<UHealthComponent> myHealthComponent{nullptr};
+	void HandleWeaponStateChanged();
+	void HandleHealthStateChanged();
+	void HandleInteractionStateChanged();
+
+	TWeakObjectPtr<AValkPlayerPawn> myPlayerPawn;
 
 	FValkWeaponHUDData myWeaponHUDData;
 	FValkHealthHUDData myHealthHUDData;

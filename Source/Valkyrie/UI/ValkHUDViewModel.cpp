@@ -3,66 +3,109 @@
 #include "ValkHUDViewModel.h"
 
 #include "Valkyrie/Components/HealthComponent.h"
+#include "Valkyrie/Components/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
+#include "Valkyrie/Player/ValkPlayerPawn.h"
 
-void UValkHUDViewModel::BindToWeaponComponent(UWeaponComponent* aWeaponComponent)
+void UValkHUDViewModel::BindToPawn(AValkPlayerPawn* aPlayerPawn)
 {
-	myWeaponComponent = aWeaponComponent;
-	if (myWeaponComponent) {
-		myWeaponComponent->myOnWeaponStateChanged.AddUniqueDynamic(
-			this,
-			&UValkHUDViewModel::HandleWeaponStateChanged
-		);
-		HandleWeaponStateChanged();
+	if (myPlayerPawn.Get() == aPlayerPawn) {
+		RefreshFromPawn();
+		return;
+	}
+
+	myPlayerPawn = aPlayerPawn;
+	if (myPlayerPawn.IsValid()) {
+		if (UWeaponComponent* weaponComponent = myPlayerPawn->FindComponentByClass<UWeaponComponent>()) {
+			weaponComponent->myOnWeaponStateChanged.AddUObject(
+				this,
+				&UValkHUDViewModel::HandleWeaponStateChanged
+			);
+		}
+
+		if (UHealthComponent* healthComponent = myPlayerPawn->FindComponentByClass<UHealthComponent>()) {
+			healthComponent->myOnHealthStateChanged.AddUObject(
+				this,
+				&UValkHUDViewModel::HandleHealthStateChanged
+			);
+		}
+
+		if (UInteractionComponent* interactionComponent = myPlayerPawn->FindComponentByClass<UInteractionComponent>()) {
+			interactionComponent->myOnInteractionStateChanged.AddUObject(
+				this,
+				&UValkHUDViewModel::HandleInteractionStateChanged
+			);
+		}
+	}
+
+	RefreshFromPawn();
+}
+
+void UValkHUDViewModel::RefreshFromPawn()
+{
+	RefreshWeaponHUDData();
+	RefreshHealthHUDData();
+	RefreshInteractionHUDData();
+	BroadcastViewModelChanged();
+}
+
+void UValkHUDViewModel::RefreshWeaponHUDData()
+{
+	UWeaponComponent* weaponComponent = myPlayerPawn.IsValid()
+		? myPlayerPawn->FindComponentByClass<UWeaponComponent>()
+		: nullptr;
+	if (weaponComponent) {
+		myWeaponHUDData.myAmmoInMag = weaponComponent->GetAmmoInMag();
+		myWeaponHUDData.myReserveAmmo = weaponComponent->GetReserveAmmo();
+		myWeaponHUDData.myIsReloading = weaponComponent->IsReloading();
+		myWeaponHUDData.myShowAmmo = true;
+	} else {
+		myWeaponHUDData = FValkWeaponHUDData{};
 	}
 }
 
-void UValkHUDViewModel::BindToHealthComponent(UHealthComponent* aHealthComponent)
+void UValkHUDViewModel::RefreshHealthHUDData()
 {
-	myHealthComponent = aHealthComponent;
-	if (myHealthComponent) {
-		myHealthComponent->OnHealthChanged.AddUniqueDynamic(
-			this,
-			&UValkHUDViewModel::HandleHealthChanged
-		);
-		HandleHealthChanged(
-			myHealthComponent->GetHealth(),
-			myHealthComponent->GetMaxHealth()
-		);
+	UHealthComponent* healthComponent = myPlayerPawn.IsValid()
+		? myPlayerPawn->FindComponentByClass<UHealthComponent>()
+		: nullptr;
+	if (healthComponent) {
+		myHealthHUDData.myHealth = healthComponent->GetHealth();
+		myHealthHUDData.myMaxHealth = healthComponent->GetMaxHealth();
+		myHealthHUDData.myShowHealth = true;
+		myHealthHUDData.myIsDead = healthComponent->IsDead();
+	} else {
+		myHealthHUDData = FValkHealthHUDData{};
 	}
+}
+
+void UValkHUDViewModel::RefreshInteractionHUDData()
+{
+	UInteractionComponent* interactionComponent = myPlayerPawn.IsValid()
+		? myPlayerPawn->FindComponentByClass<UInteractionComponent>()
+		: nullptr;
+	myShowInteractPrompt = interactionComponent && interactionComponent->HasInteractable();
+}
+
+void UValkHUDViewModel::HandleWeaponStateChanged()
+{
+	RefreshWeaponHUDData();
+	BroadcastViewModelChanged();
+}
+
+void UValkHUDViewModel::HandleHealthStateChanged()
+{
+	RefreshHealthHUDData();
+	BroadcastViewModelChanged();
+}
+
+void UValkHUDViewModel::HandleInteractionStateChanged()
+{
+	RefreshInteractionHUDData();
+	BroadcastViewModelChanged();
 }
 
 float UValkHUDViewModel::GetHealthRatio() const
 {
 	return myHealthHUDData.myMaxHealth > 0.f ? myHealthHUDData.myHealth / myHealthHUDData.myMaxHealth : 0.f;
-}
-
-void UValkHUDViewModel::HandleWeaponStateChanged()
-{
-	if (!myWeaponComponent) {
-		myWeaponHUDData = FValkWeaponHUDData{};
-		BroadcastViewModelChanged();
-		return;
-	}
-
-	myWeaponHUDData.myAmmoInMag = myWeaponComponent->GetAmmoInMag();
-	myWeaponHUDData.myReserveAmmo = myWeaponComponent->GetReserveAmmo();
-	myWeaponHUDData.myIsReloading = myWeaponComponent->IsReloading();
-	myWeaponHUDData.myShowAmmo = true;
-	BroadcastViewModelChanged();
-}
-
-void UValkHUDViewModel::HandleHealthChanged(float aHealth, float aMaxHealth)
-{
-	myHealthHUDData.myHealth = aHealth;
-	myHealthHUDData.myMaxHealth = aMaxHealth;
-	myHealthHUDData.myShowHealth = true;
-	myHealthHUDData.myIsDead = myHealthHUDData.myHealth <= 0.f;
-	BroadcastViewModelChanged();
-}
-
-void UValkHUDViewModel::SetShowInteractPrompt(bool aShowInteractPrompt)
-{
-	myShowInteractPrompt = aShowInteractPrompt;
-	BroadcastViewModelChanged();
 }

@@ -9,7 +9,6 @@
 
 class UUIExtractionHUD;
 class UHealthComponent;
-class UInteractionComponent;
 class UExtractionHUDViewModel;
 class UUserWidget;
 class AExtractionGameState;
@@ -44,10 +43,7 @@ private:
 
 	UFUNCTION()
 	void HandlePlayerDeath();
-	UFUNCTION()
-	void HandleCombatSliceStateChanged(ECombatSliceState aCombatSliceState);
-	UFUNCTION()
-	void HandleInteractableChanged(bool aHasInteractable);
+	void HandleExtractionStateChanged();
 
 	UPROPERTY()
 	TObjectPtr<UExtractionHUDViewModel> myHUDViewModel{nullptr};
@@ -61,6 +57,5 @@ private:
 	TObjectPtr<UUserWidget> myVictoryMenuWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UHealthComponent> myBoundHealthComponent{nullptr};
-	UPROPERTY()
-	TObjectPtr<AExtractionGameState> myBoundCombatSliceGameState{nullptr};
+	TWeakObjectPtr<AExtractionGameState> myBoundExtractionGameState;
 };

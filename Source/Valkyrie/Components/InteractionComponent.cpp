@@ -15,7 +15,7 @@ void UInteractionComponent::SetInteractable(AActor* anInteractableActor)
 		if (UInteractableComponent* interactable = anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::SetInteractable"));
 			myInteractableComponent = interactable;
-			OnInteractableChanged.Broadcast(true);
+			myOnInteractionStateChanged.Broadcast();
 		}
 	}
 }
@@ -26,7 +26,7 @@ void UInteractionComponent::ClearInteractable(AActor* anInteractableActor)
 		if (myInteractableComponent.Get() == anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::ClearInteractable"));
 			myInteractableComponent.Reset();
-			OnInteractableChanged.Broadcast(false);
+			myOnInteractionStateChanged.Broadcast();
 		}
 	}
 }

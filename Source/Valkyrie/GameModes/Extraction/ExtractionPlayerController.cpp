@@ -6,8 +6,7 @@
 #include "ExtractionGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "Valkyrie/Components/HealthComponent.h"
-#include "Valkyrie/Components/InteractionComponent.h"
-#include "Valkyrie/Components/WeaponComponent.h"
+#include "Valkyrie/Player/ValkPlayerPawn.h"
 #include "ExtractionHUDViewModel.h"
 
 void AExtractionPlayerController::BeginPlay()
@@ -59,23 +58,11 @@ void AExtractionPlayerController::BindHUDToPawn()
 	}
 
 	APawn* controlledPawn = GetPawn();
-	UWeaponComponent* weaponComponent = controlledPawn
-		? controlledPawn->FindComponentByClass<UWeaponComponent>()
-		: nullptr;
-	myHUDViewModel->BindToWeaponComponent(weaponComponent);
+	myHUDViewModel->BindToPawn(Cast<AValkPlayerPawn>(controlledPawn));
 
 	UHealthComponent* healthComponent = controlledPawn
 		? controlledPawn->FindComponentByClass<UHealthComponent>()
 		: nullptr;
-	myHUDViewModel->BindToHealthComponent(healthComponent);
-	
-	if (UInteractionComponent* interactionComponent = controlledPawn ? controlledPawn->FindComponentByClass<UInteractionComponent>() : nullptr) {
-		interactionComponent->OnInteractableChanged.AddUniqueDynamic(
-			this,
-			&AExtractionPlayerController::HandleInteractableChanged
-		);
-		HandleInteractableChanged(interactionComponent->HasInteractable());
-	}
 
 	if (myBoundHealthComponent != healthComponent) {
 		if (myBoundHealthComponent) {
@@ -102,23 +89,16 @@ void AExtractionPlayerController::BindHUDToGameState()
 	}
 
 	AExtractionGameState* combatSliceGameState = GetWorld()->GetGameState<AExtractionGameState>();
-	myHUDViewModel->BindToExtractionGameState(combatSliceGameState);
+	myHUDViewModel->BindToGameState(combatSliceGameState);
 
-	if (myBoundCombatSliceGameState != combatSliceGameState) {
-		if (myBoundCombatSliceGameState) {
-			myBoundCombatSliceGameState->OnCombatSliceStateChanged.RemoveDynamic(
+	if (myBoundExtractionGameState.Get() != combatSliceGameState) {
+		myBoundExtractionGameState = combatSliceGameState;
+		if (myBoundExtractionGameState.IsValid()) {
+			myBoundExtractionGameState->myOnExtractionStateChanged.AddUObject(
 				this,
-				&AExtractionPlayerController::HandleCombatSliceStateChanged
+				&AExtractionPlayerController::HandleExtractionStateChanged
 			);
-		}
-
-		myBoundCombatSliceGameState = combatSliceGameState;
-		if (myBoundCombatSliceGameState) {
-			myBoundCombatSliceGameState->OnCombatSliceStateChanged.AddUniqueDynamic(
-				this,
-				&AExtractionPlayerController::HandleCombatSliceStateChanged
-			);
-			HandleCombatSliceStateChanged(myBoundCombatSliceGameState->GetCombatSliceState());
+			HandleExtractionStateChanged();
 		}
 	}
 }
@@ -167,18 +147,16 @@ void AExtractionPlayerController::HandlePlayerDeath()
 	}
 }
 
-void AExtractionPlayerController::HandleCombatSliceStateChanged(ECombatSliceState aCombatSliceState)
+void AExtractionPlayerController::HandleExtractionStateChanged()
 {
-	if (aCombatSliceState == ECombatSliceState::Completed) {
-		ShowVictoryMenu();
-	} else if (aCombatSliceState == ECombatSliceState::Failed) {
-		ShowFailureMenu();
+	if (!myBoundExtractionGameState.IsValid()) {
+		return;
 	}
-}
 
-void AExtractionPlayerController::HandleInteractableChanged(bool aHasInteractable)
-{
-	if (myHUDViewModel) {
-		myHUDViewModel->SetShowInteractPrompt(aHasInteractable);
+	const ECombatSliceState combatSliceState = myBoundExtractionGameState->GetCombatSliceState();
+	if (combatSliceState == ECombatSliceState::Completed) {
+		ShowVictoryMenu();
+	} else if (combatSliceState == ECombatSliceState::Failed) {
+		ShowFailureMenu();
 	}
 }

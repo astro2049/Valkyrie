@@ -7,21 +7,7 @@
 #include "ExtractionTypes.h"
 #include "ExtractionGameState.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
-	FCombatSliceStateChanged,
-	ECombatSliceState, aCombatSliceState
-);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
-	FObjectiveChanged,
-	FText, anObjectiveText
-);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
-	FDefenseTimerChanged,
-	float, aDefenseTimeRemaining,
-	bool, aShowDefenseTimer
-);
+DECLARE_MULTICAST_DELEGATE(FExtractionStateChanged);
 
 UCLASS()
 class VALKYRIE_API AExtractionGameState : public AValkGameState
@@ -44,12 +30,7 @@ public:
 	UFUNCTION(BlueprintPure, Category="Combat Slice")
 	bool ShouldShowDefenseTimer() const { return myShowDefenseTimer; }
 
-	UPROPERTY(BlueprintAssignable, Category="Combat Slice")
-	FCombatSliceStateChanged OnCombatSliceStateChanged;
-	UPROPERTY(BlueprintAssignable, Category="Combat Slice")
-	FObjectiveChanged OnObjectiveChanged;
-	UPROPERTY(BlueprintAssignable, Category="Combat Slice")
-	FDefenseTimerChanged OnDefenseTimerChanged;
+	FExtractionStateChanged myOnExtractionStateChanged;
 
 private:
 	UFUNCTION()

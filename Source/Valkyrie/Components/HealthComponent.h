@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FHealthStateChanged);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FHealthChanged,
 	float, aHealth,
@@ -36,6 +38,7 @@ public:
 	UFUNCTION(BlueprintPure, Category="Health")
 	bool IsDead() const { return myIsDead; }
 
+	FHealthStateChanged myOnHealthStateChanged;
 	UPROPERTY(BlueprintAssignable, Category="Health")
 	FHealthChanged OnHealthChanged;
 	UPROPERTY(BlueprintAssignable, Category="Health")

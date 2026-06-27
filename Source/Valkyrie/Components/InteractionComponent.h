@@ -7,10 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "InteractionComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
-	FInteractableChanged,
-	bool, aHasInteractable
-);
+DECLARE_MULTICAST_DELEGATE(FInteractionStateChanged);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class VALKYRIE_API UInteractionComponent : public UActorComponent
@@ -28,8 +25,7 @@ public:
 	void TryInteract() const;
 	bool HasInteractable() const { return myInteractableComponent.IsValid(); }
 
-	UPROPERTY(BlueprintAssignable, Category="Valkyrie|Interaction")
-	FInteractableChanged OnInteractableChanged;
+	FInteractionStateChanged myOnInteractionStateChanged;
 
 private:
 	TWeakObjectPtr<UInteractableComponent> myInteractableComponent;

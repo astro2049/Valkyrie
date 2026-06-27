@@ -4,75 +4,38 @@
 
 #include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 
-void UExtractionHUDViewModel::BindToExtractionGameState(AExtractionGameState* aGameState)
+void UExtractionHUDViewModel::BindToGameState(AExtractionGameState* aGameState)
 {
-	if (myExtractionGameState == aGameState) {
+	if (myExtractionGameState.Get() == aGameState) {
 		RefreshFromExtractionGameState();
 		return;
 	}
 
-	UnbindExtractionGameState();
-
 	myExtractionGameState = aGameState;
-	if (myExtractionGameState) {
-		myExtractionGameState->OnObjectiveChanged.AddUniqueDynamic(
+	if (myExtractionGameState.IsValid()) {
+		myExtractionGameState->myOnExtractionStateChanged.AddUObject(
 			this,
-			&UExtractionHUDViewModel::HandleObjectiveChanged
-		);
-		myExtractionGameState->OnDefenseTimerChanged.AddUniqueDynamic(
-			this,
-			&UExtractionHUDViewModel::HandleDefenseTimerChanged
+			&UExtractionHUDViewModel::HandleExtractionStateChanged
 		);
 	}
 
 	RefreshFromExtractionGameState();
 }
 
-void UExtractionHUDViewModel::UnbindExtractionGameState()
-{
-	if (myExtractionGameState) {
-		myExtractionGameState->OnObjectiveChanged.RemoveDynamic(
-			this,
-			&UExtractionHUDViewModel::HandleObjectiveChanged
-		);
-		myExtractionGameState->OnDefenseTimerChanged.RemoveDynamic(
-			this,
-			&UExtractionHUDViewModel::HandleDefenseTimerChanged
-		);
-	}
-
-	myExtractionGameState = nullptr;
-	myObjectiveText = FText::GetEmpty();
-	myDefenseTimeRemaining = 0.f;
-	myShowDefenseTimer = false;
-	BroadcastViewModelChanged();
-}
-
 void UExtractionHUDViewModel::RefreshFromExtractionGameState()
 {
-	if (!myExtractionGameState) {
-		myObjectiveText = FText::GetEmpty();
-		myDefenseTimeRemaining = 0.f;
-		myShowDefenseTimer = false;
-		BroadcastViewModelChanged();
-		return;
+	if (myExtractionGameState.IsValid()) {
+		myExtractionHUDData.myObjectiveText = myExtractionGameState->GetObjectiveText();
+		myExtractionHUDData.myDefenseTimeRemaining = myExtractionGameState->GetDefenseTimeRemaining();
+		myExtractionHUDData.myShowDefenseTimer = myExtractionGameState->ShouldShowDefenseTimer();
+	} else {
+		myExtractionHUDData = FExtractionHUDData{};
 	}
 
-	myObjectiveText = myExtractionGameState->GetObjectiveText();
-	myDefenseTimeRemaining = myExtractionGameState->GetDefenseTimeRemaining();
-	myShowDefenseTimer = myExtractionGameState->ShouldShowDefenseTimer();
 	BroadcastViewModelChanged();
 }
 
-void UExtractionHUDViewModel::HandleObjectiveChanged(FText anObjectiveText)
+void UExtractionHUDViewModel::HandleExtractionStateChanged()
 {
-	myObjectiveText = anObjectiveText;
-	BroadcastViewModelChanged();
-}
-
-void UExtractionHUDViewModel::HandleDefenseTimerChanged(float aDefenseTimeRemaining, bool aShowDefenseTimer)
-{
-	myDefenseTimeRemaining = aDefenseTimeRemaining;
-	myShowDefenseTimer = aShowDefenseTimer;
-	BroadcastViewModelChanged();
+	RefreshFromExtractionGameState();
 }
