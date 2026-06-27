@@ -17,6 +17,7 @@ class VALKYRIE_API AExtractionGameMode : public AValkGameMode
 public:
 	AExtractionGameMode();
 
+	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
 	virtual void RestartPlayer(AController* aNewPlayer) override;
 
 	UFUNCTION(BlueprintCallable, Category="Combat Slice")

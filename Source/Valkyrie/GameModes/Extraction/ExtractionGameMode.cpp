@@ -4,6 +4,7 @@
 
 #include "Actors/ExtractionZone.h"
 #include "ExtractionGameState.h"
+#include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,6 +14,29 @@
 AExtractionGameMode::AExtractionGameMode()
 {
 	PrimaryActorTick.bCanEverTick = false;
+}
+
+AActor* AExtractionGameMode::ChoosePlayerStart_Implementation(AController* aPlayer)
+{
+	TArray<AActor*> playerStarts;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStarts);
+	if (playerStarts.IsEmpty()) {
+		return Super::ChoosePlayerStart_Implementation(aPlayer);
+	}
+
+	playerStarts.Sort([](const AActor& aLeft, const AActor& aRight) {
+		return aLeft.GetName() < aRight.GetName();
+	});
+
+	int32 playerIndex = 0;
+	for (FConstPlayerControllerIterator playerControllerIterator = GetWorld()->GetPlayerControllerIterator(); playerControllerIterator; ++playerControllerIterator) {
+		if (playerControllerIterator->Get() == aPlayer) {
+			break;
+		}
+		++playerIndex;
+	}
+
+	return playerStarts[playerIndex % playerStarts.Num()];
 }
 
 void AExtractionGameMode::BeginPlay()
@@ -69,7 +93,7 @@ void AExtractionGameMode::CompleteDefense()
 
 	GetWorldTimerManager().ClearTimer(myDefenseTimerHandle);
 	if (AExtractionZone* extractionZone = myExtractionZone.Get()) {
-		extractionZone->Activate();
+		extractionZone->ActivateForAll();
 	}
 }
 
