@@ -4,7 +4,6 @@
 
 #include "Components/Widget.h"
 #include "EnhancedInputSubsystems.h"
-#include "Kismet/GameplayStatics.h"
 
 void AValkPlayerController::SetInputGameOnly(bool aShowMouseCursor)
 {
@@ -43,5 +42,21 @@ void AValkPlayerController::AddInputMappingContext() const
 
 void AValkPlayerController::RestartCurrentLevel_Implementation()
 {
-	UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/MainMenu/MainMenu")));
+	if (HasAuthority()) {
+		ReturnAllPlayersToMainMenu();
+	} else {
+		Server_ReturnAllPlayersToMainMenu();
+	}
+}
+
+void AValkPlayerController::ReturnAllPlayersToMainMenu()
+{
+	if (UWorld* world = GetWorld()) {
+		world->ServerTravel(TEXT("/Game/MainMenu/MainMenu"));
+	}
+}
+
+void AValkPlayerController::Server_ReturnAllPlayersToMainMenu_Implementation()
+{
+	ReturnAllPlayersToMainMenu();
 }

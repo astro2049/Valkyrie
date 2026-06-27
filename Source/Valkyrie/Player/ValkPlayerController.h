@@ -25,4 +25,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie|Input")
 	TObjectPtr<UInputMappingContext> myInputMappingContext{nullptr};
+
+private:
+	void ReturnAllPlayersToMainMenu();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ReturnAllPlayersToMainMenu();
 };
