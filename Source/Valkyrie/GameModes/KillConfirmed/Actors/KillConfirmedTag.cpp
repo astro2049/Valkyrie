@@ -1,0 +1,68 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "KillConfirmedTag.h"
+
+#include "Valkyrie/GameModes/KillConfirmed/KillConfirmedGameMode.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/Pawn.h"
+#include "Net/UnrealNetwork.h"
+#include "Valkyrie/Components/HealthComponent.h"
+#include "Valkyrie/GameModes/PVP/PVPGameState.h"
+#include "Valkyrie/GameModes/PVP/Player/PVPPlayerState.h"
+
+AKillConfirmedTag::AKillConfirmedTag()
+{
+	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
+}
+
+void AKillConfirmedTag::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AKillConfirmedTag, myDroppedTeamId);
+}
+
+void AKillConfirmedTag::SetDroppedTeamId(const int32 aTeamId)
+{
+	if (HasAuthority()) {
+		myDroppedTeamId = aTeamId;
+	}
+}
+
+void AKillConfirmedTag::HandlePlayerEntered(AActor* const anOtherActor)
+{
+	if (!HasAuthority()) {
+		return;
+	}
+	UWorld* const world = GetWorld();
+	if (!world) {
+		return;
+	}
+	const APVPGameState* const gameState = world->GetGameState<APVPGameState>();
+	if (gameState && gameState->HasMatchEnded()) {
+		return;
+	}
+
+	APawn* const playerPawn = Cast<APawn>(anOtherActor);
+	const UHealthComponent* const healthComponent = playerPawn
+		? playerPawn->FindComponentByClass<UHealthComponent>()
+		: nullptr;
+	APVPPlayerState* const playerState = playerPawn && playerPawn->GetController()
+		? playerPawn->GetController()->GetPlayerState<APVPPlayerState>()
+		: nullptr;
+	if (!playerState || (healthComponent && healthComponent->IsDead())) {
+		return;
+	}
+
+	if (playerState->GetTeamId() == myDroppedTeamId) {
+		Destroy();
+		return;
+	}
+
+	if (AKillConfirmedGameMode* const gameMode = world->GetAuthGameMode<AKillConfirmedGameMode>()) {
+		if (gameMode->ConfirmTag(playerPawn)) {
+			Destroy();
+		}
+	}
+}

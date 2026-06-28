@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
+#include "Valkyrie/Components/HealthComponent.h"
 
 AValkPlayerPawn::AValkPlayerPawn()
 {
@@ -85,7 +86,8 @@ void AValkPlayerPawn::HandleLook(const FInputActionValue& anInputValue)
 
 void AValkPlayerPawn::HandleInteract()
 {
-	if (!myInteractionComponent) {
+	const UHealthComponent* const healthComponent = FindComponentByClass<UHealthComponent>();
+	if (!myInteractionComponent || (healthComponent && healthComponent->IsDead())) {
 		return;
 	}
 
@@ -108,7 +110,8 @@ void AValkPlayerPawn::RPC_SyncRotation_Implementation(const FRotator& aRotation)
 
 void AValkPlayerPawn::RPC_Interact_Implementation()
 {
-	if (myInteractionComponent) {
+	const UHealthComponent* const healthComponent = FindComponentByClass<UHealthComponent>();
+	if (myInteractionComponent && (!healthComponent || !healthComponent->IsDead())) {
 		myInteractionComponent->Interact();
 	}
 }

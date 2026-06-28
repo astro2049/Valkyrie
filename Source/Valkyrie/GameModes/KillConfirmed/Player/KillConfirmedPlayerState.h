@@ -1,0 +1,34 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Valkyrie/GameModes/PVP/Player/PVPPlayerState.h"
+#include "KillConfirmedPlayerState.generated.h"
+
+UCLASS()
+class VALKYRIE_API AKillConfirmedPlayerState : public APVPPlayerState
+{
+	GENERATED_BODY()
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void AddKill();
+	void AddDeath();
+	void AddConfirm();
+	int32 GetKills() const { return myKills; }
+	int32 GetDeaths() const { return myDeaths; }
+	int32 GetConfirms() const { return myConfirms; }
+
+private:
+	UFUNCTION()
+	void OnRep_CombatStats();
+
+	UPROPERTY(ReplicatedUsing=OnRep_CombatStats, VisibleAnywhere, Category="Valkyrie")
+	int32 myKills{0};
+	UPROPERTY(ReplicatedUsing=OnRep_CombatStats, VisibleAnywhere, Category="Valkyrie")
+	int32 myDeaths{0};
+	UPROPERTY(ReplicatedUsing=OnRep_CombatStats, VisibleAnywhere, Category="Valkyrie")
+	int32 myConfirms{0};
+};

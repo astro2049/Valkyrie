@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Valkyrie/Player/ValkPlayerController.h"
-#include "ExtractionTypes.h"
 #include "ExtractionPlayerController.generated.h"
 
 class UUIExtractionHUD;

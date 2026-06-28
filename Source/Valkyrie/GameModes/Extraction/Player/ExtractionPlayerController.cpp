@@ -2,12 +2,12 @@
 
 #include "ExtractionPlayerController.h"
 
-#include "UIExtractionHUD.h"
-#include "ExtractionGameState.h"
+#include "Valkyrie/GameModes/Extraction/UI/UIExtractionHUD.h"
+#include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Player/ValkPlayerPawn.h"
-#include "ExtractionHUDViewModel.h"
+#include "Valkyrie/GameModes/Extraction/UI/ExtractionHUDViewModel.h"
 
 void AExtractionPlayerController::BeginPlay()
 {

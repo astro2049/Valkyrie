@@ -60,7 +60,8 @@ void UWeaponComponent::TraceFire(const FVector aTraceStart, const FVector aTrace
 {
 	const UWorld* const world = GetWorld();
 	const AActor* const owner = GetOwner();
-	if (!world || !owner || myIsReloading || myAmmoInMag <= 0 || aTraceDirection.IsNearlyZero()) {
+	const UHealthComponent* const ownerHealth = owner ? owner->FindComponentByClass<UHealthComponent>() : nullptr;
+	if (!world || !owner || (ownerHealth && ownerHealth->IsDead()) || myIsReloading || myAmmoInMag <= 0 || aTraceDirection.IsNearlyZero()) {
 		return;
 	}
 
@@ -86,7 +87,8 @@ void UWeaponComponent::TraceFire(const FVector aTraceStart, const FVector aTrace
 		if (hasHit) {
 			if (AActor* hitActor = hitResult.GetActor()) {
 				if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
-					health->ApplyDamage(myDamage);
+					const APawn* const ownerPawn = Cast<APawn>(owner);
+					health->ApplyDamage(myDamage, ownerPawn ? ownerPawn->GetController() : nullptr);
 				}
 			}
 		}
@@ -135,7 +137,9 @@ void UWeaponComponent::StartReload()
 void UWeaponComponent::TryStartReload()
 {
 	const UWorld* const world = GetWorld();
-	if (!world || myIsReloading || myAmmoInMag >= myMagazineSize || myReserveAmmo <= 0) {
+	const AActor* const owner = GetOwner();
+	const UHealthComponent* const ownerHealth = owner ? owner->FindComponentByClass<UHealthComponent>() : nullptr;
+	if (!world || (ownerHealth && ownerHealth->IsDead()) || myIsReloading || myAmmoInMag >= myMagazineSize || myReserveAmmo <= 0) {
 		return;
 	}
 

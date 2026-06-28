@@ -25,7 +25,7 @@ void UHealthComponent::BeginPlay()
 	ResetHealth();
 }
 
-void UHealthComponent::ApplyDamage(const float aDamage)
+void UHealthComponent::ApplyDamage(const float aDamage, AController* const aDamageInstigator)
 {
 	if (aDamage <= 0.f) {
 		return;
@@ -41,6 +41,7 @@ void UHealthComponent::ApplyDamage(const float aDamage)
 			myOnHealthStateChanged.Broadcast();
 			OnHealthChanged.Broadcast(myHealth, myMaxHealth);
 			if (myIsDead) {
+				myOnHealthDeath.Broadcast(aDamageInstigator);
 				OnDeath.Broadcast();
 			}
 		}

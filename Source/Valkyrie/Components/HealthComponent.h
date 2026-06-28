@@ -6,7 +6,10 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+class AController;
+
 DECLARE_MULTICAST_DELEGATE(FHealthStateChanged);
+DECLARE_MULTICAST_DELEGATE_OneParam(FHealthDeath, AController*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FHealthChanged,
 	float, aHealth,
@@ -24,7 +27,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
-	void ApplyDamage(float aDamage);
+	void ApplyDamage(float aDamage, AController* aDamageInstigator = nullptr);
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ResetHealth();
 	float GetHealth() const { return myHealth; }
@@ -33,6 +36,7 @@ public:
 	bool IsDead() const { return myIsDead; }
 
 	FHealthStateChanged myOnHealthStateChanged; // for view model
+	FHealthDeath myOnHealthDeath; // for authoritative game mode rules
 	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FHealthChanged OnHealthChanged; // for health bar presenter component (Blueprint)
 	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
