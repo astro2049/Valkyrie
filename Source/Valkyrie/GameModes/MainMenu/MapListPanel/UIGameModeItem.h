@@ -16,22 +16,22 @@ class VALKYRIE_API UUIGameModeItem : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Menu|Mode Entry")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void InitializeModeEntry(int32 anEntryIndex, const FText& aDisplayName, bool aIsPlayable);
-	UFUNCTION(BlueprintCallable, Category="Menu|Mode Entry")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void SetSelected(bool aIsSelected);
 
-	UPROPERTY(BlueprintAssignable, Category="Menu|Mode Entry")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMenuModeEntryEvent myOnClicked;
 
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Mode Entry")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UUIButton> myButton{nullptr};
 
-	UFUNCTION(BlueprintImplementableEvent, Category="Menu|Mode Entry")
+	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie")
 	void HandleSelectedChanged(bool aIsSelected);
 
 private:

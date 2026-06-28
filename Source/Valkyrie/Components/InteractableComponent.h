@@ -6,19 +6,13 @@
 #include "Components/ActorComponent.h"
 #include "InteractableComponent.generated.h"
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VALKYRIE_API UInteractableComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
-	UInteractableComponent();
+	UInteractableComponent() { PrimaryComponentTick.bCanEverTick = false; }
 	
-	virtual void Interact();
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+	virtual void Interact() {}
 };

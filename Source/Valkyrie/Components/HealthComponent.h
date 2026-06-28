@@ -7,13 +7,11 @@
 #include "HealthComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FHealthStateChanged);
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FHealthChanged,
 	float, aHealth,
 	float, aMaxHealth
 );
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDeath);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -23,40 +21,35 @@ class VALKYRIE_API UHealthComponent : public UActorComponent
 
 public:
 	UHealthComponent();
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UFUNCTION(BlueprintCallable, Category="Health")
+	
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ApplyDamage(float aDamage);
-	UFUNCTION(BlueprintCallable, Category="Health")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ResetHealth();
-
-	UFUNCTION(BlueprintPure, Category="Health")
 	float GetHealth() const { return myHealth; }
-	UFUNCTION(BlueprintPure, Category="Health")
 	float GetMaxHealth() const { return myMaxHealth; }
-	UFUNCTION(BlueprintPure, Category="Health")
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool IsDead() const { return myIsDead; }
 
-	FHealthStateChanged myOnHealthStateChanged;
-	UPROPERTY(BlueprintAssignable, Category="Health")
-	FHealthChanged OnHealthChanged;
-	UPROPERTY(BlueprintAssignable, Category="Health")
-	FDeath OnDeath;
-
-protected:
-	virtual void BeginPlay() override;
+	FHealthStateChanged myOnHealthStateChanged; // for view model
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
+	FHealthChanged OnHealthChanged; // for health bar presenter component (Blueprint)
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
+	FDeath OnDeath; // for player controller
 
 private:
+	virtual void BeginPlay() override;
+	
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health() const;
 	UFUNCTION()
-	void OnRep_IsDead();
+	void OnRep_IsDead() const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myMaxHealth{100.f};
-	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myHealth{100.f};
-	UPROPERTY(ReplicatedUsing=OnRep_IsDead, VisibleAnywhere, BlueprintReadOnly, Category="Health", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_IsDead, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	bool myIsDead{false};
 };

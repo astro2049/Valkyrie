@@ -20,17 +20,17 @@ public:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
 	virtual void RestartPlayer(AController* aNewPlayer) override;
 
-	UFUNCTION(BlueprintCallable, Category="Combat Slice")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void StartGenerator();
-	UFUNCTION(BlueprintCallable, Category="Combat Slice")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void CompleteDefense();
-	UFUNCTION(BlueprintCallable, Category="Combat Slice")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void CompleteExtraction();
 
-	UFUNCTION(BlueprintImplementableEvent, Category="Combat Slice")
+	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie")
 	void OnExtractionCompleted();
 
-	UFUNCTION(BlueprintPure, Category="Combat Slice")
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	float GetDefenseTimeRemaining() const { return myDefenseTimeRemaining; }
 
 protected:
@@ -47,9 +47,9 @@ private:
 	void SetCombatSliceState(ECombatSliceState aNewState, const FText& anObjectiveText) const;
 	void SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer) const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myDefenseDuration{60.f};
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myDefenseTimeRemaining{60.f};
 
 	TWeakObjectPtr<AExtractionZone> myExtractionZone;

@@ -15,9 +15,9 @@ struct FMenuModeEntry
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Mode")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	FText myDisplayName;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Mode")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	TSubclassOf<AGameModeBase> myGameModeClass;
 
 	bool IsPlayable() const;
@@ -29,14 +29,14 @@ class VALKYRIE_API UMapDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Map")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	FText myDisplayName;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Map", meta=(MultiLine=true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(MultiLine=true))
 	FText myDescription;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Map")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	TObjectPtr<UTexture2D> myPreviewImage{nullptr};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Map")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	FName myLevelName;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Map")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	TArray<FMenuModeEntry> mySupportedModes;
 };

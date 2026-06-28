@@ -25,48 +25,50 @@ void UHealthComponent::BeginPlay()
 	ResetHealth();
 }
 
-void UHealthComponent::ApplyDamage(float aDamage)
+void UHealthComponent::ApplyDamage(const float aDamage)
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority()) {
+	if (aDamage <= 0.f) {
 		return;
 	}
+	
+	if (GetOwner() && GetOwner()->HasAuthority()) {
+		if (!myIsDead) {
+			myHealth = FMath::Clamp(myHealth - aDamage, 0.f, myMaxHealth);
+			if (myHealth <= 0.f) {
+				myIsDead = true;
+			}
 
-	if (myIsDead || aDamage <= 0.f) {
-		return;
-	}
-
-	myHealth = FMath::Clamp(myHealth - aDamage, 0.f, myMaxHealth);
-
-	if (myHealth <= 0.f) {
-		myIsDead = true;
-	}
-
-	myOnHealthStateChanged.Broadcast();
-	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
-
-	if (myIsDead) {
-		OnDeath.Broadcast();
+			myOnHealthStateChanged.Broadcast();
+			OnHealthChanged.Broadcast(myHealth, myMaxHealth);
+			if (myIsDead) {
+				OnDeath.Broadcast();
+			}
+		}
 	}
 }
 
 void UHealthComponent::ResetHealth()
 {
-	myIsDead = false;
+	const AActor* const owner = GetOwner();
+	if (!owner || !owner->HasAuthority()) {
+		return;
+	}
+
 	myHealth = myMaxHealth;
+	myIsDead = false;
 	myOnHealthStateChanged.Broadcast();
 	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
 }
 
-void UHealthComponent::OnRep_Health()
+void UHealthComponent::OnRep_Health() const
 {
 	myOnHealthStateChanged.Broadcast();
 	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
 }
 
-void UHealthComponent::OnRep_IsDead()
+void UHealthComponent::OnRep_IsDead() const
 {
 	myOnHealthStateChanged.Broadcast();
-
 	if (myIsDead) {
 		OnDeath.Broadcast();
 	}

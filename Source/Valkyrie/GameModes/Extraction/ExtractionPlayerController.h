@@ -24,13 +24,13 @@ public:
 	virtual void AcknowledgePossession(APawn* aPawn) override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Combat Slice|UI")
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUIExtractionHUD> myHUDWidgetClass;
-	UPROPERTY(EditDefaultsOnly, Category="Combat Slice|UI")
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myDeathMenuWidgetClass;
-	UPROPERTY(EditDefaultsOnly, Category="Combat Slice|UI")
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myDeadOverlayWidgetClass;
-	UPROPERTY(EditDefaultsOnly, Category="Combat Slice|UI")
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myVictoryMenuWidgetClass;
 
 private:

@@ -16,24 +16,24 @@ class VALKYRIE_API UUIMapItem : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Menu|Map Entry")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void InitializeMapEntry(int32 anEntryIndex, const FText& aDisplayName);
-	UFUNCTION(BlueprintCallable, Category="Menu|Map Entry")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void SetSelected(bool aIsSelected);
 
-	UPROPERTY(BlueprintAssignable, Category="Menu|Map Entry")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMenuMapEntryEvent myOnHovered;
-	UPROPERTY(BlueprintAssignable, Category="Menu|Map Entry")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMenuMapEntryEvent myOnClicked;
 
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Map Entry")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UUIButton> myButton{nullptr};
 
-	UFUNCTION(BlueprintImplementableEvent, Category="Menu|Map Entry")
+	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie")
 	void HandleSelectedChanged(bool aIsSelected);
 
 private:

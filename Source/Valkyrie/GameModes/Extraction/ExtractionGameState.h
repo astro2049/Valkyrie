@@ -21,13 +21,13 @@ public:
 	void SetObjectiveText(const FText& anObjectiveText);
 	void SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer);
 
-	UFUNCTION(BlueprintPure, Category="Combat Slice")
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	ECombatSliceState GetCombatSliceState() const { return myCombatSliceState; }
-	UFUNCTION(BlueprintPure, Category="Combat Slice")
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	FText GetObjectiveText() const { return myObjectiveText; }
-	UFUNCTION(BlueprintPure, Category="Combat Slice")
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	float GetDefenseTimeRemaining() const { return myDefenseTimeRemaining; }
-	UFUNCTION(BlueprintPure, Category="Combat Slice")
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool ShouldShowDefenseTimer() const { return myShowDefenseTimer; }
 
 	FExtractionStateChanged myOnExtractionStateChanged;
@@ -40,12 +40,12 @@ private:
 	UFUNCTION()
 	void OnRep_DefenseTimer();
 
-	UPROPERTY(ReplicatedUsing=OnRep_CombatSliceState, VisibleAnywhere, BlueprintReadOnly, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_CombatSliceState, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	ECombatSliceState myCombatSliceState{ECombatSliceState::ToStartGenerator};
-	UPROPERTY(ReplicatedUsing=OnRep_ObjectiveText, VisibleAnywhere, BlueprintReadOnly, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_ObjectiveText, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	FText myObjectiveText;
-	UPROPERTY(ReplicatedUsing=OnRep_DefenseTimer, VisibleAnywhere, BlueprintReadOnly, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_DefenseTimer, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myDefenseTimeRemaining{0.f};
-	UPROPERTY(ReplicatedUsing=OnRep_DefenseTimer, VisibleAnywhere, BlueprintReadOnly, Category="Combat Slice", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(ReplicatedUsing=OnRep_DefenseTimer, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	bool myShowDefenseTimer{false};
 };

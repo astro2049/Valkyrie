@@ -34,21 +34,20 @@ public:
 
 	const FValkWeaponHUDData& GetWeaponHUDData() const { return myWeaponHUDData; }
 	const FValkHealthHUDData& GetHealthHUDData() const { return myHealthHUDData; }
-	float GetHealthRatio() const;
+	float GetHealthRatio() const { return myHealthHUDData.myMaxHealth > 0.f ? myHealthHUDData.myHealth / myHealthHUDData.myMaxHealth : 0.f; }
 	bool GetShowInteractPrompt() const { return myShowInteractPrompt; }
 
 private:
-	void RefreshFromPawn();
+	void OnWeaponStateChanged();
+	void OnHealthStateChanged();
+	void OnInteractionStateChanged();
+
+	void RefreshPawnData();
 	void RefreshWeaponHUDData();
 	void RefreshHealthHUDData();
 	void RefreshInteractionHUDData();
 
-	void HandleWeaponStateChanged();
-	void HandleHealthStateChanged();
-	void HandleInteractionStateChanged();
-
 	TWeakObjectPtr<AValkPlayerPawn> myPlayerPawn;
-
 	FValkWeaponHUDData myWeaponHUDData;
 	FValkHealthHUDData myHealthHUDData;
 	bool myShowInteractPrompt{false};

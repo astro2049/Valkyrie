@@ -17,12 +17,12 @@ class VALKYRIE_API UInteractionComponent : public UActorComponent
 public:
 	UInteractionComponent();
 
-	UFUNCTION(BlueprintCallable, Category="Valkyrie|Interaction")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void SetInteractable(AActor* anInteractableActor);
-	UFUNCTION(BlueprintCallable, Category="Valkyrie|Interaction")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ClearInteractable(AActor* anInteractableActor);
-
-	void TryInteract() const;
+	void Interact() const;
+	
 	bool HasInteractable() const { return myInteractableComponent.IsValid(); }
 
 	FInteractionStateChanged myOnInteractionStateChanged;

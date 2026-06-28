@@ -18,10 +18,10 @@ public:
 
 	void ActivateForAll();
 
-	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie|Extraction")
+	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie")
 	void Activate();
 
-	UFUNCTION(BlueprintCallable, Category="Valkyrie|Extraction")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void HandlePlayerEntered(AActor* anOtherActor);
 
 private:

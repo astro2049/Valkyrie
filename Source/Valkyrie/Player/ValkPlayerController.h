@@ -15,20 +15,19 @@ class VALKYRIE_API AValkPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Valkyrie|Level")
-	void RestartCurrentLevel();
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
+	void ReturnAllPlayersToMainMenu();
 
 protected:
 	void AddInputMappingContext() const;
-	void SetInputGameOnly(bool aShowMouseCursor = false);
-	void SetInputUIOnly(UWidget* aWidgetToFocus, bool aShowMouseCursor = true);
-
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie|Input")
-	TObjectPtr<UInputMappingContext> myInputMappingContext{nullptr};
+	void SetInputGameOnly();
+	void SetInputUIOnly(UWidget* aWidgetToFocus);
 
 private:
-	void ReturnAllPlayersToMainMenu();
-
 	UFUNCTION(Server, Reliable)
-	void Server_ReturnAllPlayersToMainMenu();
+	void RPCServer_ReturnAllPlayersToMainMenu();
+	void Authority_ReturnAllPlayersToMainMenu() const;
+
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputMappingContext> myInputMappingContext{nullptr};
 };

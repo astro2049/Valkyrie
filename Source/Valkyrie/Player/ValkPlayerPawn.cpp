@@ -11,32 +11,30 @@ AValkPlayerPawn::AValkPlayerPawn()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	SetReplicateMovement(true);
-
 	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
 }
 
-void AValkPlayerPawn::Tick(float aDeltaSeconds)
+void AValkPlayerPawn::Tick(const float aDeltaSeconds)
 {
 	Super::Tick(aDeltaSeconds);
 
-	if (IsLocallyControlled() && !HasAuthority()) {
+	if (!HasAuthority() && IsLocallyControlled()) {
 		if (myShouldSyncLocationThisTick) {
-			Server_SyncLocation(GetActorLocation());
+			RPC_SyncLocation(GetActorLocation());
 		}
 		if (myShouldSyncRotationThisTick) {
-			Server_SyncRotation(GetActorRotation());
+			RPC_SyncRotation(GetActorRotation());
 		}
 	}
-
 	myShouldSyncLocationThisTick = false;
 	myShouldSyncRotationThisTick = false;
 }
 
-void AValkPlayerPawn::SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent)
+void AValkPlayerPawn::SetupPlayerInputComponent(UInputComponent* const aPlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(aPlayerInputComponent);
 
-	if (UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(aPlayerInputComponent)) {
+	if (UEnhancedInputComponent* const enhancedInputComponent = Cast<UEnhancedInputComponent>(aPlayerInputComponent)) {
 		// move input
 		if (myMoveAction) {
 			enhancedInputComponent->BindAction(
@@ -91,26 +89,26 @@ void AValkPlayerPawn::HandleInteract()
 		return;
 	}
 
-	if (HasAuthority()) {
-		myInteractionComponent->TryInteract();
+	if (!HasAuthority()) {
+		RPC_Interact();
 	} else {
-		Server_TryInteract();
+		myInteractionComponent->Interact();
 	}
 }
 
-void AValkPlayerPawn::Server_SyncLocation_Implementation(FVector aLocation)
+void AValkPlayerPawn::RPC_SyncLocation_Implementation(const FVector& aLocation)
 {
 	SetActorLocation(aLocation, true);
 }
 
-void AValkPlayerPawn::Server_SyncRotation_Implementation(FRotator aRotation)
+void AValkPlayerPawn::RPC_SyncRotation_Implementation(const FRotator& aRotation)
 {
 	SetActorRotation(aRotation);
 }
 
-void AValkPlayerPawn::Server_TryInteract_Implementation()
+void AValkPlayerPawn::RPC_Interact_Implementation()
 {
 	if (myInteractionComponent) {
-		myInteractionComponent->TryInteract();
+		myInteractionComponent->Interact();
 	}
 }

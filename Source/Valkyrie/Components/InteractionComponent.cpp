@@ -31,10 +31,10 @@ void UInteractionComponent::ClearInteractable(AActor* anInteractableActor)
 	}
 }
 
-void UInteractionComponent::TryInteract() const
+void UInteractionComponent::Interact() const
 {
 	if (UInteractableComponent* interactable = myInteractableComponent.Get()) {
-		UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::TryInteract"));
+		UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::Interact"));
 		interactable->Interact();
 	}
 }

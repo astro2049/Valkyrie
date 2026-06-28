@@ -23,38 +23,38 @@ class VALKYRIE_API UUIMapListPanel : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Menu|Map Select")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ResetMapSelection();
 
-	UPROPERTY(BlueprintAssignable, Category="Menu|Map Select")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMapSelectBackRequested myOnBackRequested;
-	UPROPERTY(BlueprintAssignable, Category="Menu|Map Select")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMapSelectStartRequested myOnStartRequested;
 
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Map Select")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	TArray<TObjectPtr<UMapDataAsset>> myAvailableMaps;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Map Select")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	TSubclassOf<UUIMapItem> myMapEntryWidgetClass;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Menu|Map Select")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	TSubclassOf<UUIGameModeItem> myModeEntryWidgetClass;
 
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Map Select")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UUIButton> myBackButton{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Map Select")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UUIButton> myStartButton{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Map Select")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UPanelWidget> myMapListContainer{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Map Select")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UPanelWidget> myModeListContainer{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Map Select")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UImage> myPreviewImage{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Map Select")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UTextBlock> myMapNameText{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Map Select")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UTextBlock> myMapDescriptionText{nullptr};
 
 private:

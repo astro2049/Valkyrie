@@ -18,9 +18,9 @@ public:
 	virtual void BeginPlay() override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Menu")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie")
 	TSubclassOf<UUIMainMenu> myMenuScreenWidgetClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Menu")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie")
 	int32 myMenuZOrder{0};
 
 private:

@@ -17,6 +17,6 @@ public:
 	AExtractionGenerator();
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie|Interaction", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UGeneratorInteractableComponent> myInteractableComponent;
 };

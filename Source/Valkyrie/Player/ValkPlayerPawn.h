@@ -22,11 +22,11 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie|Input")
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myMoveAction{nullptr};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie|Input")
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myLookAction{nullptr};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie|Input")
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myInteractAction{nullptr};
 
 private:
@@ -35,15 +35,14 @@ private:
 	void HandleInteract();
 
 	UFUNCTION(Server, Unreliable)
-	void Server_SyncLocation(FVector aLocation);
+	void RPC_SyncLocation(const FVector& aLocation);
 	UFUNCTION(Server, Unreliable)
-	void Server_SyncRotation(FRotator aRotation);
+	void RPC_SyncRotation(const FRotator& aRotation);
 	UFUNCTION(Server, Reliable)
-	void Server_TryInteract();
+	void RPC_Interact();
 
 	bool myShouldSyncLocationThisTick{false};
 	bool myShouldSyncRotationThisTick{false};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie|Interaction", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInteractionComponent> myInteractionComponent;
 };

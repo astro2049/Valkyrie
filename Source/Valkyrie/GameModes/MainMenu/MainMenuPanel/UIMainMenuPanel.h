@@ -16,18 +16,18 @@ class VALKYRIE_API UUIMainMenuPanel : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintAssignable, Category="Menu|Main")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMainMenuEvent myOnSelectMapRequested;
-	UPROPERTY(BlueprintAssignable, Category="Menu|Main")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMainMenuEvent myOnQuitRequested;
 
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Main")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UUIButton> mySelectMapButton{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Main")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UUIButton> myQuitButton{nullptr};
 
 private:

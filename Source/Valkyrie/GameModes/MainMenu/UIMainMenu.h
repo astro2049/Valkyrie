@@ -19,23 +19,23 @@ class VALKYRIE_API UUIMainMenu : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Menu")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ShowMainMenu();
-	UFUNCTION(BlueprintCallable, Category="Menu")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ShowMapSelect();
 
-	UPROPERTY(BlueprintAssignable, Category="Menu")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMenuScreenQuitRequested myOnQuitRequested;
-	UPROPERTY(BlueprintAssignable, Category="Menu")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FMenuScreenStartRequested myOnStartRequested;
 
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Child Widgets")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UUIMainMenuPanel> myMainMenuPanel{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Child Widgets")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UUIMapListPanel> myMapListPanel{nullptr};
 
 private:

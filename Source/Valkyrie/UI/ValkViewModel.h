@@ -17,5 +17,5 @@ public:
 	FValkViewModelChanged myOnViewModelChanged;
 
 protected:
-	void BroadcastViewModelChanged() const;
+	void BroadcastViewModelChanged() const { myOnViewModelChanged.Broadcast(); }
 };

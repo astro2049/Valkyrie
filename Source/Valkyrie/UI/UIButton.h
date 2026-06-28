@@ -17,14 +17,14 @@ class VALKYRIE_API UUIButton : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Menu|Button")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void SetLabel(const FText& aLabel);
-	UFUNCTION(BlueprintCallable, Category="Menu|Button")
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void SetButtonEnabled(bool aIsEnabled);
 
-	UPROPERTY(BlueprintAssignable, Category="Menu|Button")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FUIButtonEvent myOnClicked;
-	UPROPERTY(BlueprintAssignable, Category="Menu|Button")
+	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FUIButtonEvent myOnHovered;
 
 protected:
@@ -32,12 +32,12 @@ protected:
 	virtual void NativeDestruct() override;
 	virtual void SynchronizeProperties() override;
 
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Button")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UButton> myButton{nullptr};
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Menu|Button")
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget), Category="Valkyrie")
 	TObjectPtr<UTextBlock> myText{nullptr};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Menu|Button|Content")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie")
 	FText myLabel;
 
 private:
