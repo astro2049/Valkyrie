@@ -16,7 +16,7 @@ void ATDMPlayerState::AddKill()
 {
 	if (HasAuthority()) {
 		++myKills;
-		myOnPlayerStateChanged.Broadcast();
+		NotifyGameStateChanged();
 	}
 }
 
@@ -24,11 +24,11 @@ void ATDMPlayerState::AddDeath()
 {
 	if (HasAuthority()) {
 		++myDeaths;
-		myOnPlayerStateChanged.Broadcast();
+		NotifyGameStateChanged();
 	}
 }
 
 void ATDMPlayerState::OnRep_CombatStats()
 {
-	myOnPlayerStateChanged.Broadcast();
+	NotifyGameStateChanged();
 }

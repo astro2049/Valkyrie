@@ -25,11 +25,11 @@ int32 ATDMGameState::AddTeamKill(const int32 aTeamId)
 	} else if (aTeamId == ValkTeamId::TeamB) {
 		teamKills = ++myTeamBKills;
 	}
-	myOnPVPGameStateChanged.Broadcast();
+	NotifyStateChanged();
 	return teamKills;
 }
 
 void ATDMGameState::OnRep_TeamKills()
 {
-	myOnPVPGameStateChanged.Broadcast();
+	NotifyStateChanged();
 }

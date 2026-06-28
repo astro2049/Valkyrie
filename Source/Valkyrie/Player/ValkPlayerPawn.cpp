@@ -6,6 +6,7 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "Valkyrie/Components/HealthComponent.h"
+#include "Valkyrie/Components/WeaponComponent.h"
 
 AValkPlayerPawn::AValkPlayerPawn()
 {
@@ -13,6 +14,30 @@ AValkPlayerPawn::AValkPlayerPawn()
 	bReplicates = true;
 	SetReplicateMovement(true);
 	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
+}
+
+void AValkPlayerPawn::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (UWeaponComponent* const weaponComponent = FindComponentByClass<UWeaponComponent>()) {
+		weaponComponent->myOnWeaponStateChanged.AddUObject(
+			this,
+			&AValkPlayerPawn::HandleComponentStateChanged
+		);
+	}
+	if (UHealthComponent* const healthComponent = FindComponentByClass<UHealthComponent>()) {
+		healthComponent->myOnHealthStateChanged.AddUObject(
+			this,
+			&AValkPlayerPawn::HandleComponentStateChanged
+		);
+	}
+	if (myInteractionComponent) {
+		myInteractionComponent->myOnInteractionStateChanged.AddUObject(
+			this,
+			&AValkPlayerPawn::HandleComponentStateChanged
+		);
+	}
 }
 
 void AValkPlayerPawn::Tick(const float aDeltaSeconds)
@@ -96,6 +121,11 @@ void AValkPlayerPawn::HandleInteract()
 	} else {
 		myInteractionComponent->Interact();
 	}
+}
+
+void AValkPlayerPawn::HandleComponentStateChanged() const
+{
+	myOnPlayerPawnStateChanged.Broadcast();
 }
 
 void AValkPlayerPawn::RPC_SyncLocation_Implementation(const FVector& aLocation)

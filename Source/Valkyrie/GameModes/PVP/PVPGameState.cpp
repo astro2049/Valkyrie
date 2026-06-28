@@ -15,13 +15,13 @@ void APVPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 void APVPGameState::AddPlayerState(APlayerState* const aPlayerState)
 {
 	Super::AddPlayerState(aPlayerState);
-	myOnPVPGameStateChanged.Broadcast();
+	NotifyStateChanged();
 }
 
 void APVPGameState::RemovePlayerState(APlayerState* const aPlayerState)
 {
 	Super::RemovePlayerState(aPlayerState);
-	myOnPVPGameStateChanged.Broadcast();
+	NotifyStateChanged();
 }
 
 void APVPGameState::SetWinningTeamId(const int32 aTeamId)
@@ -32,10 +32,15 @@ void APVPGameState::SetWinningTeamId(const int32 aTeamId)
 
 	myWinningTeamId = aTeamId;
 	myMatchEnded = true;
+	NotifyStateChanged();
+}
+
+void APVPGameState::NotifyStateChanged() const
+{
 	myOnPVPGameStateChanged.Broadcast();
 }
 
 void APVPGameState::OnRep_MatchResult()
 {
-	myOnPVPGameStateChanged.Broadcast();
+	NotifyStateChanged();
 }

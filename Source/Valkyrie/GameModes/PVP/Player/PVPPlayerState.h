@@ -18,6 +18,9 @@ public:
 	void SetTeamId(int32 aTeamId);
 	int32 GetTeamId() const { return myTeamId; }
 
+protected:
+	void NotifyGameStateChanged() const;
+
 private:
 	UFUNCTION()
 	void OnRep_TeamId() const;

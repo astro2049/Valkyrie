@@ -8,7 +8,6 @@
 
 class APVPGameState;
 class APlayerState;
-class AValkPlayerState;
 
 struct FPVPScoreboardRowData
 {
@@ -45,11 +44,8 @@ protected:
 
 private:
 	void HandleGameStateChanged();
-	void HandlePlayerStateChanged();
-	void RebindPlayerStates();
 	void RebuildScoreboardData();
 
 	TWeakObjectPtr<APVPGameState> myPVPGameState;
-	TArray<TWeakObjectPtr<AValkPlayerState>> myBoundPlayerStates;
 	FPVPScoreboardData myScoreboardData;
 };

@@ -38,9 +38,7 @@ public:
 	bool GetShowInteractPrompt() const { return myShowInteractPrompt; }
 
 private:
-	void OnWeaponStateChanged();
-	void OnHealthStateChanged();
-	void OnInteractionStateChanged();
+	void HandlePlayerPawnStateChanged();
 
 	void RefreshPawnData();
 	void RefreshWeaponHUDData();

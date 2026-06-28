@@ -5,7 +5,6 @@
 #include "Valkyrie/GameModes/PVP/PVPGameState.h"
 #include "Valkyrie/GameModes/PVP/Player/PVPPlayerState.h"
 #include "Valkyrie/GameModes/PVP/PVPTypes.h"
-#include "Valkyrie/Player/ValkPlayerState.h"
 
 void UPVPScoreboardViewModel::BindToGameState(APVPGameState* const aGameState)
 {
@@ -22,46 +21,14 @@ void UPVPScoreboardViewModel::BindToGameState(APVPGameState* const aGameState)
 		}
 	}
 
-	RebindPlayerStates();
 	RebuildScoreboardData();
 	BroadcastViewModelChanged();
 }
 
 void UPVPScoreboardViewModel::HandleGameStateChanged()
 {
-	RebindPlayerStates();
 	RebuildScoreboardData();
 	BroadcastViewModelChanged();
-}
-
-void UPVPScoreboardViewModel::HandlePlayerStateChanged()
-{
-	RebuildScoreboardData();
-	BroadcastViewModelChanged();
-}
-
-void UPVPScoreboardViewModel::RebindPlayerStates()
-{
-	for (const TWeakObjectPtr<AValkPlayerState>& playerState : myBoundPlayerStates) {
-		if (playerState.IsValid()) {
-			playerState->myOnPlayerStateChanged.RemoveAll(this);
-		}
-	}
-	myBoundPlayerStates.Reset();
-
-	if (!myPVPGameState.IsValid()) {
-		return;
-	}
-
-	for (APlayerState* const playerState : myPVPGameState->PlayerArray) {
-		if (AValkPlayerState* const valkPlayerState = Cast<AValkPlayerState>(playerState)) {
-			valkPlayerState->myOnPlayerStateChanged.AddUObject(
-				this,
-				&UPVPScoreboardViewModel::HandlePlayerStateChanged
-			);
-			myBoundPlayerStates.Add(valkPlayerState);
-		}
-	}
 }
 
 void UPVPScoreboardViewModel::RebuildScoreboardData()

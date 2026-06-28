@@ -14,26 +14,15 @@ void UValkHUDViewModel::BindToPawn(AValkPlayerPawn* const aPlayerPawn)
 		return;
 	}
 
+	if (myPlayerPawn.IsValid()) {
+		myPlayerPawn->myOnPlayerPawnStateChanged.RemoveAll(this);
+	}
 	myPlayerPawn = aPlayerPawn;
-	if (const AValkPlayerPawn* const playerPawn = myPlayerPawn.Get()) {
-		if (UWeaponComponent* const weaponComponent = playerPawn->FindComponentByClass<UWeaponComponent>()) {
-			weaponComponent->myOnWeaponStateChanged.AddUObject(
-				this,
-				&UValkHUDViewModel::OnWeaponStateChanged
-			);
-		}
-		if (UHealthComponent* const healthComponent = playerPawn->FindComponentByClass<UHealthComponent>()) {
-			healthComponent->myOnHealthStateChanged.AddUObject(
-				this,
-				&UValkHUDViewModel::OnHealthStateChanged
-			);
-		}
-		if (UInteractionComponent* const interactionComponent = playerPawn->FindComponentByClass<UInteractionComponent>()) {
-			interactionComponent->myOnInteractionStateChanged.AddUObject(
-				this,
-				&UValkHUDViewModel::OnInteractionStateChanged
-			);
-		}
+	if (AValkPlayerPawn* const playerPawn = myPlayerPawn.Get()) {
+		playerPawn->myOnPlayerPawnStateChanged.AddUObject(
+			this,
+			&UValkHUDViewModel::HandlePlayerPawnStateChanged
+		);
 	}
 	RefreshPawnData();
 }
@@ -82,20 +71,7 @@ void UValkHUDViewModel::RefreshInteractionHUDData()
 	}
 }
 
-void UValkHUDViewModel::OnWeaponStateChanged()
+void UValkHUDViewModel::HandlePlayerPawnStateChanged()
 {
-	RefreshWeaponHUDData();
-	BroadcastViewModelChanged();
-}
-
-void UValkHUDViewModel::OnHealthStateChanged()
-{
-	RefreshHealthHUDData();
-	BroadcastViewModelChanged();
-}
-
-void UValkHUDViewModel::OnInteractionStateChanged()
-{
-	RefreshInteractionHUDData();
-	BroadcastViewModelChanged();
+	RefreshPawnData();
 }

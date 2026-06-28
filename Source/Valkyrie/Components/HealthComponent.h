@@ -35,7 +35,7 @@ public:
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool IsDead() const { return myIsDead; }
 
-	FHealthStateChanged myOnHealthStateChanged; // for view model
+	FHealthStateChanged myOnHealthStateChanged; // for owning actor
 	FHealthDeath myOnHealthDeath; // for authoritative game mode rules
 	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FHealthChanged OnHealthChanged; // for health bar presenter component (Blueprint)

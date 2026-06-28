@@ -20,6 +20,7 @@ public:
 	virtual void RemovePlayerState(APlayerState* aPlayerState) override;
 
 	void SetWinningTeamId(int32 aTeamId);
+	void NotifyStateChanged() const;
 	virtual bool HasMatchEnded() const override { return myMatchEnded; }
 	int32 GetWinningTeamId() const { return myWinningTeamId; }
 

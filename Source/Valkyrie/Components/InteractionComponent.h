@@ -25,7 +25,7 @@ public:
 	
 	bool HasInteractable() const { return myInteractableComponent.IsValid(); }
 
-	FInteractionStateChanged myOnInteractionStateChanged;
+	FInteractionStateChanged myOnInteractionStateChanged; // for owning actor
 
 private:
 	TWeakObjectPtr<UInteractableComponent> myInteractableComponent;

@@ -28,7 +28,7 @@ public:
 	int32 GetMagazineSize() const { return myMagazineSize; }
 	bool IsReloading() const { return myIsReloading; }
 
-	FWeaponStateChanged myOnWeaponStateChanged; // for view model
+	FWeaponStateChanged myOnWeaponStateChanged; // for owning actor
 
 private:
 	virtual void BeginPlay() override;

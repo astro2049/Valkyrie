@@ -2,7 +2,9 @@
 
 #include "PVPPlayerState.h"
 
+#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
+#include "Valkyrie/GameModes/PVP/PVPGameState.h"
 
 void APVPPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -18,10 +20,19 @@ void APVPPlayerState::SetTeamId(const int32 aTeamId)
 	}
 
 	myTeamId = aTeamId;
-	myOnPlayerStateChanged.Broadcast();
+	NotifyGameStateChanged();
 }
 
 void APVPPlayerState::OnRep_TeamId() const
 {
-	myOnPlayerStateChanged.Broadcast();
+	NotifyGameStateChanged();
+}
+
+void APVPPlayerState::NotifyGameStateChanged() const
+{
+	if (const UWorld* const world = GetWorld()) {
+		if (APVPGameState* const gameState = world->GetGameState<APVPGameState>()) {
+			gameState->NotifyStateChanged();
+		}
+	}
 }

@@ -25,11 +25,11 @@ int32 AKillConfirmedGameState::AddTeamConfirm(const int32 aTeamId)
 	} else if (aTeamId == ValkTeamId::TeamB) {
 		teamConfirms = ++myTeamBConfirms;
 	}
-	myOnPVPGameStateChanged.Broadcast();
+	NotifyStateChanged();
 	return teamConfirms;
 }
 
 void AKillConfirmedGameState::OnRep_TeamConfirms()
 {
-	myOnPVPGameStateChanged.Broadcast();
+	NotifyStateChanged();
 }
