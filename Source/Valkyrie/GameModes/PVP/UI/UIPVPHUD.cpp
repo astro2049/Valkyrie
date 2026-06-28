@@ -2,62 +2,17 @@
 
 #include "UIPVPHUD.h"
 
-#include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
-#include "Components/Widget.h"
 #include "PVPHUDViewModel.h"
 
-void UUIPVPHUD::SetViewModel(UPVPHUDViewModel* const aViewModel)
+void UUIPVPHUD::UpdateModeFromViewModel() const
 {
-	if (myViewModel == aViewModel) {
-		UpdateFromViewModel();
+	const UPVPHUDViewModel* const viewModel = Cast<UPVPHUDViewModel>(GetViewModel());
+	if (!viewModel) {
 		return;
 	}
 
-	if (myViewModel) {
-		myViewModel->myOnViewModelChanged.RemoveAll(this);
-	}
-	myViewModel = aViewModel;
-	if (myViewModel) {
-		myViewModel->myOnViewModelChanged.AddUObject(this, &UUIPVPHUD::HandleViewModelChanged);
-	}
-	UpdateFromViewModel();
-}
-
-void UUIPVPHUD::UpdateFromViewModel() const
-{
-	if (!myViewModel) {
-		return;
-	}
-
-	const FValkWeaponHUDData& weaponHUDData = myViewModel->GetWeaponHUDData();
-	if (myAmmoText) {
-		myAmmoText->SetText(weaponHUDData.myShowAmmo ? FText::AsNumber(weaponHUDData.myAmmoInMag) : FText::GetEmpty());
-	}
-	if (myReserveAmmoText) {
-		myReserveAmmoText->SetText(weaponHUDData.myShowAmmo ? FText::AsNumber(weaponHUDData.myReserveAmmo) : FText::GetEmpty());
-	}
-	if (myReloadingIndicator) {
-		myReloadingIndicator->SetVisibility(weaponHUDData.myIsReloading ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-	}
-
-	const FValkHealthHUDData& healthHUDData = myViewModel->GetHealthHUDData();
-	if (myHealthBar) {
-		myHealthBar->SetVisibility(healthHUDData.myShowHealth ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-		myHealthBar->SetPercent(healthHUDData.myShowHealth ? myViewModel->GetHealthRatio() : 0.f);
-	}
-	if (myHealthText) {
-		myHealthText->SetVisibility(healthHUDData.myShowHealth ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-		myHealthText->SetText(healthHUDData.myShowHealth
-			? FText::Format(
-				NSLOCTEXT("ValkHUD", "HealthFormat", "{0} / {1}"),
-				FText::AsNumber(FMath::CeilToInt(healthHUDData.myHealth)),
-				FText::AsNumber(FMath::CeilToInt(healthHUDData.myMaxHealth))
-			)
-			: FText::GetEmpty());
-	}
-
-	const FPVPHUDData& pvpHUDData = myViewModel->GetPVPHUDData();
+	const FPVPHUDData& pvpHUDData = viewModel->GetPVPHUDData();
 	if (myTeamAScoreText) {
 		myTeamAScoreText->SetText(pvpHUDData.myTeamAScoreText);
 	}
@@ -68,9 +23,4 @@ void UUIPVPHUD::UpdateFromViewModel() const
 		myWinnerText->SetText(pvpHUDData.myWinnerText);
 		myWinnerText->SetVisibility(pvpHUDData.myShowWinner ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
-}
-
-void UUIPVPHUD::HandleViewModelChanged()
-{
-	UpdateFromViewModel();
 }

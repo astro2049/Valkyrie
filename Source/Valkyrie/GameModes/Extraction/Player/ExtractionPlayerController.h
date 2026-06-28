@@ -3,26 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/Player/ValkPlayerController.h"
+#include "Valkyrie/Player/ValkGameplayPlayerController.h"
 #include "ExtractionPlayerController.generated.h"
 
 class UUIExtractionHUD;
-class UHealthComponent;
 class UExtractionHUDViewModel;
 class UUserWidget;
 class AExtractionGameState;
 
 UCLASS(Blueprintable)
-class VALKYRIE_API AExtractionPlayerController : public AValkPlayerController
+class VALKYRIE_API AExtractionPlayerController : public AValkGameplayPlayerController
 {
 	GENERATED_BODY()
 
-public:
-	virtual void BeginPlay() override;
-	virtual void OnPossess(APawn* aPawn) override;
-	virtual void AcknowledgePossession(APawn* aPawn) override;
-
 protected:
+	virtual void CreateModeUI() override;
+	virtual void InitializeModeState() override;
+	virtual void SetModePawn(AValkPlayerPawn* aPlayerPawn) override;
+	virtual void HandleLocalPlayerDeath() override;
+
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUIExtractionHUD> myHUDWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -33,15 +32,10 @@ protected:
 	TSubclassOf<UUserWidget> myVictoryMenuWidgetClass;
 
 private:
-	void CreateHUDAndViewModel();
-	void BindHUDToPawn();
-	void BindHUDToGameState();
 	void ShowDeadOverlay();
 	void ShowFailureMenu();
 	void ShowVictoryMenu();
 
-	UFUNCTION()
-	void HandlePlayerDeath();
 	void HandleExtractionStateChanged();
 
 	UPROPERTY()
@@ -54,7 +48,5 @@ private:
 	TObjectPtr<UUserWidget> myDeadOverlayWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myVictoryMenuWidget{nullptr};
-	UPROPERTY()
-	TObjectPtr<UHealthComponent> myBoundHealthComponent{nullptr};
 	TWeakObjectPtr<AExtractionGameState> myBoundExtractionGameState;
 };

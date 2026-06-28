@@ -3,44 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "Valkyrie/UI/UIValkHUD.h"
 #include "UIExtractionHUD.generated.h"
 
-class UExtractionHUDViewModel;
-class UProgressBar;
 class UTextBlock;
-class UWidget;
 
 UCLASS(Blueprintable)
-class VALKYRIE_API UUIExtractionHUD : public UUserWidget
+class VALKYRIE_API UUIExtractionHUD : public UUIValkHUD
 {
 	GENERATED_BODY()
 
-public:
-	void SetViewModel(UExtractionHUDViewModel* aViewModel);
-	void UpdateFromViewModel() const;
-
 protected:
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UTextBlock> myAmmoText{nullptr};
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UTextBlock> myReserveAmmoText{nullptr};
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UWidget> myReloadingIndicator{nullptr};
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UProgressBar> myHealthBar{nullptr};
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UTextBlock> myHealthText{nullptr};
+	virtual void UpdateModeFromViewModel() const override;
+
 	UPROPERTY(meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> myObjectiveText{nullptr};
 	UPROPERTY(meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> myDefenseTimerText{nullptr};
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UTextBlock> myInteractPrompt{nullptr};
-
-private:
-	void HandleViewModelChanged();
-
-	UPROPERTY()
-	TObjectPtr<UExtractionHUDViewModel> myViewModel{nullptr};
 };

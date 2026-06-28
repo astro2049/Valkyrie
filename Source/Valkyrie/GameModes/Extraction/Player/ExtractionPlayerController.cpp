@@ -5,39 +5,11 @@
 #include "Valkyrie/GameModes/Extraction/UI/UIExtractionHUD.h"
 #include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 #include "Blueprint/UserWidget.h"
-#include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Player/ValkPlayerPawn.h"
 #include "Valkyrie/GameModes/Extraction/UI/ExtractionHUDViewModel.h"
 
-void AExtractionPlayerController::BeginPlay()
+void AExtractionPlayerController::CreateModeUI()
 {
-	Super::BeginPlay();
-
-	SetInputGameOnly();
-	AddInputMappingContext();
-	CreateHUDAndViewModel();
-	BindHUDToPawn();
-	BindHUDToGameState();
-}
-
-void AExtractionPlayerController::OnPossess(APawn* aPawn)
-{
-	Super::OnPossess(aPawn);
-	BindHUDToPawn();
-}
-
-void AExtractionPlayerController::AcknowledgePossession(APawn* aPawn)
-{
-	Super::AcknowledgePossession(aPawn);
-	BindHUDToPawn();
-}
-
-void AExtractionPlayerController::CreateHUDAndViewModel()
-{
-	if (!IsLocalController()) {
-		return;
-	}
-
 	if (!myHUDViewModel) {
 		myHUDViewModel = NewObject<UExtractionHUDViewModel>(this);
 	}
@@ -51,48 +23,17 @@ void AExtractionPlayerController::CreateHUDAndViewModel()
 	}
 }
 
-void AExtractionPlayerController::BindHUDToPawn()
+void AExtractionPlayerController::InitializeModeState()
 {
-	if (!IsLocalController() || !myHUDViewModel) {
+	if (!myHUDViewModel || !GetWorld()) {
 		return;
 	}
 
-	APawn* controlledPawn = GetPawn();
-	myHUDViewModel->BindToPawn(Cast<AValkPlayerPawn>(controlledPawn));
+	AExtractionGameState* const extractionGameState = GetWorld()->GetGameState<AExtractionGameState>();
+	myHUDViewModel->BindToGameState(extractionGameState);
 
-	UHealthComponent* healthComponent = controlledPawn
-		? controlledPawn->FindComponentByClass<UHealthComponent>()
-		: nullptr;
-
-	if (myBoundHealthComponent != healthComponent) {
-		if (myBoundHealthComponent) {
-			myBoundHealthComponent->OnDeath.RemoveDynamic(
-				this,
-				&AExtractionPlayerController::HandlePlayerDeath
-			);
-		}
-
-		myBoundHealthComponent = healthComponent;
-		if (myBoundHealthComponent) {
-			myBoundHealthComponent->OnDeath.AddUniqueDynamic(
-				this,
-				&AExtractionPlayerController::HandlePlayerDeath
-			);
-		}
-	}
-}
-
-void AExtractionPlayerController::BindHUDToGameState()
-{
-	if (!IsLocalController() || !myHUDViewModel || !GetWorld()) {
-		return;
-	}
-
-	AExtractionGameState* combatSliceGameState = GetWorld()->GetGameState<AExtractionGameState>();
-	myHUDViewModel->BindToGameState(combatSliceGameState);
-
-	if (myBoundExtractionGameState.Get() != combatSliceGameState) {
-		myBoundExtractionGameState = combatSliceGameState;
+	if (myBoundExtractionGameState.Get() != extractionGameState) {
+		myBoundExtractionGameState = extractionGameState;
 		if (myBoundExtractionGameState.IsValid()) {
 			myBoundExtractionGameState->myOnExtractionStateChanged.AddUObject(
 				this,
@@ -100,6 +41,23 @@ void AExtractionPlayerController::BindHUDToGameState()
 			);
 			HandleExtractionStateChanged();
 		}
+	}
+}
+
+void AExtractionPlayerController::SetModePawn(AValkPlayerPawn* const aPlayerPawn)
+{
+	if (myHUDViewModel) {
+		myHUDViewModel->BindToPawn(aPlayerPawn);
+	}
+}
+
+void AExtractionPlayerController::HandleLocalPlayerDeath()
+{
+	ShowDeadOverlay();
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
+	if (APawn* const controlledPawn = GetPawn()) {
+		controlledPawn->DisableInput(this);
 	}
 }
 
@@ -134,16 +92,6 @@ void AExtractionPlayerController::ShowVictoryMenu()
 	if (myVictoryMenuWidget) {
 		myVictoryMenuWidget->AddToViewport();
 		SetInputUIOnly(myVictoryMenuWidget);
-	}
-}
-
-void AExtractionPlayerController::HandlePlayerDeath()
-{
-	ShowDeadOverlay();
-	SetIgnoreMoveInput(true);
-	SetIgnoreLookInput(true);
-	if (APawn* controlledPawn = GetPawn()) {
-		controlledPawn->DisableInput(this);
 	}
 }
 

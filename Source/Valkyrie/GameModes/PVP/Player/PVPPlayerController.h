@@ -3,10 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/Player/ValkPlayerController.h"
+#include "Valkyrie/Player/ValkGameplayPlayerController.h"
 #include "PVPPlayerController.generated.h"
 
-class UHealthComponent;
 class UInputAction;
 class UPVPHUDViewModel;
 class UPVPScoreboardViewModel;
@@ -14,17 +13,16 @@ class UUIPVPHUD;
 class UUIPVPScoreboard;
 
 UCLASS(Abstract)
-class VALKYRIE_API APVPPlayerController : public AValkPlayerController
+class VALKYRIE_API APVPPlayerController : public AValkGameplayPlayerController
 {
 	GENERATED_BODY()
 
-public:
-	virtual void BeginPlay() override;
-	virtual void OnPossess(APawn* aPawn) override;
-	virtual void AcknowledgePossession(APawn* aPawn) override;
-
 protected:
 	virtual void SetupInputComponent() override;
+	virtual void CreateModeUI() override;
+	virtual void InitializeModeState() override;
+	virtual void SetModePawn(AValkPlayerPawn* aPlayerPawn) override;
+	virtual void HandleLocalPlayerDeath() override;
 	virtual UPVPHUDViewModel* CreateHUDViewModel() PURE_VIRTUAL(APVPPlayerController::CreateHUDViewModel, return nullptr;);
 	virtual UPVPScoreboardViewModel* CreateScoreboardViewModel() PURE_VIRTUAL(APVPPlayerController::CreateScoreboardViewModel, return nullptr;);
 
@@ -36,13 +34,8 @@ protected:
 	TSubclassOf<UUIPVPScoreboard> myScoreboardWidgetClass;
 
 private:
-	void CreatePVPUI();
-	void BindUIToSources() const;
-	void BindToPawnHealth();
 	void ShowScoreboard();
 	void HideScoreboard();
-	UFUNCTION()
-	void HandlePlayerDeath();
 
 	UPROPERTY()
 	TObjectPtr<UPVPHUDViewModel> myHUDViewModel{nullptr};
@@ -52,6 +45,4 @@ private:
 	TObjectPtr<UUIPVPHUD> myHUDWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUIPVPScoreboard> myScoreboardWidget{nullptr};
-	UPROPERTY()
-	TObjectPtr<UHealthComponent> myBoundHealthComponent{nullptr};
 };

@@ -9,35 +9,7 @@
 #include "Valkyrie/GameModes/PVP/UI/PVPScoreboardViewModel.h"
 #include "Valkyrie/GameModes/PVP/UI/UIPVPHUD.h"
 #include "Valkyrie/GameModes/PVP/UI/UIPVPScoreboard.h"
-#include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Player/ValkPlayerPawn.h"
-
-void APVPPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-
-	SetInputGameOnly();
-	AddInputMappingContext();
-	CreatePVPUI();
-	BindUIToSources();
-	BindToPawnHealth();
-}
-
-void APVPPlayerController::OnPossess(APawn* const aPawn)
-{
-	Super::OnPossess(aPawn);
-	SetIgnoreMoveInput(false);
-	BindUIToSources();
-	BindToPawnHealth();
-}
-
-void APVPPlayerController::AcknowledgePossession(APawn* const aPawn)
-{
-	Super::AcknowledgePossession(aPawn);
-	SetIgnoreMoveInput(false);
-	BindUIToSources();
-	BindToPawnHealth();
-}
 
 void APVPPlayerController::SetupInputComponent()
 {
@@ -61,12 +33,8 @@ void APVPPlayerController::SetupInputComponent()
 	}
 }
 
-void APVPPlayerController::CreatePVPUI()
+void APVPPlayerController::CreateModeUI()
 {
-	if (!IsLocalController()) {
-		return;
-	}
-
 	myHUDViewModel = CreateHUDViewModel();
 	myScoreboardViewModel = CreateScoreboardViewModel();
 	if (myHUDWidgetClass) {
@@ -86,14 +54,9 @@ void APVPPlayerController::CreatePVPUI()
 	}
 }
 
-void APVPPlayerController::BindUIToSources() const
+void APVPPlayerController::InitializeModeState()
 {
-	if (!IsLocalController()) {
-		return;
-	}
-
 	if (myHUDViewModel) {
-		myHUDViewModel->BindToPawn(Cast<AValkPlayerPawn>(GetPawn()));
 		myHUDViewModel->BindToGameState(GetWorld() ? GetWorld()->GetGameState<APVPGameState>() : nullptr);
 	}
 	if (myScoreboardViewModel) {
@@ -101,25 +64,14 @@ void APVPPlayerController::BindUIToSources() const
 	}
 }
 
-void APVPPlayerController::BindToPawnHealth()
+void APVPPlayerController::SetModePawn(AValkPlayerPawn* const aPlayerPawn)
 {
-	UHealthComponent* const healthComponent = GetPawn()
-		? GetPawn()->FindComponentByClass<UHealthComponent>()
-		: nullptr;
-	if (myBoundHealthComponent == healthComponent) {
-		return;
-	}
-
-	if (myBoundHealthComponent) {
-		myBoundHealthComponent->OnDeath.RemoveDynamic(this, &APVPPlayerController::HandlePlayerDeath);
-	}
-	myBoundHealthComponent = healthComponent;
-	if (myBoundHealthComponent) {
-		myBoundHealthComponent->OnDeath.AddUniqueDynamic(this, &APVPPlayerController::HandlePlayerDeath);
+	if (myHUDViewModel) {
+		myHUDViewModel->BindToPawn(aPlayerPawn);
 	}
 }
 
-void APVPPlayerController::HandlePlayerDeath()
+void APVPPlayerController::HandleLocalPlayerDeath()
 {
 	SetIgnoreMoveInput(true);
 }

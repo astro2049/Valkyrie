@@ -13,7 +13,7 @@ void APVPPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void APVPPlayerState::SetTeamId(const int32 aTeamId)
 {
-	if (!HasAuthority() || myTeamId == aTeamId) {
+	if (myTeamId == aTeamId || !HasAuthority()) {
 		return;
 	}
 
