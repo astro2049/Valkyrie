@@ -3,14 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
 #include "TimerManager.h"
+#include "ValkGameplayComponent.h"
 #include "WeaponComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FWeaponStateChanged);
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class VALKYRIE_API UWeaponComponent : public UActorComponent
+class VALKYRIE_API UWeaponComponent : public UValkGameplayComponent
 {
 	GENERATED_BODY()
 
@@ -28,8 +26,6 @@ public:
 	int32 GetMagazineSize() const { return myMagazineSize; }
 	bool IsReloading() const { return myIsReloading; }
 
-	FWeaponStateChanged myOnWeaponStateChanged; // for owning actor
-
 private:
 	virtual void BeginPlay() override;
 
@@ -43,7 +39,6 @@ private:
 	void OnRep_WeaponState() const;
 
 	void FinishReload();
-	void BroadcastWeaponStateChanged() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myDamage{25.f};

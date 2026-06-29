@@ -22,17 +22,14 @@ class VALKYRIE_API UPVPHUDViewModel : public UValkHUDViewModel
 	GENERATED_BODY()
 
 public:
-	void BindToGameState(APVPGameState* aGameState);
+	virtual void RefreshData() override;
 	const FPVPHUDData& GetPVPHUDData() const { return myPVPHUDData; }
 
 protected:
 	virtual void RefreshModeHUDData() PURE_VIRTUAL(UPVPHUDViewModel::RefreshModeHUDData, );
-	APVPGameState* GetPVPGameState() const { return myPVPGameState.Get(); }
+	APVPGameState* GetPVPGameState() const;
 	FPVPHUDData& GetMutablePVPHUDData() { return myPVPHUDData; }
 
 private:
-	void HandlePVPGameStateChanged();
-
-	TWeakObjectPtr<APVPGameState> myPVPGameState;
 	FPVPHUDData myPVPHUDData;
 };

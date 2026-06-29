@@ -4,9 +4,6 @@
 
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
-#include "Valkyrie/GameModes/PVP/PVPGameState.h"
-#include "Valkyrie/GameModes/PVP/UI/PVPHUDViewModel.h"
-#include "Valkyrie/GameModes/PVP/UI/PVPScoreboardViewModel.h"
 #include "Valkyrie/GameModes/PVP/UI/UIPVPHUD.h"
 #include "Valkyrie/GameModes/PVP/UI/UIPVPScoreboard.h"
 #include "Valkyrie/Player/ValkPlayerPawn.h"
@@ -35,19 +32,15 @@ void APVPPlayerController::SetupInputComponent()
 
 void APVPPlayerController::CreateModeUI()
 {
-	myHUDViewModel = CreateHUDViewModel();
-	myScoreboardViewModel = CreateScoreboardViewModel();
 	if (myHUDWidgetClass) {
 		myHUDWidget = CreateWidget<UUIPVPHUD>(this, myHUDWidgetClass);
 		if (myHUDWidget) {
-			myHUDWidget->SetViewModel(myHUDViewModel);
 			myHUDWidget->AddToViewport();
 		}
 	}
 	if (myScoreboardWidgetClass) {
 		myScoreboardWidget = CreateWidget<UUIPVPScoreboard>(this, myScoreboardWidgetClass);
 		if (myScoreboardWidget) {
-			myScoreboardWidget->SetViewModel(myScoreboardViewModel);
 			myScoreboardWidget->AddToViewport();
 			myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
@@ -56,18 +49,15 @@ void APVPPlayerController::CreateModeUI()
 
 void APVPPlayerController::InitializeModeState()
 {
-	if (myHUDViewModel) {
-		myHUDViewModel->BindToGameState(GetWorld() ? GetWorld()->GetGameState<APVPGameState>() : nullptr);
-	}
-	if (myScoreboardViewModel) {
-		myScoreboardViewModel->BindToGameState(GetWorld() ? GetWorld()->GetGameState<APVPGameState>() : nullptr);
+	if (myHUDWidget) {
+		myHUDWidget->RefreshHUDData();
 	}
 }
 
-void APVPPlayerController::SetModePawn(AValkPlayerPawn* const aPlayerPawn)
+void APVPPlayerController::SetModePawn(AValkPlayerPawn* const)
 {
-	if (myHUDViewModel) {
-		myHUDViewModel->BindToPawn(aPlayerPawn);
+	if (myHUDWidget) {
+		myHUDWidget->RefreshHUDData();
 	}
 }
 
@@ -79,7 +69,7 @@ void APVPPlayerController::HandleLocalPlayerDeath()
 void APVPPlayerController::ShowScoreboard()
 {
 	if (myScoreboardWidget) {
-		myScoreboardWidget->RebuildRows();
+		myScoreboardWidget->RefreshScoreboardData();
 		myScoreboardWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }

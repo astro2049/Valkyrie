@@ -17,10 +17,14 @@ class VALKYRIE_API UUIPVPScoreboard : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void SetViewModel(UPVPScoreboardViewModel* aViewModel);
-	void RebuildRows();
+	void RefreshScoreboardData();
 
 protected:
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& aGeometry, float aDeltaSeconds) override;
+
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UPVPScoreboardViewModel> myViewModelClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUIPVPScoreboardRow> myRowWidgetClass;
 	UPROPERTY(meta=(BindWidgetOptional))
@@ -33,7 +37,7 @@ protected:
 	TObjectPtr<UVerticalBox> myTeamBRows{nullptr};
 
 private:
-	void HandleViewModelChanged();
+	void RebuildRows();
 	void AddRows(UVerticalBox* aContainer, const TArray<FPVPScoreboardRowData>& aRows) const;
 
 	UPROPERTY()

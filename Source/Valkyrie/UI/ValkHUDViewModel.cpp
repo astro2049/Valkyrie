@@ -2,44 +2,31 @@
 
 #include "ValkHUDViewModel.h"
 
+#include "GameFramework/PlayerController.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
 #include "Valkyrie/Player/ValkPlayerPawn.h"
 
-void UValkHUDViewModel::BindToPawn(AValkPlayerPawn* const aPlayerPawn)
+void UValkHUDViewModel::RefreshData()
 {
-	if (myPlayerPawn.Get() == aPlayerPawn) {
-		RefreshPawnData();
-		return;
-	}
-
-	if (myPlayerPawn.IsValid()) {
-		myPlayerPawn->myOnPlayerPawnStateChanged.RemoveAll(this);
-	}
-	myPlayerPawn = aPlayerPawn;
-	if (AValkPlayerPawn* const playerPawn = myPlayerPawn.Get()) {
-		playerPawn->myOnPlayerPawnStateChanged.AddUObject(
-			this,
-			&UValkHUDViewModel::HandlePlayerPawnStateChanged
-		);
-	}
-	RefreshPawnData();
+	const AValkPlayerPawn* const playerPawn = GetPlayerPawn();
+	RefreshWeaponHUDData(playerPawn);
+	RefreshHealthHUDData(playerPawn);
+	RefreshInteractionHUDData(playerPawn);
 }
 
-void UValkHUDViewModel::RefreshPawnData()
+const AValkPlayerPawn* UValkHUDViewModel::GetPlayerPawn() const
 {
-	RefreshWeaponHUDData();
-	RefreshHealthHUDData();
-	RefreshInteractionHUDData();
-	BroadcastViewModelChanged();
+	const APlayerController* const playerController = GetPlayerController();
+	return playerController ? Cast<AValkPlayerPawn>(playerController->GetPawn()) : nullptr;
 }
 
-void UValkHUDViewModel::RefreshWeaponHUDData()
+void UValkHUDViewModel::RefreshWeaponHUDData(const AValkPlayerPawn* const aPlayerPawn)
 {
 	myWeaponHUDData = {};
-	if (const AValkPlayerPawn* const playerPawn = myPlayerPawn.Get()) {
-		if (const UWeaponComponent* const weaponComponent = playerPawn->FindComponentByClass<UWeaponComponent>()) {
+	if (aPlayerPawn) {
+		if (const UWeaponComponent* const weaponComponent = aPlayerPawn->FindComponentByClass<UWeaponComponent>()) {
 			myWeaponHUDData.myAmmoInMag = weaponComponent->GetAmmoInMag();
 			myWeaponHUDData.myReserveAmmo = weaponComponent->GetReserveAmmo();
 			myWeaponHUDData.myIsReloading = weaponComponent->IsReloading();
@@ -48,11 +35,11 @@ void UValkHUDViewModel::RefreshWeaponHUDData()
 	}
 }
 
-void UValkHUDViewModel::RefreshHealthHUDData()
+void UValkHUDViewModel::RefreshHealthHUDData(const AValkPlayerPawn* const aPlayerPawn)
 {
 	myHealthHUDData = {};
-	if (const AValkPlayerPawn* const playerPawn = myPlayerPawn.Get()) {
-		if (const UHealthComponent* const healthComponent = playerPawn->FindComponentByClass<UHealthComponent>()) {
+	if (aPlayerPawn) {
+		if (const UHealthComponent* const healthComponent = aPlayerPawn->FindComponentByClass<UHealthComponent>()) {
 			myHealthHUDData.myHealth = healthComponent->GetHealth();
 			myHealthHUDData.myMaxHealth = healthComponent->GetMaxHealth();
 			myHealthHUDData.myShowHealth = true;
@@ -61,17 +48,12 @@ void UValkHUDViewModel::RefreshHealthHUDData()
 	}
 }
 
-void UValkHUDViewModel::RefreshInteractionHUDData()
+void UValkHUDViewModel::RefreshInteractionHUDData(const AValkPlayerPawn* const aPlayerPawn)
 {
 	myShowInteractPrompt = false;
-	if (const AValkPlayerPawn* const playerPawn = myPlayerPawn.Get()) {
-		if (const UInteractionComponent* const interactionComponent = playerPawn->FindComponentByClass<UInteractionComponent>()) {
+	if (aPlayerPawn) {
+		if (const UInteractionComponent* const interactionComponent = aPlayerPawn->FindComponentByClass<UInteractionComponent>()) {
 			myShowInteractPrompt = interactionComponent && interactionComponent->HasInteractable();
 		}
 	}
-}
-
-void UValkHUDViewModel::HandlePlayerPawnStateChanged()
-{
-	RefreshPawnData();
 }

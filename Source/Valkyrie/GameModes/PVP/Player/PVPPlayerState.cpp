@@ -4,7 +4,7 @@
 
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
-#include "Valkyrie/GameModes/PVP/PVPGameState.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void APVPPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -20,19 +20,17 @@ void APVPPlayerState::SetTeamId(const int32 aTeamId)
 	}
 
 	myTeamId = aTeamId;
-	NotifyGameStateChanged();
+	NotifyStateChanged();
 }
 
 void APVPPlayerState::OnRep_TeamId() const
 {
-	NotifyGameStateChanged();
+	NotifyStateChanged();
 }
 
-void APVPPlayerState::NotifyGameStateChanged() const
+void APVPPlayerState::NotifyStateChanged() const
 {
-	if (const UWorld* const world = GetWorld()) {
-		if (APVPGameState* const gameState = world->GetGameState<APVPGameState>()) {
-			gameState->NotifyStateChanged();
-		}
+	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
+		messageSubsystem->BroadcastUIMessage(EUIMessageType::PlayerStateUpdated);
 	}
 }

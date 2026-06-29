@@ -10,8 +10,6 @@
 struct FInputActionValue;
 class UInputAction;
 
-DECLARE_MULTICAST_DELEGATE(FValkPlayerPawnStateChanged);
-
 UCLASS(Blueprintable)
 class VALKYRIE_API AValkPlayerPawn : public APawn
 {
@@ -23,8 +21,6 @@ public:
 	virtual void Tick(float aDeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
 
-	FValkPlayerPawnStateChanged myOnPlayerPawnStateChanged; // for HUD view model
-
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myMoveAction{nullptr};
@@ -34,12 +30,9 @@ protected:
 	TObjectPtr<UInputAction> myInteractAction{nullptr};
 
 private:
-	virtual void BeginPlay() override;
-
 	void HandleMove(const FInputActionValue& anInputValue);
 	void HandleLook(const FInputActionValue& anInputValue);
 	void HandleInteract();
-	void HandleComponentStateChanged() const;
 
 	UFUNCTION(Server, Unreliable)
 	void RPC_SyncLocation(const FVector& aLocation);

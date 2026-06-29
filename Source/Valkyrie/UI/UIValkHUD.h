@@ -17,9 +17,11 @@ class VALKYRIE_API UUIValkHUD : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void SetViewModel(UValkHUDViewModel* aViewModel);
+	void RefreshHUDData();
 
 protected:
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& aGeometry, float aDeltaSeconds) override;
 	virtual void UpdateModeFromViewModel() const PURE_VIRTUAL(UUIValkHUD::UpdateModeFromViewModel,);
 	UValkHUDViewModel* GetViewModel() const { return myViewModel; }
 
@@ -35,10 +37,11 @@ protected:
 	TObjectPtr<UTextBlock> myHealthText{nullptr};
 	UPROPERTY(meta=(BindWidgetOptional))
 	TObjectPtr<UWidget> myInteractPrompt{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UValkHUDViewModel> myViewModelClass;
 
 private:
 	void UpdateFromViewModel() const;
-	void HandleViewModelChanged();
 
 	UPROPERTY()
 	TObjectPtr<UValkHUDViewModel> myViewModel{nullptr};

@@ -33,6 +33,8 @@ public:
 	FExtractionStateChanged myOnExtractionStateChanged;
 
 private:
+	void NotifyStateChanged() const;
+
 	UFUNCTION()
 	void OnRep_CombatSliceState();
 	UFUNCTION()

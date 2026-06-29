@@ -2,7 +2,9 @@
 
 #include "PVPGameState.h"
 
+#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void APVPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -37,7 +39,9 @@ void APVPGameState::SetWinningTeamId(const int32 aTeamId)
 
 void APVPGameState::NotifyStateChanged() const
 {
-	myOnPVPGameStateChanged.Broadcast();
+	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
+		messageSubsystem->BroadcastUIMessage(EUIMessageType::GameStateUpdated);
+	}
 }
 
 void APVPGameState::OnRep_MatchResult()

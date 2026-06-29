@@ -3,11 +3,13 @@
 #include "WeaponComponent.h"
 
 #include "DrawDebugHelpers.h"
+#include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 UWeaponComponent::UWeaponComponent()
 {
@@ -35,7 +37,7 @@ void UWeaponComponent::BeginPlay()
 	myReloadDuration = FMath::Max(myReloadDuration, 0.f);
 	myIsReloading = false;
 	myFireInterval = myRPM > 0.f ? 60.f / myRPM : 0.f;
-	BroadcastWeaponStateChanged();
+	BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
 }
 
 void UWeaponComponent::Fire()
@@ -69,7 +71,7 @@ void UWeaponComponent::TraceFire(const FVector aTraceStart, const FVector aTrace
 	if (now - myLastFiredTime >= myFireInterval) {
 		myLastFiredTime = now;
 		myAmmoInMag = FMath::Max(0, myAmmoInMag - 1);
-		BroadcastWeaponStateChanged();
+		BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
 
 		// line trace
 		const FVector start = aTraceStart;
@@ -120,7 +122,7 @@ void UWeaponComponent::RPC_TraceFire_Implementation(const FVector aTraceStart, c
 
 void UWeaponComponent::OnRep_WeaponState() const
 {
-	BroadcastWeaponStateChanged();
+	BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
 }
 
 void UWeaponComponent::StartReload()
@@ -144,7 +146,7 @@ void UWeaponComponent::TryStartReload()
 	}
 
 	myIsReloading = true;
-	BroadcastWeaponStateChanged();
+	BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
 	if (myReloadDuration > 0.f) {
 		world->GetTimerManager().SetTimer(
 			myReloadTimerHandle,
@@ -170,11 +172,6 @@ void UWeaponComponent::FinishReload()
 		myAmmoInMag += ammoToLoad;
 		myReserveAmmo -= ammoToLoad;
 		myIsReloading = false;
-		BroadcastWeaponStateChanged();
+		BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
 	}
-}
-
-void UWeaponComponent::BroadcastWeaponStateChanged() const
-{
-	myOnWeaponStateChanged.Broadcast();
 }

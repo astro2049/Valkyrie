@@ -2,40 +2,26 @@
 
 #include "ExtractionHUDViewModel.h"
 
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 
-void UExtractionHUDViewModel::BindToGameState(AExtractionGameState* aGameState)
+void UExtractionHUDViewModel::RefreshData()
 {
-	if (myExtractionGameState.Get() == aGameState) {
-		RefreshFromExtractionGameState();
-		return;
-	}
-
-	myExtractionGameState = aGameState;
-	if (myExtractionGameState.IsValid()) {
-		myExtractionGameState->myOnExtractionStateChanged.AddUObject(
-			this,
-			&UExtractionHUDViewModel::HandleExtractionStateChanged
-		);
-	}
-
-	RefreshFromExtractionGameState();
+	Super::RefreshData();
+	RefreshExtractionHUDData();
 }
 
-void UExtractionHUDViewModel::RefreshFromExtractionGameState()
+void UExtractionHUDViewModel::RefreshExtractionHUDData()
 {
-	if (myExtractionGameState.IsValid()) {
-		myExtractionHUDData.myObjectiveText = myExtractionGameState->GetObjectiveText();
-		myExtractionHUDData.myDefenseTimeRemaining = myExtractionGameState->GetDefenseTimeRemaining();
-		myExtractionHUDData.myShowDefenseTimer = myExtractionGameState->ShouldShowDefenseTimer();
+	const APlayerController* const playerController = GetPlayerController();
+	const UWorld* const world = playerController ? playerController->GetWorld() : nullptr;
+	const AExtractionGameState* const gameState = world ? world->GetGameState<AExtractionGameState>() : nullptr;
+	if (gameState) {
+		myExtractionHUDData.myObjectiveText = gameState->GetObjectiveText();
+		myExtractionHUDData.myDefenseTimeRemaining = gameState->GetDefenseTimeRemaining();
+		myExtractionHUDData.myShowDefenseTimer = gameState->ShouldShowDefenseTimer();
 	} else {
 		myExtractionHUDData = FExtractionHUDData{};
 	}
-
-	BroadcastViewModelChanged();
-}
-
-void UExtractionHUDViewModel::HandleExtractionStateChanged()
-{
-	RefreshFromExtractionGameState();
 }

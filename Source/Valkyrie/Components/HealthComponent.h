@@ -3,12 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "ValkGameplayComponent.h"
 #include "HealthComponent.generated.h"
 
 class AController;
 
-DECLARE_MULTICAST_DELEGATE(FHealthStateChanged);
 DECLARE_MULTICAST_DELEGATE_OneParam(FHealthDeath, AController*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FHealthChanged,
@@ -18,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDeath);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class VALKYRIE_API UHealthComponent : public UActorComponent
+class VALKYRIE_API UHealthComponent : public UValkGameplayComponent
 {
 	GENERATED_BODY()
 
@@ -35,7 +34,6 @@ public:
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool IsDead() const { return myIsDead; }
 
-	FHealthStateChanged myOnHealthStateChanged; // for owning actor
 	FHealthDeath myOnHealthDeath; // for authoritative game mode rules
 	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FHealthChanged OnHealthChanged; // for health bar presenter component (Blueprint)

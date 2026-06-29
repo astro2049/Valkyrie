@@ -2,44 +2,22 @@
 
 #include "PVPScoreboardViewModel.h"
 
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "Valkyrie/GameModes/PVP/PVPGameState.h"
 #include "Valkyrie/GameModes/PVP/Player/PVPPlayerState.h"
 #include "Valkyrie/GameModes/PVP/PVPTypes.h"
 
-void UPVPScoreboardViewModel::BindToGameState(APVPGameState* const aGameState)
-{
-	if (myPVPGameState.Get() != aGameState) {
-		if (myPVPGameState.IsValid()) {
-			myPVPGameState->myOnPVPGameStateChanged.RemoveAll(this);
-		}
-		myPVPGameState = aGameState;
-		if (myPVPGameState.IsValid()) {
-			myPVPGameState->myOnPVPGameStateChanged.AddUObject(
-				this,
-				&UPVPScoreboardViewModel::HandleGameStateChanged
-			);
-		}
-	}
-
-	RebuildScoreboardData();
-	BroadcastViewModelChanged();
-}
-
-void UPVPScoreboardViewModel::HandleGameStateChanged()
-{
-	RebuildScoreboardData();
-	BroadcastViewModelChanged();
-}
-
-void UPVPScoreboardViewModel::RebuildScoreboardData()
+void UPVPScoreboardViewModel::RefreshData()
 {
 	myScoreboardData = {};
 	BuildScoreText(myScoreboardData.myTeamAScoreText, myScoreboardData.myTeamBScoreText);
-	if (!myPVPGameState.IsValid()) {
+	const APVPGameState* const gameState = GetPVPGameState();
+	if (!gameState) {
 		return;
 	}
 
-	for (const APlayerState* const playerState : myPVPGameState->PlayerArray) {
+	for (const APlayerState* const playerState : gameState->PlayerArray) {
 		const APVPPlayerState* const pvpPlayerState = Cast<APVPPlayerState>(playerState);
 		FPVPScoreboardRowData rowData;
 		if (!pvpPlayerState || !BuildRowData(playerState, rowData)) {
@@ -64,4 +42,11 @@ void UPVPScoreboardViewModel::RebuildScoreboardData()
 	};
 	myScoreboardData.myTeamARows.Sort(sortRows);
 	myScoreboardData.myTeamBRows.Sort(sortRows);
+}
+
+APVPGameState* UPVPScoreboardViewModel::GetPVPGameState() const
+{
+	const APlayerController* const playerController = GetPlayerController();
+	const UWorld* const world = playerController ? playerController->GetWorld() : nullptr;
+	return world ? world->GetGameState<APVPGameState>() : nullptr;
 }

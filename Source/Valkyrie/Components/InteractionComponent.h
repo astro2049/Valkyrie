@@ -4,13 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "InteractableComponent.h"
-#include "Components/ActorComponent.h"
+#include "ValkGameplayComponent.h"
 #include "InteractionComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FInteractionStateChanged);
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class VALKYRIE_API UInteractionComponent : public UActorComponent
+class VALKYRIE_API UInteractionComponent : public UValkGameplayComponent
 {
 	GENERATED_BODY()
 
@@ -24,8 +22,6 @@ public:
 	void Interact() const;
 	
 	bool HasInteractable() const { return myInteractableComponent.IsValid(); }
-
-	FInteractionStateChanged myOnInteractionStateChanged; // for owning actor
 
 private:
 	TWeakObjectPtr<UInteractableComponent> myInteractableComponent;

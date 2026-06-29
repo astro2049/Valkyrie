@@ -6,18 +6,12 @@
 #include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 #include "Blueprint/UserWidget.h"
 #include "Valkyrie/Player/ValkPlayerPawn.h"
-#include "Valkyrie/GameModes/Extraction/UI/ExtractionHUDViewModel.h"
 
 void AExtractionPlayerController::CreateModeUI()
 {
-	if (!myHUDViewModel) {
-		myHUDViewModel = NewObject<UExtractionHUDViewModel>(this);
-	}
-
 	if (!myHUDWidget && myHUDWidgetClass) {
 		myHUDWidget = CreateWidget<UUIExtractionHUD>(this, myHUDWidgetClass);
 		if (myHUDWidget) {
-			myHUDWidget->SetViewModel(myHUDViewModel);
 			myHUDWidget->AddToViewport();
 		}
 	}
@@ -25,12 +19,14 @@ void AExtractionPlayerController::CreateModeUI()
 
 void AExtractionPlayerController::InitializeModeState()
 {
-	if (!myHUDViewModel || !GetWorld()) {
+	if (!GetWorld()) {
 		return;
 	}
 
 	AExtractionGameState* const extractionGameState = GetWorld()->GetGameState<AExtractionGameState>();
-	myHUDViewModel->BindToGameState(extractionGameState);
+	if (myHUDWidget) {
+		myHUDWidget->RefreshHUDData();
+	}
 
 	if (myBoundExtractionGameState.Get() != extractionGameState) {
 		myBoundExtractionGameState = extractionGameState;
@@ -44,10 +40,10 @@ void AExtractionPlayerController::InitializeModeState()
 	}
 }
 
-void AExtractionPlayerController::SetModePawn(AValkPlayerPawn* const aPlayerPawn)
+void AExtractionPlayerController::SetModePawn(AValkPlayerPawn* const)
 {
-	if (myHUDViewModel) {
-		myHUDViewModel->BindToPawn(aPlayerPawn);
+	if (myHUDWidget) {
+		myHUDWidget->RefreshHUDData();
 	}
 }
 

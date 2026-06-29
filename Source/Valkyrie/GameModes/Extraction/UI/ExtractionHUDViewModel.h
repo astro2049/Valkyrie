@@ -21,15 +21,12 @@ class VALKYRIE_API UExtractionHUDViewModel : public UValkHUDViewModel
 	GENERATED_BODY()
 
 public:
-	void BindToGameState(AExtractionGameState* aGameState);
-	void RefreshFromExtractionGameState();
+	virtual void RefreshData() override;
 
 	const FExtractionHUDData& GetExtractionHUDData() const { return myExtractionHUDData; }
 
 private:
-	void HandleExtractionStateChanged();
-
-	TWeakObjectPtr<AExtractionGameState> myExtractionGameState;
+	void RefreshExtractionHUDData();
 
 	FExtractionHUDData myExtractionHUDData;
 };

@@ -2,7 +2,9 @@
 
 #include "ExtractionGameState.h"
 
+#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void AExtractionGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -17,33 +19,41 @@ void AExtractionGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 void AExtractionGameState::SetCombatSliceState(ECombatSliceState aCombatSliceState)
 {
 	myCombatSliceState = aCombatSliceState;
-	myOnExtractionStateChanged.Broadcast();
+	NotifyStateChanged();
 }
 
 void AExtractionGameState::SetObjectiveText(const FText& anObjectiveText)
 {
 	myObjectiveText = anObjectiveText;
-	myOnExtractionStateChanged.Broadcast();
+	NotifyStateChanged();
 }
 
 void AExtractionGameState::SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer)
 {
 	myDefenseTimeRemaining = aDefenseTimeRemaining;
 	myShowDefenseTimer = aShowDefenseTimer;
+	NotifyStateChanged();
+}
+
+void AExtractionGameState::NotifyStateChanged() const
+{
 	myOnExtractionStateChanged.Broadcast();
+	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
+		messageSubsystem->BroadcastUIMessage(EUIMessageType::GameStateUpdated);
+	}
 }
 
 void AExtractionGameState::OnRep_CombatSliceState()
 {
-	myOnExtractionStateChanged.Broadcast();
+	NotifyStateChanged();
 }
 
 void AExtractionGameState::OnRep_ObjectiveText()
 {
-	myOnExtractionStateChanged.Broadcast();
+	NotifyStateChanged();
 }
 
 void AExtractionGameState::OnRep_DefenseTimer()
 {
-	myOnExtractionStateChanged.Broadcast();
+	NotifyStateChanged();
 }

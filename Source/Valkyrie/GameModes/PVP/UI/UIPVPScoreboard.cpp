@@ -4,24 +4,43 @@
 
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "Engine/World.h"
 #include "PVPScoreboardViewModel.h"
 #include "UIPVPScoreboardRow.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
-void UUIPVPScoreboard::SetViewModel(UPVPScoreboardViewModel* const aViewModel)
+void UUIPVPScoreboard::NativeConstruct()
 {
-	if (myViewModel == aViewModel) {
-		RebuildRows();
-		return;
-	}
+	Super::NativeConstruct();
 
-	if (myViewModel) {
-		myViewModel->myOnViewModelChanged.RemoveAll(this);
+	if (!myViewModel && myViewModelClass) {
+		myViewModel = NewObject<UPVPScoreboardViewModel>(this, myViewModelClass);
+		if (myViewModel) {
+			myViewModel->Initialize(GetOwningPlayer());
+		}
 	}
-	myViewModel = aViewModel;
+	RefreshScoreboardData();
+}
+
+void UUIPVPScoreboard::RefreshScoreboardData()
+{
 	if (myViewModel) {
-		myViewModel->myOnViewModelChanged.AddUObject(this, &UUIPVPScoreboard::HandleViewModelChanged);
+		myViewModel->RefreshData();
 	}
 	RebuildRows();
+}
+
+void UUIPVPScoreboard::NativeTick(const FGeometry& aGeometry, const float aDeltaSeconds)
+{
+	Super::NativeTick(aGeometry, aDeltaSeconds);
+
+	const UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS();
+	if (GetVisibility() == ESlateVisibility::Visible && messageSubsystem && (
+		messageSubsystem->CheckUIMessage(EUIMessageType::GameStateUpdated)
+		|| messageSubsystem->CheckUIMessage(EUIMessageType::PlayerStateUpdated)
+	)) {
+		RefreshScoreboardData();
+	}
 }
 
 void UUIPVPScoreboard::RebuildRows()
@@ -39,13 +58,6 @@ void UUIPVPScoreboard::RebuildRows()
 	}
 	AddRows(myTeamARows, scoreboardData.myTeamARows);
 	AddRows(myTeamBRows, scoreboardData.myTeamBRows);
-}
-
-void UUIPVPScoreboard::HandleViewModelChanged()
-{
-	if (GetVisibility() == ESlateVisibility::Visible) {
-		RebuildRows();
-	}
 }
 
 void UUIPVPScoreboard::AddRows(

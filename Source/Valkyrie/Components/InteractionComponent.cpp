@@ -3,6 +3,8 @@
 
 #include "InteractionComponent.h"
 
+#include "Valkyrie/UI/UIMessageSubsystem.h"
+
 // Sets default values for this component's properties
 UInteractionComponent::UInteractionComponent()
 {
@@ -15,7 +17,7 @@ void UInteractionComponent::SetInteractable(AActor* anInteractableActor)
 		if (UInteractableComponent* interactable = anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::SetInteractable"));
 			myInteractableComponent = interactable;
-			myOnInteractionStateChanged.Broadcast();
+			BroadcastLocalPlayerUIMessage(EUIMessageType::InteractionComponentUpdated);
 		}
 	}
 }
@@ -26,7 +28,7 @@ void UInteractionComponent::ClearInteractable(AActor* anInteractableActor)
 		if (myInteractableComponent.Get() == anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::ClearInteractable"));
 			myInteractableComponent.Reset();
-			myOnInteractionStateChanged.Broadcast();
+			BroadcastLocalPlayerUIMessage(EUIMessageType::InteractionComponentUpdated);
 		}
 	}
 }

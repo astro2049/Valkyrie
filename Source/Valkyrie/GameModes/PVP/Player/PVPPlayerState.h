@@ -19,7 +19,7 @@ public:
 	int32 GetTeamId() const { return myTeamId; }
 
 protected:
-	void NotifyGameStateChanged() const;
+	void NotifyStateChanged() const;
 
 private:
 	UFUNCTION()

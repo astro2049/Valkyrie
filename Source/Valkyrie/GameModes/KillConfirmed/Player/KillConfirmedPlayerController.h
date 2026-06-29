@@ -10,8 +10,4 @@ UCLASS()
 class VALKYRIE_API AKillConfirmedPlayerController : public APVPPlayerController
 {
 	GENERATED_BODY()
-
-protected:
-	virtual UPVPHUDViewModel* CreateHUDViewModel() override;
-	virtual UPVPScoreboardViewModel* CreateScoreboardViewModel() override;
 };

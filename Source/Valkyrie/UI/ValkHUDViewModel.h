@@ -30,7 +30,7 @@ class VALKYRIE_API UValkHUDViewModel : public UValkViewModel
 	GENERATED_BODY()
 
 public:
-	void BindToPawn(AValkPlayerPawn* aPlayerPawn);
+	virtual void RefreshData();
 
 	const FValkWeaponHUDData& GetWeaponHUDData() const { return myWeaponHUDData; }
 	const FValkHealthHUDData& GetHealthHUDData() const { return myHealthHUDData; }
@@ -38,14 +38,11 @@ public:
 	bool GetShowInteractPrompt() const { return myShowInteractPrompt; }
 
 private:
-	void HandlePlayerPawnStateChanged();
+	const AValkPlayerPawn* GetPlayerPawn() const;
+	void RefreshWeaponHUDData(const AValkPlayerPawn* aPlayerPawn);
+	void RefreshHealthHUDData(const AValkPlayerPawn* aPlayerPawn);
+	void RefreshInteractionHUDData(const AValkPlayerPawn* aPlayerPawn);
 
-	void RefreshPawnData();
-	void RefreshWeaponHUDData();
-	void RefreshHealthHUDData();
-	void RefreshInteractionHUDData();
-
-	TWeakObjectPtr<AValkPlayerPawn> myPlayerPawn;
 	FValkWeaponHUDData myWeaponHUDData;
 	FValkHealthHUDData myHealthHUDData;
 	bool myShowInteractPrompt{false};

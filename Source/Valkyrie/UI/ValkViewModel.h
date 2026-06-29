@@ -6,7 +6,7 @@
 #include "UObject/Object.h"
 #include "ValkViewModel.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FValkViewModelChanged);
+class APlayerController;
 
 UCLASS()
 class VALKYRIE_API UValkViewModel : public UObject
@@ -14,8 +14,11 @@ class VALKYRIE_API UValkViewModel : public UObject
 	GENERATED_BODY()
 
 public:
-	FValkViewModelChanged myOnViewModelChanged;
+	void Initialize(APlayerController* aPlayerController);
 
 protected:
-	void BroadcastViewModelChanged() const { myOnViewModelChanged.Broadcast(); }
+	APlayerController* GetPlayerController() const { return myPlayerController.Get(); }
+
+private:
+	TWeakObjectPtr<APlayerController> myPlayerController;
 };

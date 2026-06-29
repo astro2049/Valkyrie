@@ -33,19 +33,15 @@ class VALKYRIE_API UPVPScoreboardViewModel : public UValkViewModel
 	GENERATED_BODY()
 
 public:
-	void BindToGameState(APVPGameState* aGameState);
+	void RefreshData();
 	const FPVPScoreboardData& GetScoreboardData() const { return myScoreboardData; }
 	virtual bool ShouldShowConfirms() const { return false; }
 
 protected:
 	virtual bool BuildRowData(const APlayerState* aPlayerState, FPVPScoreboardRowData& aRowData) const PURE_VIRTUAL(UPVPScoreboardViewModel::BuildRowData, return false;);
 	virtual void BuildScoreText(FText& aTeamAScoreText, FText& aTeamBScoreText) const PURE_VIRTUAL(UPVPScoreboardViewModel::BuildScoreText, );
-	APVPGameState* GetPVPGameState() const { return myPVPGameState.Get(); }
+	APVPGameState* GetPVPGameState() const;
 
 private:
-	void HandleGameStateChanged();
-	void RebuildScoreboardData();
-
-	TWeakObjectPtr<APVPGameState> myPVPGameState;
 	FPVPScoreboardData myScoreboardData;
 };

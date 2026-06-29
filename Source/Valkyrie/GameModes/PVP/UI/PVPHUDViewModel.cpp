@@ -2,29 +2,19 @@
 
 #include "PVPHUDViewModel.h"
 
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "Valkyrie/GameModes/PVP/PVPGameState.h"
 
-void UPVPHUDViewModel::BindToGameState(APVPGameState* const aGameState)
+void UPVPHUDViewModel::RefreshData()
 {
-	if (myPVPGameState.Get() != aGameState) {
-		if (myPVPGameState.IsValid()) {
-			myPVPGameState->myOnPVPGameStateChanged.RemoveAll(this);
-		}
-		myPVPGameState = aGameState;
-		if (myPVPGameState.IsValid()) {
-			myPVPGameState->myOnPVPGameStateChanged.AddUObject(
-				this,
-				&UPVPHUDViewModel::HandlePVPGameStateChanged
-			);
-		}
-	}
-
+	Super::RefreshData();
 	RefreshModeHUDData();
-	BroadcastViewModelChanged();
 }
 
-void UPVPHUDViewModel::HandlePVPGameStateChanged()
+APVPGameState* UPVPHUDViewModel::GetPVPGameState() const
 {
-	RefreshModeHUDData();
-	BroadcastViewModelChanged();
+	const APlayerController* const playerController = GetPlayerController();
+	const UWorld* const world = playerController ? playerController->GetWorld() : nullptr;
+	return world ? world->GetGameState<APVPGameState>() : nullptr;
 }

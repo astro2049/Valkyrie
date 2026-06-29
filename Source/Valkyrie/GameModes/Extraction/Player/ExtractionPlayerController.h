@@ -7,7 +7,6 @@
 #include "ExtractionPlayerController.generated.h"
 
 class UUIExtractionHUD;
-class UExtractionHUDViewModel;
 class UUserWidget;
 class AExtractionGameState;
 
@@ -38,8 +37,6 @@ private:
 
 	void HandleExtractionStateChanged();
 
-	UPROPERTY()
-	TObjectPtr<UExtractionHUDViewModel> myHUDViewModel{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUIExtractionHUD> myHUDWidget{nullptr};
 	UPROPERTY()

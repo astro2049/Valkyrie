@@ -7,8 +7,6 @@
 #include "PVPTypes.h"
 #include "PVPGameState.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FPVPGameStateChanged);
-
 UCLASS()
 class VALKYRIE_API APVPGameState : public AValkGameState
 {
@@ -23,8 +21,6 @@ public:
 	void NotifyStateChanged() const;
 	virtual bool HasMatchEnded() const override { return myMatchEnded; }
 	int32 GetWinningTeamId() const { return myWinningTeamId; }
-
-	FPVPGameStateChanged myOnPVPGameStateChanged; // for PVP HUD and scoreboard view models
 
 private:
 	UFUNCTION()

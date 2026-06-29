@@ -5,23 +5,44 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
+#include "Engine/World.h"
+#include "UIMessageSubsystem.h"
 #include "ValkHUDViewModel.h"
 
-void UUIValkHUD::SetViewModel(UValkHUDViewModel* const aViewModel)
+void UUIValkHUD::NativeConstruct()
 {
-	if (myViewModel == aViewModel) {
-		UpdateFromViewModel();
-		return;
-	}
+	Super::NativeConstruct();
 
-	if (myViewModel) {
-		myViewModel->myOnViewModelChanged.RemoveAll(this);
+	if (!myViewModel && myViewModelClass) {
+		myViewModel = NewObject<UValkHUDViewModel>(this, myViewModelClass);
+		if (myViewModel) {
+			myViewModel->Initialize(GetOwningPlayer());
+		}
 	}
-	myViewModel = aViewModel;
+	RefreshHUDData();
+}
+
+void UUIValkHUD::RefreshHUDData()
+{
 	if (myViewModel) {
-		myViewModel->myOnViewModelChanged.AddUObject(this, &UUIValkHUD::HandleViewModelChanged);
+		myViewModel->RefreshData();
 	}
 	UpdateFromViewModel();
+}
+
+void UUIValkHUD::NativeTick(const FGeometry& aGeometry, const float aDeltaSeconds)
+{
+	Super::NativeTick(aGeometry, aDeltaSeconds);
+
+	const UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS();
+	if (messageSubsystem && (
+		messageSubsystem->CheckUIMessage(EUIMessageType::WeaponComponentUpdated)
+		|| messageSubsystem->CheckUIMessage(EUIMessageType::HealthComponentUpdated)
+		|| messageSubsystem->CheckUIMessage(EUIMessageType::InteractionComponentUpdated)
+		|| messageSubsystem->CheckUIMessage(EUIMessageType::GameStateUpdated)
+	)) {
+		RefreshHUDData();
+	}
 }
 
 void UUIValkHUD::UpdateFromViewModel() const
@@ -61,9 +82,4 @@ void UUIValkHUD::UpdateFromViewModel() const
 	}
 
 	UpdateModeFromViewModel();
-}
-
-void UUIValkHUD::HandleViewModelChanged()
-{
-	UpdateFromViewModel();
 }
