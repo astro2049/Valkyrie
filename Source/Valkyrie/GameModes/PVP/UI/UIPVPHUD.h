@@ -3,18 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/UI/UIValkHUD.h"
+#include "Blueprint/UserWidget.h"
 #include "UIPVPHUD.generated.h"
 
+class UPVPHUDViewModel;
 class UTextBlock;
 
 UCLASS(Blueprintable)
-class VALKYRIE_API UUIPVPHUD : public UUIValkHUD
+class VALKYRIE_API UUIPVPHUD : public UUserWidget
 {
 	GENERATED_BODY()
 
 protected:
-	virtual void UpdateModeFromViewModel() const override;
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& aGeometry, float aDeltaSeconds) override;
 
 	UPROPERTY(meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> myTeamAScoreText{nullptr};
@@ -22,4 +24,13 @@ protected:
 	TObjectPtr<UTextBlock> myTeamBScoreText{nullptr};
 	UPROPERTY(meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> myWinnerText{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UPVPHUDViewModel> myViewModelClass;
+
+private:
+	void RefreshModeData();
+	void UpdateFromViewModel() const;
+
+	UPROPERTY()
+	TObjectPtr<UPVPHUDViewModel> myViewModel{nullptr};
 };

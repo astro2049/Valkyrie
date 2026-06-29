@@ -17,15 +17,14 @@ void AKillConfirmedPlayerState::AddKill()
 {
 	if (HasAuthority()) {
 		++myKills;
-		NotifyStateChanged();
+		BroadcastStateChanged();
 	}
 }
-
 void AKillConfirmedPlayerState::AddDeath()
 {
 	if (HasAuthority()) {
 		++myDeaths;
-		NotifyStateChanged();
+		BroadcastStateChanged();
 	}
 }
 
@@ -33,11 +32,6 @@ void AKillConfirmedPlayerState::AddConfirm()
 {
 	if (HasAuthority()) {
 		++myConfirms;
-		NotifyStateChanged();
+		BroadcastStateChanged();
 	}
-}
-
-void AKillConfirmedPlayerState::OnRep_CombatStats()
-{
-	NotifyStateChanged();
 }

@@ -8,7 +8,6 @@
 
 void UExtractionHUDViewModel::RefreshData()
 {
-	Super::RefreshData();
 	RefreshExtractionHUDData();
 }
 
@@ -18,9 +17,8 @@ void UExtractionHUDViewModel::RefreshExtractionHUDData()
 	const UWorld* const world = playerController ? playerController->GetWorld() : nullptr;
 	const AExtractionGameState* const gameState = world ? world->GetGameState<AExtractionGameState>() : nullptr;
 	if (gameState) {
-		myExtractionHUDData.myObjectiveText = gameState->GetObjectiveText();
+		myExtractionHUDData.myCombatSliceState = gameState->GetCombatSliceState();
 		myExtractionHUDData.myDefenseTimeRemaining = gameState->GetDefenseTimeRemaining();
-		myExtractionHUDData.myShowDefenseTimer = gameState->ShouldShowDefenseTimer();
 	} else {
 		myExtractionHUDData = FExtractionHUDData{};
 	}

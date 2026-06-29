@@ -8,7 +8,6 @@
 
 void UPVPHUDViewModel::RefreshData()
 {
-	Super::RefreshData();
 	RefreshModeHUDData();
 }
 

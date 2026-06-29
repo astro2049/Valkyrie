@@ -35,12 +35,8 @@ void UUIValkHUD::NativeTick(const FGeometry& aGeometry, const float aDeltaSecond
 	Super::NativeTick(aGeometry, aDeltaSeconds);
 
 	const UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS();
-	if (messageSubsystem && (
-		messageSubsystem->CheckUIMessage(EUIMessageType::WeaponComponentUpdated)
-		|| messageSubsystem->CheckUIMessage(EUIMessageType::HealthComponentUpdated)
-		|| messageSubsystem->CheckUIMessage(EUIMessageType::InteractionComponentUpdated)
-		|| messageSubsystem->CheckUIMessage(EUIMessageType::GameStateUpdated)
-	)) {
+	if (messageSubsystem
+		&& messageSubsystem->CheckUIMessage(EUIMessageType::LocalPawnStateUpdated)) {
 		RefreshHUDData();
 	}
 }
@@ -80,6 +76,4 @@ void UUIValkHUD::UpdateFromViewModel() const
 	if (myInteractPrompt) {
 		myInteractPrompt->SetVisibility(myViewModel->GetShowInteractPrompt() ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
-
-	UpdateModeFromViewModel();
 }

@@ -2,48 +2,43 @@
 
 #include "ExtractionPlayerController.h"
 
-#include "Valkyrie/GameModes/Extraction/UI/UIExtractionHUD.h"
-#include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 #include "Blueprint/UserWidget.h"
-#include "Valkyrie/Player/ValkPlayerPawn.h"
+#include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
+#include "Valkyrie/GameModes/Extraction/UI/UIExtractionHUD.h"
+#include "Valkyrie/UI/UIValkHUD.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
-void AExtractionPlayerController::CreateModeUI()
+void AExtractionPlayerController::BeginPlay()
 {
-	if (!myHUDWidget && myHUDWidgetClass) {
-		myHUDWidget = CreateWidget<UUIExtractionHUD>(this, myHUDWidgetClass);
-		if (myHUDWidget) {
-			myHUDWidget->AddToViewport();
-		}
-	}
-}
+	Super::BeginPlay();
 
-void AExtractionPlayerController::InitializeModeState()
-{
-	if (!GetWorld()) {
+	if (!IsLocalController()) {
 		return;
 	}
 
-	AExtractionGameState* const extractionGameState = GetWorld()->GetGameState<AExtractionGameState>();
-	if (myHUDWidget) {
-		myHUDWidget->RefreshHUDData();
+	if (!myPlayerHUDWidget && myPlayerHUDWidgetClass) {
+		myPlayerHUDWidget = CreateWidget<UUIValkHUD>(this, myPlayerHUDWidgetClass);
+		if (myPlayerHUDWidget) {
+			myPlayerHUDWidget->AddToViewport();
+		}
 	}
-
-	if (myBoundExtractionGameState.Get() != extractionGameState) {
-		myBoundExtractionGameState = extractionGameState;
-		if (myBoundExtractionGameState.IsValid()) {
-			myBoundExtractionGameState->myOnExtractionStateChanged.AddUObject(
-				this,
-				&AExtractionPlayerController::HandleExtractionStateChanged
-			);
-			HandleExtractionStateChanged();
+	if (!myModeWidget && myModeWidgetClass) {
+		myModeWidget = CreateWidget<UUIExtractionHUD>(this, myModeWidgetClass);
+		if (myModeWidget) {
+			myModeWidget->AddToViewport();
 		}
 	}
 }
 
-void AExtractionPlayerController::SetModePawn(AValkPlayerPawn* const)
+void AExtractionPlayerController::Tick(const float aDeltaSeconds)
 {
-	if (myHUDWidget) {
-		myHUDWidget->RefreshHUDData();
+	Super::Tick(aDeltaSeconds);
+
+	const UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS();
+	if (IsLocalController()
+		&& messageSubsystem
+		&& messageSubsystem->CheckUIMessage(EUIMessageType::GameStateUpdated)) {
+		UpdateEndMenuFromState();
 	}
 }
 
@@ -54,6 +49,23 @@ void AExtractionPlayerController::HandleLocalPlayerDeath()
 	SetIgnoreLookInput(true);
 	if (APawn* const controlledPawn = GetPawn()) {
 		controlledPawn->DisableInput(this);
+	}
+}
+
+void AExtractionPlayerController::UpdateEndMenuFromState()
+{
+	const AExtractionGameState* const gameState = GetWorld()
+		? GetWorld()->GetGameState<AExtractionGameState>()
+		: nullptr;
+	if (!gameState) {
+		return;
+	}
+
+	const ECombatSliceState combatSliceState = gameState->GetCombatSliceState();
+	if (combatSliceState == ECombatSliceState::Completed) {
+		ShowVictoryMenu();
+	} else if (combatSliceState == ECombatSliceState::Failed) {
+		ShowFailureMenu();
 	}
 }
 
@@ -88,19 +100,5 @@ void AExtractionPlayerController::ShowVictoryMenu()
 	if (myVictoryMenuWidget) {
 		myVictoryMenuWidget->AddToViewport();
 		SetInputUIOnly(myVictoryMenuWidget);
-	}
-}
-
-void AExtractionPlayerController::HandleExtractionStateChanged()
-{
-	if (!myBoundExtractionGameState.IsValid()) {
-		return;
-	}
-
-	const ECombatSliceState combatSliceState = myBoundExtractionGameState->GetCombatSliceState();
-	if (combatSliceState == ECombatSliceState::Completed) {
-		ShowVictoryMenu();
-	} else if (combatSliceState == ECombatSliceState::Failed) {
-		ShowFailureMenu();
 	}
 }

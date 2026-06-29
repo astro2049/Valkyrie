@@ -16,19 +16,13 @@ void ATDMPlayerState::AddKill()
 {
 	if (HasAuthority()) {
 		++myKills;
-		NotifyStateChanged();
+		BroadcastStateChanged();
 	}
 }
-
 void ATDMPlayerState::AddDeath()
 {
 	if (HasAuthority()) {
 		++myDeaths;
-		NotifyStateChanged();
+		BroadcastStateChanged();
 	}
-}
-
-void ATDMPlayerState::OnRep_CombatStats()
-{
-	NotifyStateChanged();
 }

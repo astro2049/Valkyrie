@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/UI/ValkHUDViewModel.h"
+#include "Valkyrie/UI/ValkViewModel.h"
 #include "PVPHUDViewModel.generated.h"
 
 class APVPGameState;
@@ -17,12 +17,12 @@ struct FPVPHUDData
 };
 
 UCLASS(Abstract)
-class VALKYRIE_API UPVPHUDViewModel : public UValkHUDViewModel
+class VALKYRIE_API UPVPHUDViewModel : public UValkViewModel
 {
 	GENERATED_BODY()
 
 public:
-	virtual void RefreshData() override;
+	void RefreshData();
 	const FPVPHUDData& GetPVPHUDData() const { return myPVPHUDData; }
 
 protected:

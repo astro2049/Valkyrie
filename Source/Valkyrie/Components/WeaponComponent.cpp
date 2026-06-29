@@ -37,7 +37,7 @@ void UWeaponComponent::BeginPlay()
 	myReloadDuration = FMath::Max(myReloadDuration, 0.f);
 	myIsReloading = false;
 	myFireInterval = myRPM > 0.f ? 60.f / myRPM : 0.f;
-	BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
+	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 }
 
 void UWeaponComponent::Fire()
@@ -71,7 +71,7 @@ void UWeaponComponent::TraceFire(const FVector aTraceStart, const FVector aTrace
 	if (now - myLastFiredTime >= myFireInterval) {
 		myLastFiredTime = now;
 		myAmmoInMag = FMath::Max(0, myAmmoInMag - 1);
-		BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
+		BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 
 		// line trace
 		const FVector start = aTraceStart;
@@ -122,7 +122,7 @@ void UWeaponComponent::RPC_TraceFire_Implementation(const FVector aTraceStart, c
 
 void UWeaponComponent::OnRep_WeaponState() const
 {
-	BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
+	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 }
 
 void UWeaponComponent::StartReload()
@@ -146,7 +146,7 @@ void UWeaponComponent::TryStartReload()
 	}
 
 	myIsReloading = true;
-	BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
+	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 	if (myReloadDuration > 0.f) {
 		world->GetTimerManager().SetTimer(
 			myReloadTimerHandle,
@@ -172,6 +172,6 @@ void UWeaponComponent::FinishReload()
 		myAmmoInMag += ammoToLoad;
 		myReserveAmmo -= ammoToLoad;
 		myIsReloading = false;
-		BroadcastLocalPlayerUIMessage(EUIMessageType::WeaponComponentUpdated);
+		BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 	}
 }

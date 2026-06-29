@@ -27,9 +27,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void CompleteExtraction();
 
-	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie")
-	void OnExtractionCompleted();
-
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	float GetDefenseTimeRemaining() const { return myDefenseTimeRemaining; }
 
@@ -44,8 +41,8 @@ private:
 	void BindPlayerDeath(AController* aController);
 	bool AreAllPlayersDead() const;
 	void FailExtraction();
-	void SetCombatSliceState(ECombatSliceState aNewState, const FText& anObjectiveText) const;
-	void SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer) const;
+	void SetCombatSliceState(ECombatSliceState aNewState) const;
+	void SetDefenseTimeRemaining(float aDefenseTimeRemaining) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myDefenseDuration{60.f};

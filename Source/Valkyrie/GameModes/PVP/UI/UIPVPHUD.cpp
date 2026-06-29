@@ -3,16 +3,49 @@
 #include "UIPVPHUD.h"
 
 #include "Components/TextBlock.h"
+#include "Engine/World.h"
 #include "PVPHUDViewModel.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
-void UUIPVPHUD::UpdateModeFromViewModel() const
+void UUIPVPHUD::NativeConstruct()
 {
-	const UPVPHUDViewModel* const viewModel = Cast<UPVPHUDViewModel>(GetViewModel());
-	if (!viewModel) {
+	Super::NativeConstruct();
+
+	if (!myViewModel && myViewModelClass) {
+		myViewModel = NewObject<UPVPHUDViewModel>(this, myViewModelClass);
+		if (myViewModel) {
+			myViewModel->Initialize(GetOwningPlayer());
+		}
+	}
+	RefreshModeData();
+}
+
+void UUIPVPHUD::NativeTick(const FGeometry& aGeometry, const float aDeltaSeconds)
+{
+	Super::NativeTick(aGeometry, aDeltaSeconds);
+
+	const UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS();
+	if (messageSubsystem
+		&& messageSubsystem->CheckUIMessage(EUIMessageType::GameStateUpdated)) {
+		RefreshModeData();
+	}
+}
+
+void UUIPVPHUD::RefreshModeData()
+{
+	if (myViewModel) {
+		myViewModel->RefreshData();
+	}
+	UpdateFromViewModel();
+}
+
+void UUIPVPHUD::UpdateFromViewModel() const
+{
+	if (!myViewModel) {
 		return;
 	}
 
-	const FPVPHUDData& pvpHUDData = viewModel->GetPVPHUDData();
+	const FPVPHUDData& pvpHUDData = myViewModel->GetPVPHUDData();
 	if (myTeamAScoreText) {
 		myTeamAScoreText->SetText(pvpHUDData.myTeamAScoreText);
 	}

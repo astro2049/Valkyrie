@@ -11,49 +11,24 @@ void AExtractionGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AExtractionGameState, myCombatSliceState);
-	DOREPLIFETIME(AExtractionGameState, myObjectiveText);
 	DOREPLIFETIME(AExtractionGameState, myDefenseTimeRemaining);
-	DOREPLIFETIME(AExtractionGameState, myShowDefenseTimer);
 }
 
 void AExtractionGameState::SetCombatSliceState(ECombatSliceState aCombatSliceState)
 {
 	myCombatSliceState = aCombatSliceState;
-	NotifyStateChanged();
+	BroadcastStateChanged();
 }
 
-void AExtractionGameState::SetObjectiveText(const FText& anObjectiveText)
-{
-	myObjectiveText = anObjectiveText;
-	NotifyStateChanged();
-}
-
-void AExtractionGameState::SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer)
+void AExtractionGameState::SetDefenseTimeRemaining(const float aDefenseTimeRemaining)
 {
 	myDefenseTimeRemaining = aDefenseTimeRemaining;
-	myShowDefenseTimer = aShowDefenseTimer;
-	NotifyStateChanged();
+	BroadcastStateChanged();
 }
 
-void AExtractionGameState::NotifyStateChanged() const
+void AExtractionGameState::BroadcastStateChanged() const
 {
-	myOnExtractionStateChanged.Broadcast();
 	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
 		messageSubsystem->BroadcastUIMessage(EUIMessageType::GameStateUpdated);
 	}
-}
-
-void AExtractionGameState::OnRep_CombatSliceState()
-{
-	NotifyStateChanged();
-}
-
-void AExtractionGameState::OnRep_ObjectiveText()
-{
-	NotifyStateChanged();
-}
-
-void AExtractionGameState::OnRep_DefenseTimer()
-{
-	NotifyStateChanged();
 }

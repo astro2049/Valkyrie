@@ -48,11 +48,8 @@ void AExtractionGameMode::BeginPlay()
 	);
 
 	myDefenseTimeRemaining = myDefenseDuration;
-	SetCombatSliceState(
-		ECombatSliceState::ToStartGenerator,
-		FText::FromString(TEXT("Objective: Start the generator"))
-	);
-	SetDefenseTimer(0.f, false);
+	SetCombatSliceState(ECombatSliceState::ToStartGenerator);
+	SetDefenseTimeRemaining(0.f);
 }
 
 void AExtractionGameMode::RestartPlayer(AController* aNewPlayer)
@@ -65,13 +62,10 @@ void AExtractionGameMode::StartGenerator()
 {
 	const AExtractionGameState* combatSliceGameState = GetGameState<AExtractionGameState>();
 	ensure(combatSliceGameState && combatSliceGameState->GetCombatSliceState() == ECombatSliceState::ToStartGenerator);
-	SetCombatSliceState(
-		ECombatSliceState::ToCompleteDefense,
-		FText::FromString(TEXT("Objective: Defend the generator"))
-	);
+	SetCombatSliceState(ECombatSliceState::ToCompleteDefense);
 
 	myDefenseTimeRemaining = myDefenseDuration;
-	SetDefenseTimer(myDefenseTimeRemaining, true);
+	SetDefenseTimeRemaining(myDefenseTimeRemaining);
 	GetWorldTimerManager().SetTimer(
 		myDefenseTimerHandle,
 		this,
@@ -85,11 +79,8 @@ void AExtractionGameMode::CompleteDefense()
 {
 	const AExtractionGameState* combatSliceGameState = GetGameState<AExtractionGameState>();
 	ensure(combatSliceGameState && combatSliceGameState->GetCombatSliceState() == ECombatSliceState::ToCompleteDefense);
-	SetCombatSliceState(
-		ECombatSliceState::ToExtract,
-		FText::FromString(TEXT("Objective: Reach extraction"))
-	);
-	SetDefenseTimer(0.f, false);
+	SetCombatSliceState(ECombatSliceState::ToExtract);
+	SetDefenseTimeRemaining(0.f);
 
 	GetWorldTimerManager().ClearTimer(myDefenseTimerHandle);
 	if (AExtractionZone* extractionZone = myExtractionZone.Get()) {
@@ -101,12 +92,8 @@ void AExtractionGameMode::CompleteExtraction()
 {
 	const AExtractionGameState* combatSliceGameState = GetGameState<AExtractionGameState>();
 	ensure(combatSliceGameState && combatSliceGameState->GetCombatSliceState() == ECombatSliceState::ToExtract);
-	SetCombatSliceState(
-		ECombatSliceState::Completed,
-		FText::FromString(TEXT("Extraction Complete"))
-	);
-	SetDefenseTimer(0.f, false);
-	OnExtractionCompleted();
+	SetCombatSliceState(ECombatSliceState::Completed);
+	SetDefenseTimeRemaining(0.f);
 }
 
 void AExtractionGameMode::HandlePlayerDeath()
@@ -119,7 +106,7 @@ void AExtractionGameMode::HandlePlayerDeath()
 void AExtractionGameMode::TickDefenseTimer()
 {
 	myDefenseTimeRemaining = FMath::Max(0.f, myDefenseTimeRemaining - 1.f);
-	SetDefenseTimer(myDefenseTimeRemaining, true);
+	SetDefenseTimeRemaining(myDefenseTimeRemaining);
 
 	if (myDefenseTimeRemaining <= 0.f) {
 		CompleteDefense();
@@ -164,26 +151,22 @@ void AExtractionGameMode::FailExtraction()
 	if (combatSliceGameState
 		&& combatSliceGameState->GetCombatSliceState() != ECombatSliceState::Completed
 		&& combatSliceGameState->GetCombatSliceState() != ECombatSliceState::Failed) {
-		SetCombatSliceState(
-			ECombatSliceState::Failed,
-			FText::FromString(TEXT("Mission Failed"))
-		);
-		SetDefenseTimer(0.f, false);
+		SetCombatSliceState(ECombatSliceState::Failed);
+		SetDefenseTimeRemaining(0.f);
 		GetWorldTimerManager().ClearTimer(myDefenseTimerHandle);
 	}
 }
 
-void AExtractionGameMode::SetCombatSliceState(ECombatSliceState aNewState, const FText& anObjectiveText) const
+void AExtractionGameMode::SetCombatSliceState(const ECombatSliceState aNewState) const
 {
 	if (AExtractionGameState* combatSliceGameState = GetGameState<AExtractionGameState>()) {
 		combatSliceGameState->SetCombatSliceState(aNewState);
-		combatSliceGameState->SetObjectiveText(anObjectiveText);
 	}
 }
 
-void AExtractionGameMode::SetDefenseTimer(float aDefenseTimeRemaining, bool aShowDefenseTimer) const
+void AExtractionGameMode::SetDefenseTimeRemaining(const float aDefenseTimeRemaining) const
 {
 	if (AExtractionGameState* combatSliceGameState = GetGameState<AExtractionGameState>()) {
-		combatSliceGameState->SetDefenseTimer(aDefenseTimeRemaining, aShowDefenseTimer);
+		combatSliceGameState->SetDefenseTimeRemaining(aDefenseTimeRemaining);
 	}
 }

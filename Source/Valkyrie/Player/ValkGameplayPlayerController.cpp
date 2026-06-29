@@ -2,8 +2,8 @@
 
 #include "ValkGameplayPlayerController.h"
 
-#include "ValkPlayerPawn.h"
 #include "Valkyrie/Components/HealthComponent.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void AValkGameplayPlayerController::BeginPlay()
 {
@@ -15,8 +15,6 @@ void AValkGameplayPlayerController::BeginPlay()
 
 	SetInputGameOnly();
 	AddInputMappingContext();
-	CreateModeUI();
-	InitializeModeState();
 	OnPossessedPawnChanged.AddUniqueDynamic(
 		this,
 		&AValkGameplayPlayerController::HandlePossessedPawnChanged
@@ -43,7 +41,9 @@ void AValkGameplayPlayerController::SetControlledPawn(APawn* const aPawn)
 		);
 	}
 
-	SetModePawn(Cast<AValkPlayerPawn>(aPawn));
+	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
+		messageSubsystem->BroadcastUIMessage(EUIMessageType::LocalPawnStateUpdated);
+	}
 }
 
 void AValkGameplayPlayerController::HandlePossessedPawnChanged(

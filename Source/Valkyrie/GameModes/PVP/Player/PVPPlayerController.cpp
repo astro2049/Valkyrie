@@ -6,7 +6,36 @@
 #include "InputAction.h"
 #include "Valkyrie/GameModes/PVP/UI/UIPVPHUD.h"
 #include "Valkyrie/GameModes/PVP/UI/UIPVPScoreboard.h"
-#include "Valkyrie/Player/ValkPlayerPawn.h"
+#include "Valkyrie/UI/UIValkHUD.h"
+
+void APVPPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (!IsLocalController()) {
+		return;
+	}
+
+	if (myPlayerHUDWidgetClass) {
+		myPlayerHUDWidget = CreateWidget<UUIValkHUD>(this, myPlayerHUDWidgetClass);
+		if (myPlayerHUDWidget) {
+			myPlayerHUDWidget->AddToViewport();
+		}
+	}
+	if (myModeWidgetClass) {
+		myModeWidget = CreateWidget<UUIPVPHUD>(this, myModeWidgetClass);
+		if (myModeWidget) {
+			myModeWidget->AddToViewport();
+		}
+	}
+	if (myScoreboardWidgetClass) {
+		myScoreboardWidget = CreateWidget<UUIPVPScoreboard>(this, myScoreboardWidgetClass);
+		if (myScoreboardWidget) {
+			myScoreboardWidget->AddToViewport();
+			myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
 
 void APVPPlayerController::SetupInputComponent()
 {
@@ -27,37 +56,6 @@ void APVPPlayerController::SetupInputComponent()
 				&APVPPlayerController::HideScoreboard
 			);
 		}
-	}
-}
-
-void APVPPlayerController::CreateModeUI()
-{
-	if (myHUDWidgetClass) {
-		myHUDWidget = CreateWidget<UUIPVPHUD>(this, myHUDWidgetClass);
-		if (myHUDWidget) {
-			myHUDWidget->AddToViewport();
-		}
-	}
-	if (myScoreboardWidgetClass) {
-		myScoreboardWidget = CreateWidget<UUIPVPScoreboard>(this, myScoreboardWidgetClass);
-		if (myScoreboardWidget) {
-			myScoreboardWidget->AddToViewport();
-			myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
-		}
-	}
-}
-
-void APVPPlayerController::InitializeModeState()
-{
-	if (myHUDWidget) {
-		myHUDWidget->RefreshHUDData();
-	}
-}
-
-void APVPPlayerController::SetModePawn(AValkPlayerPawn* const)
-{
-	if (myHUDWidget) {
-		myHUDWidget->RefreshHUDData();
 	}
 }
 

@@ -3,25 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/UI/ValkHUDViewModel.h"
+#include "Valkyrie/GameModes/Extraction/ExtractionTypes.h"
+#include "Valkyrie/UI/ValkViewModel.h"
 #include "ExtractionHUDViewModel.generated.h"
 
 class AExtractionGameState;
 
 struct FExtractionHUDData
 {
-	FText myObjectiveText;
+	ECombatSliceState myCombatSliceState{ECombatSliceState::ToStartGenerator};
 	float myDefenseTimeRemaining{0.f};
-	bool myShowDefenseTimer{false};
 };
 
 UCLASS()
-class VALKYRIE_API UExtractionHUDViewModel : public UValkHUDViewModel
+class VALKYRIE_API UExtractionHUDViewModel : public UValkViewModel
 {
 	GENERATED_BODY()
 
 public:
-	virtual void RefreshData() override;
+	void RefreshData();
 
 	const FExtractionHUDData& GetExtractionHUDData() const { return myExtractionHUDData; }
 

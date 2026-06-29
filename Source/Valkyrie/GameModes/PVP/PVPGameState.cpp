@@ -17,13 +17,13 @@ void APVPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 void APVPGameState::AddPlayerState(APlayerState* const aPlayerState)
 {
 	Super::AddPlayerState(aPlayerState);
-	NotifyStateChanged();
+	BroadcastStateChanged();
 }
 
 void APVPGameState::RemovePlayerState(APlayerState* const aPlayerState)
 {
 	Super::RemovePlayerState(aPlayerState);
-	NotifyStateChanged();
+	BroadcastStateChanged();
 }
 
 void APVPGameState::SetWinningTeamId(const int32 aTeamId)
@@ -34,17 +34,12 @@ void APVPGameState::SetWinningTeamId(const int32 aTeamId)
 
 	myWinningTeamId = aTeamId;
 	myMatchEnded = true;
-	NotifyStateChanged();
+	BroadcastStateChanged();
 }
 
-void APVPGameState::NotifyStateChanged() const
+void APVPGameState::BroadcastStateChanged() const
 {
 	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
 		messageSubsystem->BroadcastUIMessage(EUIMessageType::GameStateUpdated);
 	}
-}
-
-void APVPGameState::OnRep_MatchResult()
-{
-	NotifyStateChanged();
 }

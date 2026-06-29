@@ -18,16 +18,14 @@ public:
 	virtual void RemovePlayerState(APlayerState* aPlayerState) override;
 
 	void SetWinningTeamId(int32 aTeamId);
-	void NotifyStateChanged() const;
+	UFUNCTION()
+	void BroadcastStateChanged() const;
 	virtual bool HasMatchEnded() const override { return myMatchEnded; }
 	int32 GetWinningTeamId() const { return myWinningTeamId; }
 
 private:
-	UFUNCTION()
-	void OnRep_MatchResult();
-
-	UPROPERTY(ReplicatedUsing=OnRep_MatchResult, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
 	bool myMatchEnded{false};
-	UPROPERTY(ReplicatedUsing=OnRep_MatchResult, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
 	int32 myWinningTeamId{ValkTeamId::None};
 };

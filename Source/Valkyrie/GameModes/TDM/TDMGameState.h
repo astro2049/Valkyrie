@@ -19,11 +19,8 @@ public:
 	int32 GetTeamBKills() const { return myTeamBKills; }
 
 private:
-	UFUNCTION()
-	void OnRep_TeamKills();
-
-	UPROPERTY(ReplicatedUsing=OnRep_TeamKills, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
 	int32 myTeamAKills{0};
-	UPROPERTY(ReplicatedUsing=OnRep_TeamKills, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
 	int32 myTeamBKills{0};
 };

@@ -20,15 +20,10 @@ void APVPPlayerState::SetTeamId(const int32 aTeamId)
 	}
 
 	myTeamId = aTeamId;
-	NotifyStateChanged();
+	BroadcastStateChanged();
 }
 
-void APVPPlayerState::OnRep_TeamId() const
-{
-	NotifyStateChanged();
-}
-
-void APVPPlayerState::NotifyStateChanged() const
+void APVPPlayerState::BroadcastStateChanged() const
 {
 	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
 		messageSubsystem->BroadcastUIMessage(EUIMessageType::PlayerStateUpdated);

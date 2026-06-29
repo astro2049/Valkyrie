@@ -11,7 +11,7 @@ class UTextBlock;
 class UValkHUDViewModel;
 class UWidget;
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(Blueprintable)
 class VALKYRIE_API UUIValkHUD : public UUserWidget
 {
 	GENERATED_BODY()
@@ -22,8 +22,6 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& aGeometry, float aDeltaSeconds) override;
-	virtual void UpdateModeFromViewModel() const PURE_VIRTUAL(UUIValkHUD::UpdateModeFromViewModel,);
-	UValkHUDViewModel* GetViewModel() const { return myViewModel; }
 
 	UPROPERTY(meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> myAmmoText{nullptr};

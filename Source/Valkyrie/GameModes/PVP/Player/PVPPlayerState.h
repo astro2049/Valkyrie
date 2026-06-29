@@ -19,12 +19,10 @@ public:
 	int32 GetTeamId() const { return myTeamId; }
 
 protected:
-	void NotifyStateChanged() const;
+	UFUNCTION()
+	void BroadcastStateChanged() const;
 
 private:
-	UFUNCTION()
-	void OnRep_TeamId() const;
-
-	UPROPERTY(ReplicatedUsing=OnRep_TeamId, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
 	int32 myTeamId{ValkTeamId::None};
 };

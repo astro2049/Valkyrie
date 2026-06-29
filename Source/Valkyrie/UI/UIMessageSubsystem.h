@@ -13,9 +13,7 @@
 UENUM()
 enum class EUIMessageType : uint8
 {
-	WeaponComponentUpdated,
-	HealthComponentUpdated,
-	InteractionComponentUpdated,
+	LocalPawnStateUpdated,
 	GameStateUpdated,
 	PlayerStateUpdated,
 	Count

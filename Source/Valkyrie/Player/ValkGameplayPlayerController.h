@@ -6,7 +6,6 @@
 #include "ValkPlayerController.h"
 #include "ValkGameplayPlayerController.generated.h"
 
-class AValkPlayerPawn;
 class UHealthComponent;
 
 UCLASS(Abstract)
@@ -18,9 +17,6 @@ public:
 	virtual void BeginPlay() override;
 
 protected:
-	virtual void CreateModeUI() PURE_VIRTUAL(AValkGameplayPlayerController::CreateModeUI, );
-	virtual void InitializeModeState() PURE_VIRTUAL(AValkGameplayPlayerController::InitializeModeState, );
-	virtual void SetModePawn(AValkPlayerPawn* aPlayerPawn) PURE_VIRTUAL(AValkGameplayPlayerController::SetModePawn, );
 	virtual void HandleLocalPlayerDeath() PURE_VIRTUAL(AValkGameplayPlayerController::HandleLocalPlayerDeath, );
 
 private:
