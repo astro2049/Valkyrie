@@ -19,8 +19,8 @@ public:
 	int32 GetTeamBConfirms() const { return myTeamBConfirms; }
 
 private:
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myTeamAConfirms{0};
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myTeamBConfirms{0};
 };

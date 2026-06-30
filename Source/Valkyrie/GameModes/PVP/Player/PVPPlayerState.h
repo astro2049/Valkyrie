@@ -18,11 +18,7 @@ public:
 	void SetTeamId(int32 aTeamId);
 	int32 GetTeamId() const { return myTeamId; }
 
-protected:
-	UFUNCTION()
-	void BroadcastStateChanged() const;
-
 private:
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myTeamId{ValkTeamId::None};
 };

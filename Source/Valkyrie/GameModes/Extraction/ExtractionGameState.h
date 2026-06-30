@@ -24,11 +24,8 @@ public:
 	float GetDefenseTimeRemaining() const { return myDefenseTimeRemaining; }
 
 private:
-	UFUNCTION()
-	void BroadcastStateChanged() const;
-
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	ECombatSliceState myCombatSliceState{ECombatSliceState::ToStartGenerator};
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myDefenseTimeRemaining{0.f};
 };

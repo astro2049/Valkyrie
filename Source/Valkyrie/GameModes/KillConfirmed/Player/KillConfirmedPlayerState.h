@@ -22,10 +22,10 @@ public:
 	int32 GetConfirms() const { return myConfirms; }
 
 private:
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myKills{0};
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myDeaths{0};
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myConfirms{0};
 };

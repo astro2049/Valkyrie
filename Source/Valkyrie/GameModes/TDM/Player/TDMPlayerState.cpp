@@ -16,13 +16,11 @@ void ATDMPlayerState::AddKill()
 {
 	if (HasAuthority()) {
 		++myKills;
-		BroadcastStateChanged();
 	}
 }
 void ATDMPlayerState::AddDeath()
 {
 	if (HasAuthority()) {
 		++myDeaths;
-		BroadcastStateChanged();
 	}
 }

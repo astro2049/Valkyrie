@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ValkGameplayComponent.h"
+#include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
 class AController;
@@ -17,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDeath);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class VALKYRIE_API UHealthComponent : public UValkGameplayComponent
+class VALKYRIE_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

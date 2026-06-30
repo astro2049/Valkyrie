@@ -19,8 +19,8 @@ public:
 	int32 GetTeamBKills() const { return myTeamBKills; }
 
 private:
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myTeamAKills{0};
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myTeamBKills{0};
 };

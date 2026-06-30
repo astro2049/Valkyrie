@@ -4,42 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "PVPScoreboardViewModel.h"
 #include "UIPVPScoreboard.generated.h"
-
-class UUIPVPScoreboardRow;
-class UTextBlock;
-class UVerticalBox;
 
 UCLASS(Blueprintable)
 class VALKYRIE_API UUIPVPScoreboard : public UUserWidget
 {
 	GENERATED_BODY()
-
-public:
-	void RefreshScoreboardData();
-
-protected:
-	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& aGeometry, float aDeltaSeconds) override;
-
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UPVPScoreboardViewModel> myViewModelClass;
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUIPVPScoreboardRow> myRowWidgetClass;
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UTextBlock> myTeamAScoreText{nullptr};
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UTextBlock> myTeamBScoreText{nullptr};
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UVerticalBox> myTeamARows{nullptr};
-	UPROPERTY(meta=(BindWidgetOptional))
-	TObjectPtr<UVerticalBox> myTeamBRows{nullptr};
-
-private:
-	void RebuildRows();
-	void AddRows(UVerticalBox* aContainer, const TArray<FPVPScoreboardRowData>& aRows) const;
-
-	UPROPERTY()
-	TObjectPtr<UPVPScoreboardViewModel> myViewModel{nullptr};
 };

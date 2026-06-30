@@ -20,8 +20,8 @@ public:
 	int32 GetDeaths() const { return myDeaths; }
 
 private:
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myKills{0};
-	UPROPERTY(ReplicatedUsing=BroadcastStateChanged, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myDeaths{0};
 };

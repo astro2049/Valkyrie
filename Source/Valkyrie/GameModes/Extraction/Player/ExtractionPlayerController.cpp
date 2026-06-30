@@ -6,7 +6,6 @@
 #include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 #include "Valkyrie/GameModes/Extraction/UI/UIExtractionHUD.h"
 #include "Valkyrie/UI/UIValkHUD.h"
-#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void AExtractionPlayerController::BeginPlay()
 {
@@ -34,10 +33,7 @@ void AExtractionPlayerController::Tick(const float aDeltaSeconds)
 {
 	Super::Tick(aDeltaSeconds);
 
-	const UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS();
-	if (IsLocalController()
-		&& messageSubsystem
-		&& messageSubsystem->CheckUIMessage(EUIMessageType::GameStateUpdated)) {
+	if (IsLocalController()) {
 		UpdateEndMenuFromState();
 	}
 }

@@ -3,7 +3,6 @@
 #include "HealthComponent.h"
 
 #include "Net/UnrealNetwork.h"
-#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -40,7 +39,6 @@ void UHealthComponent::ApplyDamage(const float aDamage, AController* const aDama
 			}
 
 			OnHealthChanged.Broadcast(myHealth, myMaxHealth);
-			BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 			if (myIsDead) {
 				myOnHealthDeath.Broadcast(aDamageInstigator);
 				OnDeath.Broadcast();
@@ -59,18 +57,15 @@ void UHealthComponent::ResetHealth()
 	myHealth = myMaxHealth;
 	myIsDead = false;
 	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
-	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 }
 
 void UHealthComponent::OnRep_Health() const
 {
 	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
-	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 }
 
 void UHealthComponent::OnRep_IsDead() const
 {
-	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 	if (myIsDead) {
 		OnDeath.Broadcast();
 	}

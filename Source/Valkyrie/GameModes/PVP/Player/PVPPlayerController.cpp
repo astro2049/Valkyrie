@@ -67,7 +67,6 @@ void APVPPlayerController::HandleLocalPlayerDeath()
 void APVPPlayerController::ShowScoreboard()
 {
 	if (myScoreboardWidget) {
-		myScoreboardWidget->RefreshScoreboardData();
 		myScoreboardWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }

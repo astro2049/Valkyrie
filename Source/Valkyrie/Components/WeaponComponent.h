@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 #include "TimerManager.h"
-#include "ValkGameplayComponent.h"
 #include "WeaponComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class VALKYRIE_API UWeaponComponent : public UValkGameplayComponent
+class VALKYRIE_API UWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -35,9 +35,6 @@ private:
 	void TryStartReload();
 	UFUNCTION(Server, Reliable)
 	void RPC_TryStartReload();
-	UFUNCTION()
-	void OnRep_WeaponState() const;
-
 	void FinishReload();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
@@ -46,13 +43,13 @@ private:
 	float myRPM{600.f};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	int32 myMagazineSize{30};
-	UPROPERTY(ReplicatedUsing=OnRep_WeaponState, EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	int32 myAmmoInMag{30};
-	UPROPERTY(ReplicatedUsing=OnRep_WeaponState, EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	int32 myReserveAmmo{90};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myReloadDuration{2.f};
-	UPROPERTY(ReplicatedUsing=OnRep_WeaponState, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	bool myIsReloading{false};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myTraceDistance{1000.f};

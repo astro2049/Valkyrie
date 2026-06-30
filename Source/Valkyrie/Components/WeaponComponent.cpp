@@ -9,7 +9,6 @@
 #include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 UWeaponComponent::UWeaponComponent()
 {
@@ -37,7 +36,6 @@ void UWeaponComponent::BeginPlay()
 	myReloadDuration = FMath::Max(myReloadDuration, 0.f);
 	myIsReloading = false;
 	myFireInterval = myRPM > 0.f ? 60.f / myRPM : 0.f;
-	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 }
 
 void UWeaponComponent::Fire()
@@ -71,7 +69,6 @@ void UWeaponComponent::TraceFire(const FVector aTraceStart, const FVector aTrace
 	if (now - myLastFiredTime >= myFireInterval) {
 		myLastFiredTime = now;
 		myAmmoInMag = FMath::Max(0, myAmmoInMag - 1);
-		BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 
 		// line trace
 		const FVector start = aTraceStart;
@@ -120,11 +117,6 @@ void UWeaponComponent::RPC_TraceFire_Implementation(const FVector aTraceStart, c
 	TraceFire(aTraceStart, aTraceDirection);
 }
 
-void UWeaponComponent::OnRep_WeaponState() const
-{
-	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
-}
-
 void UWeaponComponent::StartReload()
 {
 	if (const AActor* owner = GetOwner()) {
@@ -146,7 +138,6 @@ void UWeaponComponent::TryStartReload()
 	}
 
 	myIsReloading = true;
-	BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 	if (myReloadDuration > 0.f) {
 		world->GetTimerManager().SetTimer(
 			myReloadTimerHandle,
@@ -172,6 +163,5 @@ void UWeaponComponent::FinishReload()
 		myAmmoInMag += ammoToLoad;
 		myReserveAmmo -= ammoToLoad;
 		myIsReloading = false;
-		BroadcastLocalPlayerUIMessage(EUIMessageType::LocalPawnStateUpdated);
 	}
 }

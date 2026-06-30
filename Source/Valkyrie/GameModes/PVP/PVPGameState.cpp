@@ -2,9 +2,7 @@
 
 #include "PVPGameState.h"
 
-#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
-#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void APVPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -12,18 +10,6 @@ void APVPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 	DOREPLIFETIME(APVPGameState, myMatchEnded);
 	DOREPLIFETIME(APVPGameState, myWinningTeamId);
-}
-
-void APVPGameState::AddPlayerState(APlayerState* const aPlayerState)
-{
-	Super::AddPlayerState(aPlayerState);
-	BroadcastStateChanged();
-}
-
-void APVPGameState::RemovePlayerState(APlayerState* const aPlayerState)
-{
-	Super::RemovePlayerState(aPlayerState);
-	BroadcastStateChanged();
 }
 
 void APVPGameState::SetWinningTeamId(const int32 aTeamId)
@@ -34,12 +20,4 @@ void APVPGameState::SetWinningTeamId(const int32 aTeamId)
 
 	myWinningTeamId = aTeamId;
 	myMatchEnded = true;
-	BroadcastStateChanged();
-}
-
-void APVPGameState::BroadcastStateChanged() const
-{
-	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
-		messageSubsystem->BroadcastUIMessage(EUIMessageType::GameStateUpdated);
-	}
 }

@@ -3,7 +3,6 @@
 #include "ValkGameplayPlayerController.h"
 
 #include "Valkyrie/Components/HealthComponent.h"
-#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void AValkGameplayPlayerController::BeginPlay()
 {
@@ -41,9 +40,6 @@ void AValkGameplayPlayerController::SetControlledPawn(APawn* const aPawn)
 		);
 	}
 
-	if (UUIMessageSubsystem* const messageSubsystem = VALK_UISUBSYS()) {
-		messageSubsystem->BroadcastUIMessage(EUIMessageType::LocalPawnStateUpdated);
-	}
 }
 
 void AValkGameplayPlayerController::HandlePossessedPawnChanged(

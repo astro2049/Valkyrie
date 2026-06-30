@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 #include "InteractableComponent.h"
-#include "ValkGameplayComponent.h"
 #include "InteractionComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class VALKYRIE_API UInteractionComponent : public UValkGameplayComponent
+class VALKYRIE_API UInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
