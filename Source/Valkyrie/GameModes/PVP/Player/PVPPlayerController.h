@@ -7,9 +7,7 @@
 #include "PVPPlayerController.generated.h"
 
 class UInputAction;
-class UUIValkHUD;
-class UUIPVPHUD;
-class UUIPVPScoreboard;
+class UUserWidget;
 
 UCLASS(Abstract)
 class VALKYRIE_API APVPPlayerController : public AValkGameplayPlayerController
@@ -24,20 +22,20 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myScoreboardAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUIValkHUD> myPlayerHUDWidgetClass;
+	TSubclassOf<UUserWidget> myPlayerHUDWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUIPVPHUD> myModeWidgetClass;
+	TSubclassOf<UUserWidget> myModeWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUIPVPScoreboard> myScoreboardWidgetClass;
+	TSubclassOf<UUserWidget> myScoreboardWidgetClass;
 
 private:
 	void ShowScoreboard();
 	void HideScoreboard();
 
 	UPROPERTY()
-	TObjectPtr<UUIValkHUD> myPlayerHUDWidget{nullptr};
+	TObjectPtr<UUserWidget> myPlayerHUDWidget{nullptr};
 	UPROPERTY()
-	TObjectPtr<UUIPVPHUD> myModeWidget{nullptr};
+	TObjectPtr<UUserWidget> myModeWidget{nullptr};
 	UPROPERTY()
-	TObjectPtr<UUIPVPScoreboard> myScoreboardWidget{nullptr};
+	TObjectPtr<UUserWidget> myScoreboardWidget{nullptr};
 };

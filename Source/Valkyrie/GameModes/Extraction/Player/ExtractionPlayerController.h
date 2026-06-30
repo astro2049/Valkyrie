@@ -6,8 +6,6 @@
 #include "Valkyrie/Player/ValkGameplayPlayerController.h"
 #include "ExtractionPlayerController.generated.h"
 
-class UUIExtractionHUD;
-class UUIValkHUD;
 class UUserWidget;
 
 UCLASS(Blueprintable)
@@ -23,9 +21,9 @@ protected:
 	virtual void HandleLocalPlayerDeath() override;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUIValkHUD> myPlayerHUDWidgetClass;
+	TSubclassOf<UUserWidget> myPlayerHUDWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUIExtractionHUD> myModeWidgetClass;
+	TSubclassOf<UUserWidget> myModeWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myDeathMenuWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -40,9 +38,9 @@ private:
 	void ShowVictoryMenu();
 
 	UPROPERTY()
-	TObjectPtr<UUIValkHUD> myPlayerHUDWidget{nullptr};
+	TObjectPtr<UUserWidget> myPlayerHUDWidget{nullptr};
 	UPROPERTY()
-	TObjectPtr<UUIExtractionHUD> myModeWidget{nullptr};
+	TObjectPtr<UUserWidget> myModeWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myDeathMenuWidget{nullptr};
 	UPROPERTY()

@@ -2,11 +2,9 @@
 
 #include "PVPPlayerController.h"
 
+#include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
-#include "Valkyrie/GameModes/PVP/UI/UIPVPHUD.h"
-#include "Valkyrie/GameModes/PVP/UI/UIPVPScoreboard.h"
-#include "Valkyrie/UI/UIValkHUD.h"
 
 void APVPPlayerController::BeginPlay()
 {
@@ -17,19 +15,19 @@ void APVPPlayerController::BeginPlay()
 	}
 
 	if (myPlayerHUDWidgetClass) {
-		myPlayerHUDWidget = CreateWidget<UUIValkHUD>(this, myPlayerHUDWidgetClass);
+		myPlayerHUDWidget = CreateWidget<UUserWidget>(this, myPlayerHUDWidgetClass);
 		if (myPlayerHUDWidget) {
 			myPlayerHUDWidget->AddToViewport();
 		}
 	}
 	if (myModeWidgetClass) {
-		myModeWidget = CreateWidget<UUIPVPHUD>(this, myModeWidgetClass);
+		myModeWidget = CreateWidget<UUserWidget>(this, myModeWidgetClass);
 		if (myModeWidget) {
 			myModeWidget->AddToViewport();
 		}
 	}
 	if (myScoreboardWidgetClass) {
-		myScoreboardWidget = CreateWidget<UUIPVPScoreboard>(this, myScoreboardWidgetClass);
+		myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
 		if (myScoreboardWidget) {
 			myScoreboardWidget->AddToViewport();
 			myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);

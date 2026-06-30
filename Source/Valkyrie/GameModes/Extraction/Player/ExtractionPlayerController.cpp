@@ -4,8 +4,6 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
-#include "Valkyrie/GameModes/Extraction/UI/UIExtractionHUD.h"
-#include "Valkyrie/UI/UIValkHUD.h"
 
 void AExtractionPlayerController::BeginPlay()
 {
@@ -16,13 +14,13 @@ void AExtractionPlayerController::BeginPlay()
 	}
 
 	if (!myPlayerHUDWidget && myPlayerHUDWidgetClass) {
-		myPlayerHUDWidget = CreateWidget<UUIValkHUD>(this, myPlayerHUDWidgetClass);
+		myPlayerHUDWidget = CreateWidget<UUserWidget>(this, myPlayerHUDWidgetClass);
 		if (myPlayerHUDWidget) {
 			myPlayerHUDWidget->AddToViewport();
 		}
 	}
 	if (!myModeWidget && myModeWidgetClass) {
-		myModeWidget = CreateWidget<UUIExtractionHUD>(this, myModeWidgetClass);
+		myModeWidget = CreateWidget<UUserWidget>(this, myModeWidgetClass);
 		if (myModeWidget) {
 			myModeWidget->AddToViewport();
 		}
