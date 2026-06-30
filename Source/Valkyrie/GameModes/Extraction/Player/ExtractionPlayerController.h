@@ -21,9 +21,7 @@ protected:
 	virtual void HandleLocalPlayerDeath() override;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUserWidget> myPlayerHUDWidgetClass;
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUserWidget> myModeWidgetClass;
+	TSubclassOf<UUserWidget> myHUDWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myDeathMenuWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -38,9 +36,7 @@ private:
 	void ShowVictoryMenu();
 
 	UPROPERTY()
-	TObjectPtr<UUserWidget> myPlayerHUDWidget{nullptr};
-	UPROPERTY()
-	TObjectPtr<UUserWidget> myModeWidget{nullptr};
+	TObjectPtr<UUserWidget> myHUDWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myDeathMenuWidget{nullptr};
 	UPROPERTY()

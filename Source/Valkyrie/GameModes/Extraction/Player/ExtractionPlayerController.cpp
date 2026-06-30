@@ -13,16 +13,10 @@ void AExtractionPlayerController::BeginPlay()
 		return;
 	}
 
-	if (!myPlayerHUDWidget && myPlayerHUDWidgetClass) {
-		myPlayerHUDWidget = CreateWidget<UUserWidget>(this, myPlayerHUDWidgetClass);
-		if (myPlayerHUDWidget) {
-			myPlayerHUDWidget->AddToViewport();
-		}
-	}
-	if (!myModeWidget && myModeWidgetClass) {
-		myModeWidget = CreateWidget<UUserWidget>(this, myModeWidgetClass);
-		if (myModeWidget) {
-			myModeWidget->AddToViewport();
+	if (!myHUDWidget && myHUDWidgetClass) {
+		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
+		if (myHUDWidget) {
+			myHUDWidget->AddToViewport();
 		}
 	}
 }

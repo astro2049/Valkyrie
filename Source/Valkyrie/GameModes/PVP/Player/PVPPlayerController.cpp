@@ -14,16 +14,10 @@ void APVPPlayerController::BeginPlay()
 		return;
 	}
 
-	if (myPlayerHUDWidgetClass) {
-		myPlayerHUDWidget = CreateWidget<UUserWidget>(this, myPlayerHUDWidgetClass);
-		if (myPlayerHUDWidget) {
-			myPlayerHUDWidget->AddToViewport();
-		}
-	}
-	if (myModeWidgetClass) {
-		myModeWidget = CreateWidget<UUserWidget>(this, myModeWidgetClass);
-		if (myModeWidget) {
-			myModeWidget->AddToViewport();
+	if (myHUDWidgetClass) {
+		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
+		if (myHUDWidget) {
+			myHUDWidget->AddToViewport();
 		}
 	}
 	if (myScoreboardWidgetClass) {

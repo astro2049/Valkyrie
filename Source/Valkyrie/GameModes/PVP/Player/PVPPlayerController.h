@@ -22,9 +22,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myScoreboardAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUserWidget> myPlayerHUDWidgetClass;
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUserWidget> myModeWidgetClass;
+	TSubclassOf<UUserWidget> myHUDWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myScoreboardWidgetClass;
 
@@ -33,9 +31,7 @@ private:
 	void HideScoreboard();
 
 	UPROPERTY()
-	TObjectPtr<UUserWidget> myPlayerHUDWidget{nullptr};
-	UPROPERTY()
-	TObjectPtr<UUserWidget> myModeWidget{nullptr};
+	TObjectPtr<UUserWidget> myHUDWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myScoreboardWidget{nullptr};
 };
