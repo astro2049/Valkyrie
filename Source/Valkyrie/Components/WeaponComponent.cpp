@@ -107,14 +107,12 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 	}
 }
 
-void UWeaponComponent::StartReload()
+void UWeaponComponent::Reload()
 {
-	if (GetOwner()) {
-		Server_TryStartReload();
-	}
+	Server_Reload();
 }
 
-void UWeaponComponent::Server_TryStartReload_Implementation()
+void UWeaponComponent::Server_Reload_Implementation()
 {
 	const UWorld* const world = GetWorld();
 	const AActor* const owner = GetOwner();
@@ -139,10 +137,13 @@ void UWeaponComponent::Server_TryStartReload_Implementation()
 
 void UWeaponComponent::FinishReload()
 {
-	if (myIsReloading) {
-		const int32 ammoToLoad = FMath::Min(myMagazineSize - myAmmoInMag, myReserveAmmo);
-		myAmmoInMag += ammoToLoad;
-		myReserveAmmo -= ammoToLoad;
-		myIsReloading = false;
+	const AActor* const owner = GetOwner();
+	if (!owner || !owner->HasAuthority() || !myIsReloading) {
+		return;
 	}
+
+	const int32 ammoToLoad = FMath::Min(myMagazineSize - myAmmoInMag, myReserveAmmo);
+	myAmmoInMag += ammoToLoad;
+	myReserveAmmo -= ammoToLoad;
+	myIsReloading = false;
 }

@@ -6,12 +6,15 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "Valkyrie/Components/HealthComponent.h"
+#include "Valkyrie/Components/WeaponComponent.h"
 
 AValkPlayerPawn::AValkPlayerPawn()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	SetReplicateMovement(true);
+	myHealthComponent = CreateDefaultSubobject<UHealthComponent>("HealthComponent");
+	myWeaponComponent = CreateDefaultSubobject<UWeaponComponent>("myWeaponComponent");
 	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
 }
 
@@ -54,6 +57,24 @@ void AValkPlayerPawn::SetupPlayerInputComponent(UInputComponent* const aPlayerIn
 				&AValkPlayerPawn::HandleLook
 			);
 		}
+		// fire
+		if (myFireAction) {
+			enhancedInputComponent->BindAction(
+				myFireAction,
+				ETriggerEvent::Triggered,
+				this,
+				&AValkPlayerPawn::HandleFire
+			);
+		}
+		// reload
+		if (myReloadAction) {
+			enhancedInputComponent->BindAction(
+				myReloadAction,
+				ETriggerEvent::Triggered,
+				this,
+				&AValkPlayerPawn::HandleReload
+			);
+		}
 		// interact
 		if (myInteractAction) {
 			enhancedInputComponent->BindAction(
@@ -81,6 +102,20 @@ void AValkPlayerPawn::HandleLook(const FInputActionValue& anInputValue)
 		AddControllerYawInput(lookInput.X);
 		AddControllerPitchInput(lookInput.Y);
 		myShouldSyncRotationThisTick = true;
+	}
+}
+
+void AValkPlayerPawn::HandleFire()
+{
+	if (myWeaponComponent) {
+		myWeaponComponent->Fire();
+	}
+}
+
+void AValkPlayerPawn::HandleReload()
+{
+	if (myWeaponComponent) {
+		myWeaponComponent->Reload();
 	}
 }
 

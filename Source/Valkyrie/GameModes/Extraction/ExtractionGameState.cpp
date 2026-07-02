@@ -14,10 +14,18 @@ void AExtractionGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 void AExtractionGameState::SetCombatSliceState(ECombatSliceState aCombatSliceState)
 {
+	if (!HasAuthority()) {
+		return;
+	}
+
 	myCombatSliceState = aCombatSliceState;
 }
 
 void AExtractionGameState::SetDefenseTimeRemaining(const float aDefenseTimeRemaining)
 {
+	if (!HasAuthority()) {
+		return;
+	}
+
 	myDefenseTimeRemaining = aDefenseTimeRemaining;
 }

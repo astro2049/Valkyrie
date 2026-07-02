@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/InteractionComponent.h"
+#include "Valkyrie/Components/WeaponComponent.h"
 #include "ValkPlayerPawn.generated.h"
 
 struct FInputActionValue;
@@ -21,18 +23,23 @@ public:
 	virtual void Tick(float aDeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
 
-protected:
+private:
+	void HandleMove(const FInputActionValue& anInputValue);
+	void HandleLook(const FInputActionValue& anInputValue);
+	void HandleFire();
+	void HandleReload();
+	void HandleInteract();
+
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myMoveAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myLookAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> myFireAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> myReloadAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myInteractAction{nullptr};
-
-private:
-	void HandleMove(const FInputActionValue& anInputValue);
-	void HandleLook(const FInputActionValue& anInputValue);
-	void HandleInteract();
 
 	UFUNCTION(Server, Unreliable)
 	void Server_SyncLocation(const FVector& aLocation);
@@ -43,6 +50,11 @@ private:
 
 	bool myShouldSyncLocationThisTick{false};
 	bool myShouldSyncRotationThisTick{false};
+
+	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
+	TObjectPtr<UHealthComponent> myHealthComponent;
+	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
+	TObjectPtr<UWeaponComponent> myWeaponComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInteractionComponent> myInteractionComponent;
 };
