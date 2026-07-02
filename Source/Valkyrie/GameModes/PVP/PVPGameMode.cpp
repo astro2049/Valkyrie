@@ -70,13 +70,7 @@ void APVPGameMode::EndPVPMatch(const int32 aWinningTeamId)
 	}
 
 	gameState->SetWinningTeamId(aWinningTeamId);
-	GetWorldTimerManager().SetTimer(
-		myReturnTimerHandle,
-		this,
-		&APVPGameMode::ReturnPlayersToMainMenu,
-		myPostMatchDelay,
-		false
-	);
+	ScheduleReturnToMainMenu();
 }
 
 int32 APVPGameMode::GetBalancedTeamId() const
@@ -147,9 +141,3 @@ void APVPGameMode::RespawnPlayer(AController* const aController)
 	RestartPlayer(aController);
 }
 
-void APVPGameMode::ReturnPlayersToMainMenu()
-{
-	if (UWorld* const world = GetWorld()) {
-		world->ServerTravel(TEXT("/Game/MainMenu/MainMenu"));
-	}
-}

@@ -3,7 +3,6 @@
 #include "ExtractionPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
-#include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 
 void AExtractionPlayerController::BeginPlay()
 {
@@ -21,15 +20,6 @@ void AExtractionPlayerController::BeginPlay()
 	}
 }
 
-void AExtractionPlayerController::Tick(const float aDeltaSeconds)
-{
-	Super::Tick(aDeltaSeconds);
-
-	if (IsLocalController()) {
-		UpdateEndMenuFromState();
-	}
-}
-
 void AExtractionPlayerController::HandleLocalPlayerDeath()
 {
 	ShowDeadOverlay();
@@ -37,23 +27,6 @@ void AExtractionPlayerController::HandleLocalPlayerDeath()
 	SetIgnoreLookInput(true);
 	if (APawn* const controlledPawn = GetPawn()) {
 		controlledPawn->DisableInput(this);
-	}
-}
-
-void AExtractionPlayerController::UpdateEndMenuFromState()
-{
-	const AExtractionGameState* const gameState = GetWorld()
-		? GetWorld()->GetGameState<AExtractionGameState>()
-		: nullptr;
-	if (!gameState) {
-		return;
-	}
-
-	const ECombatSliceState combatSliceState = gameState->GetCombatSliceState();
-	if (combatSliceState == ECombatSliceState::Completed) {
-		ShowVictoryMenu();
-	} else if (combatSliceState == ECombatSliceState::Failed) {
-		ShowFailureMenu();
 	}
 }
 
@@ -67,26 +40,3 @@ void AExtractionPlayerController::ShowDeadOverlay()
 	}
 }
 
-void AExtractionPlayerController::ShowFailureMenu()
-{
-	if (IsLocalController() && !myDeathMenuWidget && myDeathMenuWidgetClass) {
-		myDeathMenuWidget = CreateWidget<UUserWidget>(this, myDeathMenuWidgetClass);
-		if (myDeathMenuWidget) {
-			myDeathMenuWidget->AddToViewport();
-			SetInputUIOnly(myDeathMenuWidget);
-		}
-	}
-}
-
-void AExtractionPlayerController::ShowVictoryMenu()
-{
-	if (!IsLocalController() || myVictoryMenuWidget || !myVictoryMenuWidgetClass) {
-		return;
-	}
-
-	myVictoryMenuWidget = CreateWidget<UUserWidget>(this, myVictoryMenuWidgetClass);
-	if (myVictoryMenuWidget) {
-		myVictoryMenuWidget->AddToViewport();
-		SetInputUIOnly(myVictoryMenuWidget);
-	}
-}

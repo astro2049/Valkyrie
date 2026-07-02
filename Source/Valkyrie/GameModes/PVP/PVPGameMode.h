@@ -28,13 +28,9 @@ private:
 	void BindPlayerDeath(AController* aController);
 	void HandlePlayerDeath(AController* aKillerController, AController* aVictimController);
 	void RespawnPlayer(AController* aController);
-	void ReturnPlayersToMainMenu();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	int32 myScoreLimit{10};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myRespawnDelay{3.f};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myPostMatchDelay{5.f};
-	FTimerHandle myReturnTimerHandle;
 };

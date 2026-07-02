@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "TimerManager.h"
 #include "ValkGameMode.generated.h"
 
 UCLASS()
@@ -13,4 +14,14 @@ class VALKYRIE_API AValkGameMode : public AGameModeBase
 
 public:
 	AValkGameMode();
+
+protected:
+	void ScheduleReturnToMainMenu();
+
+private:
+	void ReturnPlayersToMainMenu() const;
+
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myPostMatchDelay{5.f};
+	FTimerHandle myReturnTimerHandle;
 };

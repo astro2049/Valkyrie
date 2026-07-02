@@ -33,14 +33,3 @@ void AValkPlayerController::SetInputUIOnly(UWidget* const aWidgetToFocus)
 	SetInputMode(inputMode);
 }
 
-void AValkPlayerController::ReturnAllPlayersToMainMenu()
-{
-	Server_ReturnAllPlayersToMainMenu();
-}
-
-void AValkPlayerController::Server_ReturnAllPlayersToMainMenu_Implementation()
-{
-	if (UWorld* const world = GetWorld()) {
-		world->ServerTravel(TEXT("/Game/MainMenu/MainMenu"));
-	}
-}

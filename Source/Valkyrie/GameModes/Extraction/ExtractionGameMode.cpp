@@ -94,6 +94,7 @@ void AExtractionGameMode::CompleteExtraction()
 	ensure(combatSliceGameState && combatSliceGameState->GetCombatSliceState() == ECombatSliceState::ToExtract);
 	SetCombatSliceState(ECombatSliceState::Completed);
 	SetDefenseTimeRemaining(0.f);
+	ScheduleReturnToMainMenu();
 }
 
 void AExtractionGameMode::HandlePlayerDeath()
@@ -154,6 +155,7 @@ void AExtractionGameMode::FailExtraction()
 		SetCombatSliceState(ECombatSliceState::Failed);
 		SetDefenseTimeRemaining(0.f);
 		GetWorldTimerManager().ClearTimer(myDefenseTimerHandle);
+		ScheduleReturnToMainMenu();
 	}
 }
 
