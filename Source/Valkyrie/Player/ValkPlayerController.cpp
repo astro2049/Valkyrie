@@ -35,19 +35,10 @@ void AValkPlayerController::SetInputUIOnly(UWidget* const aWidgetToFocus)
 
 void AValkPlayerController::ReturnAllPlayersToMainMenu()
 {
-	if (!HasAuthority()) {
-		RPCServer_ReturnAllPlayersToMainMenu();
-	} else {
-		Authority_ReturnAllPlayersToMainMenu();
-	}
+	Server_ReturnAllPlayersToMainMenu();
 }
 
-void AValkPlayerController::RPCServer_ReturnAllPlayersToMainMenu_Implementation()
-{
-	Authority_ReturnAllPlayersToMainMenu();
-}
-
-void AValkPlayerController::Authority_ReturnAllPlayersToMainMenu() const
+void AValkPlayerController::Server_ReturnAllPlayersToMainMenu_Implementation()
 {
 	if (UWorld* const world = GetWorld()) {
 		world->ServerTravel(TEXT("/Game/MainMenu/MainMenu"));

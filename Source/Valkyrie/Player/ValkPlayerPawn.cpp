@@ -21,10 +21,10 @@ void AValkPlayerPawn::Tick(const float aDeltaSeconds)
 
 	if (!HasAuthority() && IsLocallyControlled()) {
 		if (myShouldSyncLocationThisTick) {
-			RPC_SyncLocation(GetActorLocation());
+			Server_SyncLocation(GetActorLocation());
 		}
 		if (myShouldSyncRotationThisTick) {
-			RPC_SyncRotation(GetActorRotation());
+			Server_SyncRotation(GetActorRotation());
 		}
 	}
 	myShouldSyncLocationThisTick = false;
@@ -86,32 +86,25 @@ void AValkPlayerPawn::HandleLook(const FInputActionValue& anInputValue)
 
 void AValkPlayerPawn::HandleInteract()
 {
+	Server_Interact();
+}
+
+void AValkPlayerPawn::Server_SyncLocation_Implementation(const FVector& aLocation)
+{
+	SetActorLocation(aLocation, true);
+}
+
+void AValkPlayerPawn::Server_SyncRotation_Implementation(const FRotator& aRotation)
+{
+	SetActorRotation(aRotation);
+}
+
+void AValkPlayerPawn::Server_Interact_Implementation()
+{
 	const UHealthComponent* const healthComponent = FindComponentByClass<UHealthComponent>();
 	if (!myInteractionComponent || (healthComponent && healthComponent->IsDead())) {
 		return;
 	}
 
-	if (!HasAuthority()) {
-		RPC_Interact();
-	} else {
-		myInteractionComponent->Interact();
-	}
-}
-
-void AValkPlayerPawn::RPC_SyncLocation_Implementation(const FVector& aLocation)
-{
-	SetActorLocation(aLocation, true);
-}
-
-void AValkPlayerPawn::RPC_SyncRotation_Implementation(const FRotator& aRotation)
-{
-	SetActorRotation(aRotation);
-}
-
-void AValkPlayerPawn::RPC_Interact_Implementation()
-{
-	const UHealthComponent* const healthComponent = FindComponentByClass<UHealthComponent>();
-	if (myInteractionComponent && (!healthComponent || !healthComponent->IsDead())) {
-		myInteractionComponent->Interact();
-	}
+	myInteractionComponent->Interact();
 }

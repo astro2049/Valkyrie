@@ -45,18 +45,13 @@ void UWeaponComponent::Fire()
 			if (const APlayerCameraManager* const playerCameraManager = playerController->PlayerCameraManager) {
 				const FVector traceStart = playerCameraManager->GetCameraLocation();
 				const FVector traceDirection = playerCameraManager->GetActorForwardVector();
-
-				if (!ownerPawn->HasAuthority()) {
-					RPC_TraceFire(traceStart, traceDirection);
-				} else {
-					TraceFire(traceStart, traceDirection);
-				}
+				Server_TraceFire(traceStart, traceDirection);
 			}
 		}
 	}
 }
 
-void UWeaponComponent::TraceFire(const FVector aTraceStart, const FVector aTraceDirection)
+void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart, const FVector aTraceDirection)
 {
 	const UWorld* const world = GetWorld();
 	const AActor* const owner = GetOwner();
@@ -112,23 +107,14 @@ void UWeaponComponent::TraceFire(const FVector aTraceStart, const FVector aTrace
 	}
 }
 
-void UWeaponComponent::RPC_TraceFire_Implementation(const FVector aTraceStart, const FVector aTraceDirection)
-{
-	TraceFire(aTraceStart, aTraceDirection);
-}
-
 void UWeaponComponent::StartReload()
 {
-	if (const AActor* owner = GetOwner()) {
-		if (!owner->HasAuthority()) {
-			RPC_TryStartReload();
-		} else {
-			TryStartReload();
-		}
+	if (GetOwner()) {
+		Server_TryStartReload();
 	}
 }
 
-void UWeaponComponent::TryStartReload()
+void UWeaponComponent::Server_TryStartReload_Implementation()
 {
 	const UWorld* const world = GetWorld();
 	const AActor* const owner = GetOwner();
@@ -149,11 +135,6 @@ void UWeaponComponent::TryStartReload()
 	} else {
 		FinishReload();
 	}
-}
-
-void UWeaponComponent::RPC_TryStartReload_Implementation()
-{
-	TryStartReload();
 }
 
 void UWeaponComponent::FinishReload()

@@ -25,8 +25,7 @@ protected:
 
 private:
 	UFUNCTION(Server, Reliable)
-	void RPCServer_ReturnAllPlayersToMainMenu();
-	void Authority_ReturnAllPlayersToMainMenu() const;
+	void Server_ReturnAllPlayersToMainMenu();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputMappingContext> myInputMappingContext{nullptr};

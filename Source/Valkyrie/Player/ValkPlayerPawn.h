@@ -35,11 +35,11 @@ private:
 	void HandleInteract();
 
 	UFUNCTION(Server, Unreliable)
-	void RPC_SyncLocation(const FVector& aLocation);
+	void Server_SyncLocation(const FVector& aLocation);
 	UFUNCTION(Server, Unreliable)
-	void RPC_SyncRotation(const FRotator& aRotation);
+	void Server_SyncRotation(const FRotator& aRotation);
 	UFUNCTION(Server, Reliable)
-	void RPC_Interact();
+	void Server_Interact();
 
 	bool myShouldSyncLocationThisTick{false};
 	bool myShouldSyncRotationThisTick{false};

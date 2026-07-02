@@ -29,12 +29,10 @@ public:
 private:
 	virtual void BeginPlay() override;
 
-	void TraceFire(FVector aTraceStart, FVector aTraceDirection);
 	UFUNCTION(Server, Reliable)
-	void RPC_TraceFire(FVector aTraceStart, FVector aTraceDirection);
-	void TryStartReload();
+	void Server_TraceFire(FVector aTraceStart, FVector aTraceDirection);
 	UFUNCTION(Server, Reliable)
-	void RPC_TryStartReload();
+	void Server_TryStartReload();
 	void FinishReload();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
