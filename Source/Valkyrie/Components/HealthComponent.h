@@ -25,9 +25,7 @@ public:
 	UHealthComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ApplyDamage(float aDamage, AController* aDamageInstigator = nullptr);
-	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ResetHealth();
 	float GetHealth() const { return myHealth; }
 	float GetMaxHealth() const { return myMaxHealth; }
