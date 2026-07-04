@@ -1,54 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UIDataPVPLibrary.h"
+#include "UINode_GetPVPScoreboardData.h"
 
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Valkyrie/GameModes/PVP/KillConfirmed/KillConfirmedGameState.h"
-#include "Valkyrie/Player/States/PVP/KillConfirmed/KillConfirmedPlayerState.h"
 #include "Valkyrie/GameModes/PVP/PVPGameState.h"
-#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
 #include "Valkyrie/GameModes/PVP/PVPTypes.h"
 #include "Valkyrie/GameModes/PVP/TDM/TDMGameState.h"
+#include "Valkyrie/Player/States/PVP/KillConfirmed/KillConfirmedPlayerState.h"
+#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
 #include "Valkyrie/Player/States/PVP/TDM/TDMPlayerState.h"
 
-FValkPVPData UUIDataPVPLibrary::GetTDMData(APlayerController* const aPlayerController)
-{
-	FValkPVPData data;
-	data.myWinningTeamId = ValkTeamId::None;
-	const UWorld* const world = aPlayerController ? aPlayerController->GetWorld() : nullptr;
-	if (const ATDMGameState* const gameState = world ? world->GetGameState<ATDMGameState>() : nullptr) {
-		data.myTeamAScore = gameState->GetTeamAKills();
-		data.myTeamBScore = gameState->GetTeamBKills();
-		data.myMatchEnded = gameState->HasMatchEnded();
-		data.myWinningTeamId = gameState->GetWinningTeamId();
-	}
-	return data;
-}
-
-FValkPVPData UUIDataPVPLibrary::GetKillConfirmedData(APlayerController* const aPlayerController)
-{
-	FValkPVPData data;
-	data.myWinningTeamId = ValkTeamId::None;
-	const UWorld* const world = aPlayerController ? aPlayerController->GetWorld() : nullptr;
-	if (const AKillConfirmedGameState* const gameState = world ? world->GetGameState<AKillConfirmedGameState>() : nullptr) {
-		data.myTeamAScore = gameState->GetTeamAConfirms();
-		data.myTeamBScore = gameState->GetTeamBConfirms();
-		data.myMatchEnded = gameState->HasMatchEnded();
-		data.myWinningTeamId = gameState->GetWinningTeamId();
-	}
-	return data;
-}
-
-bool UUIDataPVPLibrary::EqualEqual_ValkPVPData(
-	const FValkPVPData& aLeft,
-	const FValkPVPData& aRight
-)
-{
-	return aLeft == aRight;
-}
-
-void UUIDataPVPLibrary::GetPVPScoreboardData(
+void UUINode_GetPVPScoreboardData::GetPVPScoreboardData(
 	APlayerController* const aPlayerController,
 	int32& aTeamAScore,
 	int32& aTeamBScore,

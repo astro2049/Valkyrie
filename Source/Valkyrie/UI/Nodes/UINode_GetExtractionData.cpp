@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UIDataExtractionLibrary.h"
+#include "UINode_GetExtractionData.h"
 
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Valkyrie/GameModes/Extraction/ExtractionGameState.h"
 
-FValkExtractionData UUIDataExtractionLibrary::GetExtractionData(APlayerController* const aPlayerController)
+FValkExtractionData UUINode_GetExtractionData::GetExtractionData(APlayerController* const aPlayerController)
 {
 	FValkExtractionData data;
 	const UWorld* const world = aPlayerController ? aPlayerController->GetWorld() : nullptr;
@@ -15,12 +15,4 @@ FValkExtractionData UUIDataExtractionLibrary::GetExtractionData(APlayerControlle
 		data.myDefenseTimeRemaining = gameState->GetDefenseTimeRemaining();
 	}
 	return data;
-}
-
-bool UUIDataExtractionLibrary::EqualEqual_ValkExtractionData(
-	const FValkExtractionData& aLeft,
-	const FValkExtractionData& aRight
-)
-{
-	return aLeft == aRight;
 }

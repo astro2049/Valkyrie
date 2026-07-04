@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UIDataHUDLibrary.h"
+#include "UINode_GetHUDData.h"
 
 #include "GameFramework/PlayerController.h"
+#include "Valkyrie/Actors/Player/ValkPlayerPawn.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
-#include "Valkyrie/Actors/Player/ValkPlayerPawn.h"
 
-FValkHUDData UUIDataHUDLibrary::GetHUDData(APlayerController* const aPlayerController)
+FValkHUDData UUINode_GetHUDData::GetHUDData(APlayerController* const aPlayerController)
 {
 	FValkHUDData data;
 	const AValkPlayerPawn* const playerPawn = aPlayerController
@@ -31,12 +31,4 @@ FValkHUDData UUIDataHUDLibrary::GetHUDData(APlayerController* const aPlayerContr
 		data.myHasInteractable = interactionComponent->HasInteractable();
 	}
 	return data;
-}
-
-bool UUIDataHUDLibrary::EqualEqual_ValkHUDData(
-	const FValkHUDData& aLeft,
-	const FValkHUDData& aRight
-)
-{
-	return aLeft == aRight;
 }
