@@ -5,7 +5,7 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Valkyrie/GameModes/PVP/KillConfirmed/KillConfirmedGameState.h"
-#include "Valkyrie/GameModes/PVP/PVPTypes.h"
+#include "Valkyrie/Common/ValkTypes.h"
 
 FValkKillConfirmedData UUINode_GetKillConfirmedData::GetKillConfirmedData(APlayerController* const aPlayerController)
 {

@@ -8,7 +8,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/GameModes/PVP/PVPGameState.h"
-#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
+#include "Valkyrie/Player/States/ValkPlayerState.h"
 
 AKillConfirmedTag::AKillConfirmedTag()
 {
@@ -48,8 +48,8 @@ void AKillConfirmedTag::HandlePlayerEntered(AActor* const anOtherActor)
 	const UHealthComponent* const healthComponent = playerPawn
 		? playerPawn->FindComponentByClass<UHealthComponent>()
 		: nullptr;
-	APVPPlayerState* const playerState = playerPawn && playerPawn->GetController()
-		? playerPawn->GetController()->GetPlayerState<APVPPlayerState>()
+	AValkPlayerState* const playerState = playerPawn && playerPawn->GetController()
+		? playerPawn->GetController()->GetPlayerState<AValkPlayerState>()
 		: nullptr;
 	if (!playerState || (healthComponent && healthComponent->IsDead())) {
 		return;

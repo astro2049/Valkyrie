@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Valkyrie/GameModes/ValkGameState.h"
-#include "PVPTypes.h"
+#include "Valkyrie/Common/ValkTypes.h"
 #include "PVPGameState.generated.h"
 
 UCLASS()

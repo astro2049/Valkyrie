@@ -6,10 +6,10 @@
 #include "GameFramework/PlayerController.h"
 #include "Valkyrie/GameModes/PVP/KillConfirmed/KillConfirmedGameState.h"
 #include "Valkyrie/GameModes/PVP/PVPGameState.h"
-#include "Valkyrie/GameModes/PVP/PVPTypes.h"
+#include "Valkyrie/Common/ValkTypes.h"
 #include "Valkyrie/GameModes/PVP/TDM/TDMGameState.h"
 #include "Valkyrie/Player/States/PVP/KillConfirmed/KillConfirmedPlayerState.h"
-#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
+#include "Valkyrie/Player/States/ValkPlayerState.h"
 #include "Valkyrie/Player/States/PVP/TDM/TDMPlayerState.h"
 
 void UUINode_GetPVPScoreboardData::GetPVPScoreboardData(
@@ -43,7 +43,7 @@ void UUINode_GetPVPScoreboardData::GetPVPScoreboardData(
 	}
 
 	for (const APlayerState* const playerState : gameState->PlayerArray) {
-		const APVPPlayerState* const pvpPlayerState = Cast<APVPPlayerState>(playerState);
+		const AValkPlayerState* const pvpPlayerState = Cast<AValkPlayerState>(playerState);
 		if (!pvpPlayerState) {
 			continue;
 		}

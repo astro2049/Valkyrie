@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
+#include "Valkyrie/Player/States/ValkPlayerState.h"
 #include "KillConfirmedPlayerState.generated.h"
 
 UCLASS()
-class VALKYRIE_API AKillConfirmedPlayerState : public APVPPlayerState
+class VALKYRIE_API AKillConfirmedPlayerState : public AValkPlayerState
 {
 	GENERATED_BODY()
 

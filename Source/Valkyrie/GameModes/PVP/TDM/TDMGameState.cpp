@@ -3,7 +3,7 @@
 #include "TDMGameState.h"
 
 #include "Net/UnrealNetwork.h"
-#include "Valkyrie/GameModes/PVP/PVPTypes.h"
+#include "Valkyrie/Common/ValkTypes.h"
 
 void ATDMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

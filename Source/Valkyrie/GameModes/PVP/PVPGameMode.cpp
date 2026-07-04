@@ -4,8 +4,8 @@
 
 #include "PVPGameState.h"
 #include "Valkyrie/Player/Controllers/PVP/PVPPlayerController.h"
-#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
-#include "PVPTypes.h"
+#include "Valkyrie/Player/States/ValkPlayerState.h"
+#include "Valkyrie/Common/ValkTypes.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
@@ -16,12 +16,12 @@ APVPGameMode::APVPGameMode()
 {
 	GameStateClass = APVPGameState::StaticClass();
 	PlayerControllerClass = APVPPlayerController::StaticClass();
-	PlayerStateClass = APVPPlayerState::StaticClass();
+	PlayerStateClass = AValkPlayerState::StaticClass();
 }
 
 void APVPGameMode::PostLogin(APlayerController* const aNewPlayer)
 {
-	if (APVPPlayerState* const playerState = aNewPlayer ? aNewPlayer->GetPlayerState<APVPPlayerState>() : nullptr) {
+	if (AValkPlayerState* const playerState = aNewPlayer ? aNewPlayer->GetPlayerState<AValkPlayerState>() : nullptr) {
 		playerState->SetTeamId(GetBalancedTeamId());
 	}
 
@@ -30,7 +30,7 @@ void APVPGameMode::PostLogin(APlayerController* const aNewPlayer)
 
 AActor* APVPGameMode::ChoosePlayerStart_Implementation(AController* const aPlayer)
 {
-	const APVPPlayerState* const playerState = aPlayer ? aPlayer->GetPlayerState<APVPPlayerState>() : nullptr;
+	const AValkPlayerState* const playerState = aPlayer ? aPlayer->GetPlayerState<AValkPlayerState>() : nullptr;
 	if (!playerState || playerState->GetTeamId() == ValkTeamId::None) {
 		return Super::ChoosePlayerStart_Implementation(aPlayer);
 	}
@@ -79,7 +79,7 @@ int32 APVPGameMode::GetBalancedTeamId() const
 	int32 teamBPlayerCount = 0;
 	if (const APVPGameState* const gameState = GetGameState<APVPGameState>()) {
 		for (const APlayerState* const playerState : gameState->PlayerArray) {
-			const APVPPlayerState* const pvpPlayerState = Cast<APVPPlayerState>(playerState);
+			const AValkPlayerState* const pvpPlayerState = Cast<AValkPlayerState>(playerState);
 			if (pvpPlayerState && pvpPlayerState->GetTeamId() == ValkTeamId::TeamA) {
 				++teamAPlayerCount;
 			} else if (pvpPlayerState && pvpPlayerState->GetTeamId() == ValkTeamId::TeamB) {

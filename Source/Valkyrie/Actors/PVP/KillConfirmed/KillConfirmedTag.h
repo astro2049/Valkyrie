@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Valkyrie/GameModes/PVP/PVPTypes.h"
+#include "Valkyrie/Common/ValkTypes.h"
 #include "KillConfirmedTag.generated.h"
 
 UCLASS()
