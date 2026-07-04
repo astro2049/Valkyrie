@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/Player/ValkGameplayPlayerController.h"
+#include "Valkyrie/Player/Controllers/ValkGameplayPlayerController.h"
 #include "PVPPlayerController.generated.h"
 
 class UInputAction;

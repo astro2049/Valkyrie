@@ -3,9 +3,9 @@
 #include "KillConfirmedGameMode.h"
 
 #include "KillConfirmedGameState.h"
-#include "Valkyrie/GameModes/KillConfirmed/Player/KillConfirmedPlayerController.h"
-#include "Valkyrie/GameModes/KillConfirmed/Player/KillConfirmedPlayerState.h"
-#include "Valkyrie/GameModes/KillConfirmed/Actors/KillConfirmedTag.h"
+#include "Valkyrie/Player/Controllers/PVP/KillConfirmed/KillConfirmedPlayerController.h"
+#include "Valkyrie/Player/States/PVP/KillConfirmed/KillConfirmedPlayerState.h"
+#include "Valkyrie/Actors/PVP/KillConfirmed/KillConfirmedTag.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
 

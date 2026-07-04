@@ -4,13 +4,13 @@
 
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
-#include "Valkyrie/GameModes/KillConfirmed/KillConfirmedGameState.h"
-#include "Valkyrie/GameModes/KillConfirmed/Player/KillConfirmedPlayerState.h"
+#include "Valkyrie/GameModes/PVP/KillConfirmed/KillConfirmedGameState.h"
+#include "Valkyrie/Player/States/PVP/KillConfirmed/KillConfirmedPlayerState.h"
 #include "Valkyrie/GameModes/PVP/PVPGameState.h"
-#include "Valkyrie/GameModes/PVP/Player/PVPPlayerState.h"
+#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
 #include "Valkyrie/GameModes/PVP/PVPTypes.h"
-#include "Valkyrie/GameModes/TDM/TDMGameState.h"
-#include "Valkyrie/GameModes/TDM/Player/TDMPlayerState.h"
+#include "Valkyrie/GameModes/PVP/TDM/TDMGameState.h"
+#include "Valkyrie/Player/States/PVP/TDM/TDMPlayerState.h"
 
 FValkPVPData UUIDataPVPLibrary::GetTDMData(APlayerController* const aPlayerController)
 {

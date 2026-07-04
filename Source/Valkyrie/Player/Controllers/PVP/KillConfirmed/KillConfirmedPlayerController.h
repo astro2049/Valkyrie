@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/GameModes/PVP/Player/PVPPlayerController.h"
+#include "Valkyrie/Player/Controllers/PVP/PVPPlayerController.h"
 #include "KillConfirmedPlayerController.generated.h"
 
 UCLASS()

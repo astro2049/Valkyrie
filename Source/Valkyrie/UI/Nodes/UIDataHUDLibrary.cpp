@@ -6,7 +6,7 @@
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
-#include "Valkyrie/Player/ValkPlayerPawn.h"
+#include "Valkyrie/Actors/Player/ValkPlayerPawn.h"
 
 FValkHUDData UUIDataHUDLibrary::GetHUDData(APlayerController* const aPlayerController)
 {

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/Player/ValkPlayerState.h"
+#include "Valkyrie/Player/States/ValkPlayerState.h"
 #include "Valkyrie/GameModes/PVP/PVPTypes.h"
 #include "PVPPlayerState.generated.h"
 

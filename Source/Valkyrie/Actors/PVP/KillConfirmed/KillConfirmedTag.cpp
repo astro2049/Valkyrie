@@ -2,13 +2,13 @@
 
 #include "KillConfirmedTag.h"
 
-#include "Valkyrie/GameModes/KillConfirmed/KillConfirmedGameMode.h"
+#include "Valkyrie/GameModes/PVP//KillConfirmed/KillConfirmedGameMode.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/GameModes/PVP/PVPGameState.h"
-#include "Valkyrie/GameModes/PVP/Player/PVPPlayerState.h"
+#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
 
 AKillConfirmedTag::AKillConfirmedTag()
 {

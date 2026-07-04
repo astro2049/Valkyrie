@@ -3,8 +3,8 @@
 #include "TDMGameMode.h"
 
 #include "TDMGameState.h"
-#include "Valkyrie/GameModes/TDM/Player/TDMPlayerController.h"
-#include "Valkyrie/GameModes/TDM/Player/TDMPlayerState.h"
+#include "Valkyrie/Player/Controllers/PVP/TDM/TDMPlayerController.h"
+#include "Valkyrie/Player/States/PVP/TDM/TDMPlayerState.h"
 #include "GameFramework/Controller.h"
 
 ATDMGameMode::ATDMGameMode()

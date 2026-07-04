@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/GameModes/PVP/Player/PVPPlayerState.h"
-#include "KillConfirmedPlayerState.generated.h"
+#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
+#include "TDMPlayerState.generated.h"
 
 UCLASS()
-class VALKYRIE_API AKillConfirmedPlayerState : public APVPPlayerState
+class VALKYRIE_API ATDMPlayerState : public APVPPlayerState
 {
 	GENERATED_BODY()
 
@@ -16,16 +16,12 @@ public:
 
 	void AddKill();
 	void AddDeath();
-	void AddConfirm();
 	int32 GetKills() const { return myKills; }
 	int32 GetDeaths() const { return myDeaths; }
-	int32 GetConfirms() const { return myConfirms; }
 
 private:
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myKills{0};
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	int32 myDeaths{0};
-	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
-	int32 myConfirms{0};
 };

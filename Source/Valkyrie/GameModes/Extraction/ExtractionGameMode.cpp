@@ -2,7 +2,7 @@
 
 #include "ExtractionGameMode.h"
 
-#include "Actors/ExtractionZone.h"
+#include "Valkyrie/Actors/Extraction/ExtractionZone.h"
 #include "ExtractionGameState.h"
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerController.h"

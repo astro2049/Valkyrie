@@ -3,8 +3,8 @@
 #include "PVPGameMode.h"
 
 #include "PVPGameState.h"
-#include "Valkyrie/GameModes/PVP/Player/PVPPlayerController.h"
-#include "Valkyrie/GameModes/PVP/Player/PVPPlayerState.h"
+#include "Valkyrie/Player/Controllers/PVP/PVPPlayerController.h"
+#include "Valkyrie/Player/States/PVP/PVPPlayerState.h"
 #include "PVPTypes.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerStart.h"
