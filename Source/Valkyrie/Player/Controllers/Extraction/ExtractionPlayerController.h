@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/Player/Controllers/ValkGameplayPlayerController.h"
+#include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "ExtractionPlayerController.generated.h"
 
 class UUserWidget;
 
 UCLASS(Blueprintable)
-class VALKYRIE_API AExtractionPlayerController : public AValkGameplayPlayerController
+class VALKYRIE_API AExtractionPlayerController : public AValkPlayerController
 {
 	GENERATED_BODY()
 
@@ -17,14 +17,14 @@ public:
 	virtual void BeginPlay() override;
 
 protected:
-	virtual void HandleLocalPlayerDeath() override;
-
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myHUDWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myDeadOverlayWidgetClass;
 
 private:
+	UFUNCTION()
+	void HandlePlayerDied();
 	void ShowDeadOverlay();
 
 	UPROPERTY()

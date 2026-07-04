@@ -3,6 +3,7 @@
 #include "ExtractionPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Valkyrie/Components/HealthComponent.h"
 
 void AExtractionPlayerController::BeginPlay()
 {
@@ -12,7 +13,16 @@ void AExtractionPlayerController::BeginPlay()
 		return;
 	}
 
-	if (!myHUDWidget && myHUDWidgetClass) {
+	if (APawn* const pawn = GetPawn()) {
+		if (UHealthComponent* const healthComponent = pawn->FindComponentByClass<UHealthComponent>()) {
+			healthComponent->OnDeath.AddUniqueDynamic(
+				this,
+				&AExtractionPlayerController::HandlePlayerDied
+			);
+		}
+	}
+
+	if (myHUDWidgetClass) {
 		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
 		if (myHUDWidget) {
 			myHUDWidget->AddToViewport();
@@ -20,8 +30,12 @@ void AExtractionPlayerController::BeginPlay()
 	}
 }
 
-void AExtractionPlayerController::HandleLocalPlayerDeath()
+void AExtractionPlayerController::HandlePlayerDied()
 {
+	if (!IsLocalController()) {
+		return;
+	}
+
 	ShowDeadOverlay();
 	SetIgnoreMoveInput(true);
 	SetIgnoreLookInput(true);
@@ -32,11 +46,13 @@ void AExtractionPlayerController::HandleLocalPlayerDeath()
 
 void AExtractionPlayerController::ShowDeadOverlay()
 {
-	if (IsLocalController() && !myDeadOverlayWidget && myDeadOverlayWidgetClass) {
-		myDeadOverlayWidget = CreateWidget<UUserWidget>(this, myDeadOverlayWidgetClass);
-		if (myDeadOverlayWidget) {
-			myDeadOverlayWidget->AddToViewport();
-		}
+	if (!IsLocalController() || myDeadOverlayWidget || !myDeadOverlayWidgetClass) {
+		return;
+	}
+
+	myDeadOverlayWidget = CreateWidget<UUserWidget>(this, myDeadOverlayWidgetClass);
+	if (myDeadOverlayWidget) {
+		myDeadOverlayWidget->AddToViewport();
 	}
 }
 

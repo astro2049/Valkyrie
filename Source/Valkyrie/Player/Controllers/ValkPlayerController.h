@@ -15,6 +15,8 @@ class VALKYRIE_API AValkPlayerController : public APlayerController
 	GENERATED_BODY()
 
 protected:
+	virtual void BeginPlay() override;
+
 	void AddInputMappingContext() const;
 	void SetInputGameOnly();
 	void SetInputUIOnly(UWidget* aWidgetToFocus);

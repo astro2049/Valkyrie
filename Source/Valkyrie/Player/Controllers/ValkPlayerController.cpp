@@ -5,19 +5,33 @@
 #include "Components/Widget.h"
 #include "EnhancedInputSubsystems.h"
 
+void AValkPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetInputGameOnly();
+	AddInputMappingContext();
+}
+
 void AValkPlayerController::AddInputMappingContext() const
 {
-	if (IsLocalController() && myInputMappingContext) {
-		if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
-			if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
-				inputSubsystem->AddMappingContext(myInputMappingContext, 0);
-			}
+	if (!IsLocalController() || !myInputMappingContext) {
+		return;
+	}
+
+	if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
+		if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
+			inputSubsystem->AddMappingContext(myInputMappingContext, 0);
 		}
 	}
 }
 
 void AValkPlayerController::SetInputGameOnly()
 {
+	if (!IsLocalController()) {
+		return;
+	}
+
 	bShowMouseCursor = false;
 	const FInputModeGameOnly inputMode;
 	SetInputMode(inputMode);
@@ -25,6 +39,10 @@ void AValkPlayerController::SetInputGameOnly()
 
 void AValkPlayerController::SetInputUIOnly(UWidget* const aWidgetToFocus)
 {
+	if (!IsLocalController()) {
+		return;
+	}
+
 	bShowMouseCursor = true;
 	FInputModeUIOnly inputMode;
 	if (aWidgetToFocus) {
