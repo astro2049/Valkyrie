@@ -3,7 +3,6 @@
 #include "KillConfirmedGameMode.h"
 
 #include "KillConfirmedGameState.h"
-#include "Valkyrie/Player/Controllers/PVP/KillConfirmed/KillConfirmedPlayerController.h"
 #include "Valkyrie/Player/States/PVP/KillConfirmed/KillConfirmedPlayerState.h"
 #include "Valkyrie/Actors/PVP/KillConfirmed/KillConfirmedTag.h"
 #include "GameFramework/Controller.h"
@@ -12,7 +11,6 @@
 AKillConfirmedGameMode::AKillConfirmedGameMode()
 {
 	GameStateClass = AKillConfirmedGameState::StaticClass();
-	PlayerControllerClass = AKillConfirmedPlayerController::StaticClass();
 	PlayerStateClass = AKillConfirmedPlayerState::StaticClass();
 }
 

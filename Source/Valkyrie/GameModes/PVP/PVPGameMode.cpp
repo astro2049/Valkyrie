@@ -3,7 +3,7 @@
 #include "PVPGameMode.h"
 
 #include "Valkyrie/GameModes/ValkGameState.h"
-#include "Valkyrie/Player/Controllers/PVP/PVPPlayerController.h"
+#include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/States/ValkPlayerState.h"
 #include "Valkyrie/Common/ValkTypes.h"
 #include "GameFramework/PlayerController.h"
@@ -11,7 +11,7 @@
 
 APVPGameMode::APVPGameMode()
 {
-	PlayerControllerClass = APVPPlayerController::StaticClass();
+	PlayerControllerClass = AValkPlayerController::StaticClass();
 }
 
 void APVPGameMode::PostLogin(APlayerController* const aNewPlayer)

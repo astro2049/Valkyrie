@@ -3,14 +3,12 @@
 #include "TDMGameMode.h"
 
 #include "TDMGameState.h"
-#include "Valkyrie/Player/Controllers/PVP/TDM/TDMPlayerController.h"
 #include "Valkyrie/Player/States/PVP/TDM/TDMPlayerState.h"
 #include "GameFramework/Controller.h"
 
 ATDMGameMode::ATDMGameMode()
 {
 	GameStateClass = ATDMGameState::StaticClass();
-	PlayerControllerClass = ATDMPlayerController::StaticClass();
 	PlayerStateClass = ATDMPlayerState::StaticClass();
 }
 

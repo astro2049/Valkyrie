@@ -4,47 +4,22 @@
 
 #include "Blueprint/UserWidget.h"
 
-void AExtractionPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (!IsLocalController()) {
-		return;
-	}
-
-	if (myHUDWidgetClass) {
-		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
-		if (myHUDWidget) {
-			myHUDWidget->AddToViewport();
-		}
-	}
-}
-
 void AExtractionPlayerController::OnPlayerDeath()
 {
 	if (!IsLocalController()) {
 		return;
 	}
 
-	ShowDeadOverlay();
-	SetIgnoreMoveInput(true);
-	SetIgnoreLookInput(true);
-	if (APawn* const controlledPawn = GetPawn()) {
-		controlledPawn->DisableInput(this);
-	}
-}
-
-void AExtractionPlayerController::ShowDeadOverlay()
-{
-	if (!IsLocalController()) {
-		return;
-	}
-
+	Super::OnPlayerDeath();
 	if (!myDeadOverlayWidget && myDeadOverlayWidgetClass) {
 		myDeadOverlayWidget = CreateWidget<UUserWidget>(this, myDeadOverlayWidgetClass);
 		if (myDeadOverlayWidget) {
 			myDeadOverlayWidget->AddToViewport();
 		}
+	}
+	SetIgnoreLookInput(true);
+	if (APawn* const controlledPawn = GetPawn()) {
+		controlledPawn->DisableInput(this);
 	}
 }
 

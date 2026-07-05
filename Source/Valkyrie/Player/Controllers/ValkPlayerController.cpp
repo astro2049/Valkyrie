@@ -2,8 +2,10 @@
 
 #include "ValkPlayerController.h"
 
-#include "Components/Widget.h"
+#include "Blueprint/UserWidget.h"
+#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InputAction.h"
 
 void AValkPlayerController::BeginPlay()
 {
@@ -11,6 +13,54 @@ void AValkPlayerController::BeginPlay()
 
 	SetInputGameOnly();
 	AddInputMappingContext();
+	OnPossessedPawnChanged.AddUniqueDynamic(
+		this,
+		&AValkPlayerController::OnPawnChanged
+	);
+
+	if (!IsLocalController()) {
+		return;
+	}
+
+	if (myHUDWidgetClass) {
+		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
+		if (myHUDWidget) {
+			myHUDWidget->AddToViewport();
+		}
+	}
+	if (myScoreboardWidgetClass) {
+		myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
+		if (myScoreboardWidget) {
+			myScoreboardWidget->AddToViewport();
+			myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void AValkPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (!IsLocalController()) {
+		return;
+	}
+
+	if (UEnhancedInputComponent* const enhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)) {
+		if (myInputActionOpenScoreboard) {
+			enhancedInputComponent->BindAction(
+				myInputActionOpenScoreboard,
+				ETriggerEvent::Started,
+				this,
+				&AValkPlayerController::ShowScoreboard
+			);
+			enhancedInputComponent->BindAction(
+				myInputActionOpenScoreboard,
+				ETriggerEvent::Completed,
+				this,
+				&AValkPlayerController::HideScoreboard
+			);
+		}
+	}
 }
 
 void AValkPlayerController::Client_OnPlayerDeath_Implementation()
@@ -20,6 +70,43 @@ void AValkPlayerController::Client_OnPlayerDeath_Implementation()
 
 void AValkPlayerController::OnPlayerDeath()
 {
+	if (!IsLocalController()) {
+		return;
+	}
+
+	SetIgnoreMoveInput(true);
+}
+
+void AValkPlayerController::OnPawnChanged(APawn* const, APawn* const)
+{
+	if (!IsLocalController()) {
+		return;
+	}
+
+	SetIgnoreMoveInput(false);
+	SetIgnoreLookInput(false);
+}
+
+void AValkPlayerController::ShowScoreboard()
+{
+	if (!IsLocalController()) {
+		return;
+	}
+
+	if (myScoreboardWidget) {
+		myScoreboardWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void AValkPlayerController::HideScoreboard()
+{
+	if (!IsLocalController()) {
+		return;
+	}
+
+	if (myScoreboardWidget) {
+		myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void AValkPlayerController::AddInputMappingContext() const
@@ -47,18 +134,3 @@ void AValkPlayerController::SetInputGameOnly()
 	const FInputModeGameOnly inputMode;
 	SetInputMode(inputMode);
 }
-
-void AValkPlayerController::SetInputUIOnly(UWidget* const aWidgetToFocus)
-{
-	if (!IsLocalController()) {
-		return;
-	}
-
-	bShowMouseCursor = true;
-	FInputModeUIOnly inputMode;
-	if (aWidgetToFocus) {
-		inputMode.SetWidgetToFocus(aWidgetToFocus->TakeWidget());
-	}
-	SetInputMode(inputMode);
-}
-

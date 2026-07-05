@@ -13,22 +13,13 @@ class VALKYRIE_API AExtractionPlayerController : public AValkPlayerController
 {
 	GENERATED_BODY()
 
-public:
-	virtual void BeginPlay() override;
-
 protected:
 	virtual void OnPlayerDeath() override;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUserWidget> myHUDWidgetClass;
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myDeadOverlayWidgetClass;
 
 private:
-	void ShowDeadOverlay();
-
-	UPROPERTY()
-	TObjectPtr<UUserWidget> myHUDWidget{nullptr};
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myDeadOverlayWidget{nullptr};
 };
