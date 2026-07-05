@@ -17,14 +17,14 @@ public:
 	virtual void BeginPlay() override;
 
 protected:
+	virtual void OnPlayerDeath() override;
+
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myHUDWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myDeadOverlayWidgetClass;
 
 private:
-	UFUNCTION()
-	void HandlePlayerDied();
 	void ShowDeadOverlay();
 
 	UPROPERTY()

@@ -13,6 +13,15 @@ void AValkPlayerController::BeginPlay()
 	AddInputMappingContext();
 }
 
+void AValkPlayerController::Client_OnPlayerDeath_Implementation()
+{
+	OnPlayerDeath();
+}
+
+void AValkPlayerController::OnPlayerDeath()
+{
+}
+
 void AValkPlayerController::AddInputMappingContext() const
 {
 	if (!IsLocalController() || !myInputMappingContext) {

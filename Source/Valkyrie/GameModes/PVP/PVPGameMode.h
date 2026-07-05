@@ -16,22 +16,19 @@ public:
 	APVPGameMode();
 
 	virtual void PostLogin(APlayerController* aNewPlayer) override;
-	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
-	virtual void RestartPlayer(AController* aNewPlayer) override;
 
 protected:
+	virtual void OnPlayerDeath(AController* aKillerController, AController* aVictimController) override;
 	virtual void HandleModePlayerKilled(AController* aVictimController, AController* aKillerController) PURE_VIRTUAL(APVPGameMode::HandleModePlayerKilled, );
 	void EndPVPMatch(EValkTeamId aWinningTeamId);
 	int32 GetScoreLimit() const { return myScoreLimit; }
 
 private:
 	EValkTeamId GetBalancedTeamId() const;
-	void BindPlayerDeath(AController* aController);
-	void HandlePlayerDeath(AController* aKillerController, AController* aVictimController);
 	void RespawnPlayer(AController* aController);
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	int32 myScoreLimit{10};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myRespawnDelay{3.f};
+	float myRespawnDelay{1.5f};
 };

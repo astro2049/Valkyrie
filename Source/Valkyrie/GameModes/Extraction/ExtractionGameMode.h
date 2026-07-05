@@ -17,9 +17,6 @@ class VALKYRIE_API AExtractionGameMode : public AValkGameMode
 public:
 	AExtractionGameMode();
 
-	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
-	virtual void RestartPlayer(AController* aNewPlayer) override;
-
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void StartGenerator();
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
@@ -32,13 +29,10 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnPlayerDeath(AController* aKillerController, AController* aVictimController) override;
 
 private:
-	UFUNCTION()
-	void HandlePlayerDeath();
-
 	void TickDefenseTimer();
-	void BindPlayerDeath(AController* aController);
 	bool AreAllPlayersDead() const;
 	void FailExtraction();
 	void SetCombatSliceState(ECombatSliceState aNewState) const;

@@ -14,11 +14,17 @@ class VALKYRIE_API AValkGameMode : public AGameModeBase
 
 public:
 	AValkGameMode();
+	virtual void PostLogin(APlayerController* aNewPlayer) override;
+	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
+	virtual void RestartPlayer(AController* aNewPlayer) override;
+
+	virtual void OnPlayerDeath(AController* aKillerController, AController* aVictimController);
 
 protected:
 	void ScheduleReturnToMainMenu();
 
 private:
+	void BindPlayerDeath(AController* aController);
 	void ReturnPlayersToMainMenu() const;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

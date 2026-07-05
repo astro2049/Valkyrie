@@ -14,8 +14,13 @@ class VALKYRIE_API AValkPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION(Client, Reliable)
+	void Client_OnPlayerDeath();
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnPlayerDeath();
 
 	void AddInputMappingContext() const;
 	void SetInputGameOnly();

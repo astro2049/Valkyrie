@@ -5,7 +5,6 @@
 #include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
-#include "Valkyrie/Components/HealthComponent.h"
 
 void APVPPlayerController::BeginPlay()
 {
@@ -17,9 +16,8 @@ void APVPPlayerController::BeginPlay()
 
 	OnPossessedPawnChanged.AddUniqueDynamic(
 		this,
-		&APVPPlayerController::HandlePossessedPawnChanged
+		&APVPPlayerController::OnPawnChanged
 	);
-	SetControlledPawn(GetPawn());
 
 	// UI widgets
 	// HUD
@@ -65,7 +63,19 @@ void APVPPlayerController::SetupInputComponent()
 	}
 }
 
-void APVPPlayerController::SetControlledPawn(const APawn* const aPawn)
+void APVPPlayerController::OnPlayerDeath()
+{
+	if (!IsLocalController()) {
+		return;
+	}
+
+	SetIgnoreMoveInput(true);
+}
+
+void APVPPlayerController::OnPawnChanged(
+	APawn* const,
+	APawn* const
+)
 {
 	if (!IsLocalController()) {
 		return;
@@ -73,37 +83,6 @@ void APVPPlayerController::SetControlledPawn(const APawn* const aPawn)
 
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);
-
-	if (myHealthComponent) {
-		myHealthComponent->OnDeath.RemoveDynamic(
-			this,
-			&APVPPlayerController::HandlePlayerDied
-		);
-	}
-	myHealthComponent = aPawn ? aPawn->FindComponentByClass<UHealthComponent>() : nullptr;
-	if (myHealthComponent) {
-		myHealthComponent->OnDeath.AddUniqueDynamic(
-			this,
-			&APVPPlayerController::HandlePlayerDied
-		);
-	}
-}
-
-void APVPPlayerController::HandlePossessedPawnChanged(
-	APawn* const,
-	APawn* const aNewPawn
-)
-{
-	SetControlledPawn(aNewPawn);
-}
-
-void APVPPlayerController::HandlePlayerDied()
-{
-	if (!IsLocalController()) {
-		return;
-	}
-
-	SetIgnoreMoveInput(true);
 }
 
 void APVPPlayerController::ShowScoreboard()

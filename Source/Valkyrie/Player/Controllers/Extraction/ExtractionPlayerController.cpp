@@ -3,7 +3,6 @@
 #include "ExtractionPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
-#include "Valkyrie/Components/HealthComponent.h"
 
 void AExtractionPlayerController::BeginPlay()
 {
@@ -11,15 +10,6 @@ void AExtractionPlayerController::BeginPlay()
 
 	if (!IsLocalController()) {
 		return;
-	}
-
-	if (APawn* const pawn = GetPawn()) {
-		if (UHealthComponent* const healthComponent = pawn->FindComponentByClass<UHealthComponent>()) {
-			healthComponent->OnDeath.AddUniqueDynamic(
-				this,
-				&AExtractionPlayerController::HandlePlayerDied
-			);
-		}
 	}
 
 	if (myHUDWidgetClass) {
@@ -30,7 +20,7 @@ void AExtractionPlayerController::BeginPlay()
 	}
 }
 
-void AExtractionPlayerController::HandlePlayerDied()
+void AExtractionPlayerController::OnPlayerDeath()
 {
 	if (!IsLocalController()) {
 		return;

@@ -4,10 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "Valkyrie/Common/ValkTypes.h"
 #include "ValkGameState.generated.h"
 
 UCLASS()
 class VALKYRIE_API AValkGameState : public AGameStateBase
 {
 	GENERATED_BODY()
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void SetWinningTeamId(EValkTeamId aTeamId);
+	virtual bool HasMatchEnded() const override { return myMatchEnded; }
+	EValkTeamId GetWinningTeamId() const { return myWinningTeamId; }
+
+private:
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
+	bool myMatchEnded{false};
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
+	EValkTeamId myWinningTeamId{EValkTeamId::None};
 };

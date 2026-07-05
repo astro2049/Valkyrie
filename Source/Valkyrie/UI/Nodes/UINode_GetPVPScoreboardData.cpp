@@ -5,7 +5,7 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Valkyrie/GameModes/PVP/KillConfirmed/KillConfirmedGameState.h"
-#include "Valkyrie/GameModes/PVP/PVPGameState.h"
+#include "Valkyrie/GameModes/ValkGameState.h"
 #include "Valkyrie/Common/ValkTypes.h"
 #include "Valkyrie/GameModes/PVP/TDM/TDMGameState.h"
 #include "Valkyrie/Player/States/PVP/KillConfirmed/KillConfirmedPlayerState.h"
@@ -28,7 +28,7 @@ void UUINode_GetPVPScoreboardData::GetPVPScoreboardData(
 	someTeamBRows.Reset();
 
 	const UWorld* const world = aPlayerController ? aPlayerController->GetWorld() : nullptr;
-	const APVPGameState* const gameState = world ? world->GetGameState<APVPGameState>() : nullptr;
+	const AValkGameState* const gameState = world ? world->GetGameState<AValkGameState>() : nullptr;
 	if (!gameState) {
 		return;
 	}

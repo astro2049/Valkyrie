@@ -7,7 +7,7 @@
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/Components/HealthComponent.h"
-#include "Valkyrie/GameModes/PVP/PVPGameState.h"
+#include "Valkyrie/GameModes/ValkGameState.h"
 #include "Valkyrie/Player/States/ValkPlayerState.h"
 
 AKillConfirmedTag::AKillConfirmedTag()
@@ -39,7 +39,7 @@ void AKillConfirmedTag::HandlePlayerEntered(AActor* const anOtherActor)
 	if (!world) {
 		return;
 	}
-	const APVPGameState* const gameState = world->GetGameState<APVPGameState>();
+	const AValkGameState* const gameState = world->GetGameState<AValkGameState>();
 	if (gameState && gameState->HasMatchEnded()) {
 		return;
 	}

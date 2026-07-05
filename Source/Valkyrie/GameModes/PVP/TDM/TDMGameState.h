@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/GameModes/PVP/PVPGameState.h"
+#include "Valkyrie/GameModes/ValkGameState.h"
 #include "TDMGameState.generated.h"
 
 UCLASS()
-class VALKYRIE_API ATDMGameState : public APVPGameState
+class VALKYRIE_API ATDMGameState : public AValkGameState
 {
 	GENERATED_BODY()
 

@@ -8,7 +8,6 @@
 
 class UInputAction;
 class UUserWidget;
-class UHealthComponent;
 
 UCLASS(Abstract)
 class VALKYRIE_API APVPPlayerController : public AValkPlayerController
@@ -18,14 +17,12 @@ class VALKYRIE_API APVPPlayerController : public AValkPlayerController
 private:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	virtual void OnPlayerDeath() override;
 	UFUNCTION()
-	void HandlePossessedPawnChanged(APawn* anOldPawn, APawn* aNewPawn);
-	void SetControlledPawn(const APawn* aPawn);
+	void OnPawnChanged(APawn* anOldPawn, APawn* aNewPawn);
 
 	void ShowScoreboard();
 	void HideScoreboard();
-	UFUNCTION()
-	void HandlePlayerDied();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myHUDWidgetClass;
@@ -37,6 +34,4 @@ private:
 	TSubclassOf<UUserWidget> myScoreboardWidgetClass;
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myScoreboardWidget{nullptr};
-	UPROPERTY()
-	TObjectPtr<UHealthComponent> myHealthComponent{nullptr};
 };

@@ -4,7 +4,6 @@
 
 #include "Valkyrie/Actors/Extraction/ExtractionZone.h"
 #include "ExtractionGameState.h"
-#include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,29 +13,7 @@
 AExtractionGameMode::AExtractionGameMode()
 {
 	PrimaryActorTick.bCanEverTick = false;
-}
-
-AActor* AExtractionGameMode::ChoosePlayerStart_Implementation(AController* aPlayer)
-{
-	TArray<AActor*> playerStarts;
-	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStarts);
-	if (playerStarts.IsEmpty()) {
-		return Super::ChoosePlayerStart_Implementation(aPlayer);
-	}
-
-	playerStarts.Sort([](const AActor& aLeft, const AActor& aRight) {
-		return aLeft.GetName() < aRight.GetName();
-	});
-
-	int32 playerIndex = 0;
-	for (FConstPlayerControllerIterator playerControllerIterator = GetWorld()->GetPlayerControllerIterator(); playerControllerIterator; ++playerControllerIterator) {
-		if (playerControllerIterator->Get() == aPlayer) {
-			break;
-		}
-		++playerIndex;
-	}
-
-	return playerStarts[playerIndex % playerStarts.Num()];
+	GameStateClass = AExtractionGameState::StaticClass();
 }
 
 void AExtractionGameMode::BeginPlay()
@@ -50,12 +27,6 @@ void AExtractionGameMode::BeginPlay()
 	myDefenseTimeRemaining = myDefenseDuration;
 	SetCombatSliceState(ECombatSliceState::ToStartGenerator);
 	SetDefenseTimeRemaining(0.f);
-}
-
-void AExtractionGameMode::RestartPlayer(AController* aNewPlayer)
-{
-	Super::RestartPlayer(aNewPlayer);
-	BindPlayerDeath(aNewPlayer);
 }
 
 void AExtractionGameMode::StartGenerator()
@@ -97,8 +68,13 @@ void AExtractionGameMode::CompleteExtraction()
 	ScheduleReturnToMainMenu();
 }
 
-void AExtractionGameMode::HandlePlayerDeath()
+void AExtractionGameMode::OnPlayerDeath(
+	AController* const aKillerController,
+	AController* const aVictimController
+)
 {
+	Super::OnPlayerDeath(aKillerController, aVictimController);
+
 	if (AreAllPlayersDead()) {
 		FailExtraction();
 	}
@@ -111,18 +87,6 @@ void AExtractionGameMode::TickDefenseTimer()
 
 	if (myDefenseTimeRemaining <= 0.f) {
 		CompleteDefense();
-	}
-}
-
-void AExtractionGameMode::BindPlayerDeath(AController* aController)
-{
-	APawn* pawn = aController ? aController->GetPawn() : nullptr;
-	UHealthComponent* healthComponent = pawn ? pawn->FindComponentByClass<UHealthComponent>() : nullptr;
-	if (healthComponent) {
-		healthComponent->OnDeath.AddUniqueDynamic(
-			this,
-			&AExtractionGameMode::HandlePlayerDeath
-		);
 	}
 }
 
