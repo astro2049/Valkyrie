@@ -14,7 +14,7 @@ class VALKYRIE_API AKillConfirmedGameState : public APVPGameState
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	int32 AddTeamConfirm(int32 aTeamId);
+	int32 AddTeamConfirm(EValkTeamId aTeamId);
 	int32 GetTeamAConfirms() const { return myTeamAConfirms; }
 	int32 GetTeamBConfirms() const { return myTeamBConfirms; }
 

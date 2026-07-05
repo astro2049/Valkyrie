@@ -13,16 +13,16 @@ void AKillConfirmedGameState::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	DOREPLIFETIME(AKillConfirmedGameState, myTeamBConfirms);
 }
 
-int32 AKillConfirmedGameState::AddTeamConfirm(const int32 aTeamId)
+int32 AKillConfirmedGameState::AddTeamConfirm(const EValkTeamId aTeamId)
 {
 	if (!HasAuthority()) {
 		return 0;
 	}
 
 	int32 teamConfirms = 0;
-	if (aTeamId == ValkTeamId::TeamA) {
+	if (aTeamId == EValkTeamId::TeamA) {
 		teamConfirms = ++myTeamAConfirms;
-	} else if (aTeamId == ValkTeamId::TeamB) {
+	} else if (aTeamId == EValkTeamId::TeamB) {
 		teamConfirms = ++myTeamBConfirms;
 	}
 	return teamConfirms;

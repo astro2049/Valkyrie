@@ -23,7 +23,7 @@ void AKillConfirmedTag::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AKillConfirmedTag, myDroppedTeamId);
 }
 
-void AKillConfirmedTag::SetDroppedTeamId(const int32 aTeamId)
+void AKillConfirmedTag::SetDroppedTeamId(const EValkTeamId aTeamId)
 {
 	if (HasAuthority()) {
 		myDroppedTeamId = aTeamId;

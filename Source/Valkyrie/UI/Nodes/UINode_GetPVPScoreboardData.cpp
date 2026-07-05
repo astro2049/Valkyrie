@@ -61,9 +61,9 @@ void UUINode_GetPVPScoreboardData::GetPVPScoreboardData(
 			continue;
 		}
 
-		if (pvpPlayerState->GetTeamId() == ValkTeamId::TeamA) {
+		if (pvpPlayerState->GetTeamId() == EValkTeamId::TeamA) {
 			someTeamARows.Add(MoveTemp(rowData));
-		} else if (pvpPlayerState->GetTeamId() == ValkTeamId::TeamB) {
+		} else if (pvpPlayerState->GetTeamId() == EValkTeamId::TeamB) {
 			someTeamBRows.Add(MoveTemp(rowData));
 		}
 	}

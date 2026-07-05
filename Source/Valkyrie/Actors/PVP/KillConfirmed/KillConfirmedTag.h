@@ -16,11 +16,11 @@ public:
 	AKillConfirmedTag();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void SetDroppedTeamId(int32 aTeamId);
+	void SetDroppedTeamId(EValkTeamId aTeamId);
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void HandlePlayerEntered(AActor* anOtherActor);
 
 private:
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
-	int32 myDroppedTeamId{ValkTeamId::None};
+	EValkTeamId myDroppedTeamId{EValkTeamId::None};
 };

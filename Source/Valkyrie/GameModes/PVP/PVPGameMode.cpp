@@ -31,11 +31,11 @@ void APVPGameMode::PostLogin(APlayerController* const aNewPlayer)
 AActor* APVPGameMode::ChoosePlayerStart_Implementation(AController* const aPlayer)
 {
 	const AValkPlayerState* const playerState = aPlayer ? aPlayer->GetPlayerState<AValkPlayerState>() : nullptr;
-	if (!playerState || playerState->GetTeamId() == ValkTeamId::None) {
+	if (!playerState || playerState->GetTeamId() == EValkTeamId::None) {
 		return Super::ChoosePlayerStart_Implementation(aPlayer);
 	}
 
-	const FName playerStartTag = playerState->GetTeamId() == ValkTeamId::TeamA
+	const FName playerStartTag = playerState->GetTeamId() == EValkTeamId::TeamA
 		? FName(TEXT("TeamA"))
 		: FName(TEXT("TeamB"));
 
@@ -62,7 +62,7 @@ void APVPGameMode::RestartPlayer(AController* const aNewPlayer)
 	BindPlayerDeath(aNewPlayer);
 }
 
-void APVPGameMode::EndPVPMatch(const int32 aWinningTeamId)
+void APVPGameMode::EndPVPMatch(const EValkTeamId aWinningTeamId)
 {
 	APVPGameState* const gameState = GetGameState<APVPGameState>();
 	if (!gameState || gameState->HasMatchEnded()) {
@@ -73,22 +73,22 @@ void APVPGameMode::EndPVPMatch(const int32 aWinningTeamId)
 	ScheduleReturnToMainMenu();
 }
 
-int32 APVPGameMode::GetBalancedTeamId() const
+EValkTeamId APVPGameMode::GetBalancedTeamId() const
 {
 	int32 teamAPlayerCount = 0;
 	int32 teamBPlayerCount = 0;
 	if (const APVPGameState* const gameState = GetGameState<APVPGameState>()) {
 		for (const APlayerState* const playerState : gameState->PlayerArray) {
 			const AValkPlayerState* const pvpPlayerState = Cast<AValkPlayerState>(playerState);
-			if (pvpPlayerState && pvpPlayerState->GetTeamId() == ValkTeamId::TeamA) {
+			if (pvpPlayerState && pvpPlayerState->GetTeamId() == EValkTeamId::TeamA) {
 				++teamAPlayerCount;
-			} else if (pvpPlayerState && pvpPlayerState->GetTeamId() == ValkTeamId::TeamB) {
+			} else if (pvpPlayerState && pvpPlayerState->GetTeamId() == EValkTeamId::TeamB) {
 				++teamBPlayerCount;
 			}
 		}
 	}
 
-	return teamAPlayerCount <= teamBPlayerCount ? ValkTeamId::TeamA : ValkTeamId::TeamB;
+	return teamAPlayerCount <= teamBPlayerCount ? EValkTeamId::TeamA : EValkTeamId::TeamB;
 }
 
 void APVPGameMode::BindPlayerDeath(AController* const aController)

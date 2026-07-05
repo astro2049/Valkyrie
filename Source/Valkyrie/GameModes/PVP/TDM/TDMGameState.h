@@ -14,7 +14,7 @@ class VALKYRIE_API ATDMGameState : public APVPGameState
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	int32 AddTeamKill(int32 aTeamId);
+	int32 AddTeamKill(EValkTeamId aTeamId);
 	int32 GetTeamAKills() const { return myTeamAKills; }
 	int32 GetTeamBKills() const { return myTeamBKills; }
 

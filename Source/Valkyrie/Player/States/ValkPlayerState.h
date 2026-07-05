@@ -13,13 +13,13 @@ class VALKYRIE_API AValkPlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
-	void SetTeamId(const int32 aTeamId) { myTeamId = aTeamId; }
-	int32 GetTeamId() const { return myTeamId; }
+	void SetTeamId(const EValkTeamId aTeamId) { myTeamId = aTeamId; }
+	EValkTeamId GetTeamId() const { return myTeamId; }
 	
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
-	int32 myTeamId{ValkTeamId::None};
+	EValkTeamId myTeamId{EValkTeamId::None};
 };

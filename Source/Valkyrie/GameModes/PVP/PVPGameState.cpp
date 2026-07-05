@@ -12,7 +12,7 @@ void APVPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(APVPGameState, myWinningTeamId);
 }
 
-void APVPGameState::SetWinningTeamId(const int32 aTeamId)
+void APVPGameState::SetWinningTeamId(const EValkTeamId aTeamId)
 {
 	if (!HasAuthority() || myMatchEnded) {
 		return;

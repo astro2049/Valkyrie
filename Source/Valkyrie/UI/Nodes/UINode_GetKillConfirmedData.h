@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Valkyrie/Common/ValkTypes.h"
 #include "UINode_GetKillConfirmedData.generated.h"
 
 class APlayerController;
@@ -20,7 +21,7 @@ struct FValkKillConfirmedData
 	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
 	bool myMatchEnded{false};
 	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
-	int32 myWinningTeamId{INDEX_NONE};
+	EValkTeamId myWinningTeamId{EValkTeamId::None};
 };
 
 UCLASS()

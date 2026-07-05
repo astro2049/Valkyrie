@@ -15,13 +15,13 @@ class VALKYRIE_API APVPGameState : public AValkGameState
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void SetWinningTeamId(int32 aTeamId);
+	void SetWinningTeamId(EValkTeamId aTeamId);
 	virtual bool HasMatchEnded() const override { return myMatchEnded; }
-	int32 GetWinningTeamId() const { return myWinningTeamId; }
+	EValkTeamId GetWinningTeamId() const { return myWinningTeamId; }
 
 private:
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	bool myMatchEnded{false};
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
-	int32 myWinningTeamId{ValkTeamId::None};
+	EValkTeamId myWinningTeamId{EValkTeamId::None};
 };

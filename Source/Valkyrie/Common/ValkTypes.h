@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 
-namespace ValkTeamId
+UENUM(BlueprintType)
+enum class EValkTeamId : uint8
 {
-	constexpr int32 None = INDEX_NONE;
-	constexpr int32 TeamA = 0;
-	constexpr int32 TeamB = 1;
-}
+	None = 0,
+	TeamA = 1,
+	TeamB = 2
+};

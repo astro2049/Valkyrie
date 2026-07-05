@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Valkyrie/Common/ValkTypes.h"
 #include "Valkyrie/GameModes/ValkGameMode.h"
 #include "PVPGameMode.generated.h"
 
@@ -20,11 +21,11 @@ public:
 
 protected:
 	virtual void HandleModePlayerKilled(AController* aVictimController, AController* aKillerController) PURE_VIRTUAL(APVPGameMode::HandleModePlayerKilled, );
-	void EndPVPMatch(int32 aWinningTeamId);
+	void EndPVPMatch(EValkTeamId aWinningTeamId);
 	int32 GetScoreLimit() const { return myScoreLimit; }
 
 private:
-	int32 GetBalancedTeamId() const;
+	EValkTeamId GetBalancedTeamId() const;
 	void BindPlayerDeath(AController* aController);
 	void HandlePlayerDeath(AController* aKillerController, AController* aVictimController);
 	void RespawnPlayer(AController* aController);
