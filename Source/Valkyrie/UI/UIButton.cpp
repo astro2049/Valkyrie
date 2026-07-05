@@ -55,20 +55,16 @@ void UUIButton::HandleButtonHovered()
 
 void UUIButton::BindButton()
 {
-	if (!myButton) {
-		return;
+	if (myButton) {
+		myButton->OnClicked.AddUniqueDynamic(this, &UUIButton::HandleButtonClicked);
+		myButton->OnHovered.AddUniqueDynamic(this, &UUIButton::HandleButtonHovered);
 	}
-
-	myButton->OnClicked.AddUniqueDynamic(this, &UUIButton::HandleButtonClicked);
-	myButton->OnHovered.AddUniqueDynamic(this, &UUIButton::HandleButtonHovered);
 }
 
 void UUIButton::UnbindButton()
 {
-	if (!myButton) {
-		return;
+	if (myButton) {
+		myButton->OnClicked.RemoveDynamic(this, &UUIButton::HandleButtonClicked);
+		myButton->OnHovered.RemoveDynamic(this, &UUIButton::HandleButtonHovered);
 	}
-
-	myButton->OnClicked.RemoveDynamic(this, &UUIButton::HandleButtonClicked);
-	myButton->OnHovered.RemoveDynamic(this, &UUIButton::HandleButtonHovered);
 }

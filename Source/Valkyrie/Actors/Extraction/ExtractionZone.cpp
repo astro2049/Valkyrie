@@ -38,11 +38,15 @@ void AExtractionZone::OnRep_IsActive()
 
 void AExtractionZone::HandlePlayerEntered(AActor* anOtherActor)
 {
-	if (!Cast<AValkPlayerPawn>(anOtherActor)) {
+	if (!anOtherActor) {
 		return;
 	}
 
-	if (AExtractionGameMode* extractionGameMode = GetWorld()->GetAuthGameMode<AExtractionGameMode>()) {
-		extractionGameMode->CompleteExtraction();
+	if (Cast<AValkPlayerPawn>(anOtherActor)) {
+		if (const UWorld* const world = GetWorld()) {
+			if (AExtractionGameMode* extractionGameMode = world->GetAuthGameMode<AExtractionGameMode>()) {
+				extractionGameMode->CompleteExtraction();
+			}
+		}
 	}
 }

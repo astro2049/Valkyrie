@@ -24,13 +24,15 @@ void AValkPlayerController::OnPlayerDeath()
 
 void AValkPlayerController::AddInputMappingContext() const
 {
-	if (!IsLocalController() || !myInputMappingContext) {
+	if (!IsLocalController()) {
 		return;
 	}
 
-	if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
-		if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
-			inputSubsystem->AddMappingContext(myInputMappingContext, 0);
+	if (myInputMappingContext) {
+		if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
+			if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
+				inputSubsystem->AddMappingContext(myInputMappingContext, 0);
+			}
 		}
 	}
 }

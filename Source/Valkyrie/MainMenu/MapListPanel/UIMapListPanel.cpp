@@ -51,21 +51,15 @@ void UUIMapListPanel::HandleBackClicked()
 
 void UUIMapListPanel::HandleStartClicked()
 {
-	if (!IsValidMapIndex(mySelectedMapIndex)) {
-		return;
+	if (IsValidMapIndex(mySelectedMapIndex)) {
+		UMapDataAsset* selectedMap = myAvailableMaps[mySelectedMapIndex];
+		if (IsValidModeIndex(selectedMap, mySelectedModeIndex)) {
+			const FMenuModeEntry selectedMode = selectedMap->mySupportedModes[mySelectedModeIndex];
+			if (selectedMode.IsPlayable()) {
+				myOnStartRequested.Broadcast(selectedMap, selectedMode);
+			}
+		}
 	}
-
-	UMapDataAsset* selectedMap = myAvailableMaps[mySelectedMapIndex];
-	if (!IsValidModeIndex(selectedMap, mySelectedModeIndex)) {
-		return;
-	}
-
-	const FMenuModeEntry selectedMode = selectedMap->mySupportedModes[mySelectedModeIndex];
-	if (!selectedMode.IsPlayable()) {
-		return;
-	}
-
-	myOnStartRequested.Broadcast(selectedMap, selectedMode);
 }
 
 void UUIMapListPanel::HandleMapEntryHovered(int32 anEntryIndex)
@@ -99,27 +93,25 @@ void UUIMapListPanel::BuildMapList()
 {
 	ClearMapList();
 
-	if (!myMapEntryWidgetClass) {
-		return;
-	}
+	if (myMapEntryWidgetClass) {
+		for (int32 mapIndex = 0; mapIndex < myAvailableMaps.Num(); ++mapIndex) {
+			UMapDataAsset* mapData = myAvailableMaps[mapIndex];
+			if (!mapData) {
+				continue;
+			}
 
-	for (int32 mapIndex = 0; mapIndex < myAvailableMaps.Num(); ++mapIndex) {
-		UMapDataAsset* mapData = myAvailableMaps[mapIndex];
-		if (!mapData) {
-			continue;
+			UUIMapItem* mapEntry = CreateWidget<UUIMapItem>(GetOwningPlayer(), myMapEntryWidgetClass);
+			if (!mapEntry) {
+				continue;
+			}
+
+			mapEntry->InitializeMapEntry(mapIndex, mapData->myDisplayName);
+			mapEntry->myOnHovered.AddUniqueDynamic(this, &UUIMapListPanel::HandleMapEntryHovered);
+			mapEntry->myOnClicked.AddUniqueDynamic(this, &UUIMapListPanel::HandleMapEntryClicked);
+
+			myMapEntryWidgets.Add(mapEntry);
+			myMapListContainer->AddChild(mapEntry);
 		}
-
-		UUIMapItem* mapEntry = CreateWidget<UUIMapItem>(GetOwningPlayer(), myMapEntryWidgetClass);
-		if (!mapEntry) {
-			continue;
-		}
-
-		mapEntry->InitializeMapEntry(mapIndex, mapData->myDisplayName);
-		mapEntry->myOnHovered.AddUniqueDynamic(this, &UUIMapListPanel::HandleMapEntryHovered);
-		mapEntry->myOnClicked.AddUniqueDynamic(this, &UUIMapListPanel::HandleMapEntryClicked);
-
-		myMapEntryWidgets.Add(mapEntry);
-		myMapListContainer->AddChild(mapEntry);
 	}
 }
 
@@ -127,23 +119,21 @@ void UUIMapListPanel::BuildModeList(const UMapDataAsset* aMapData)
 {
 	ClearModeList();
 
-	if (!aMapData || !myModeEntryWidgetClass) {
-		return;
-	}
+	if (aMapData && myModeEntryWidgetClass) {
+		for (int32 modeIndex = 0; modeIndex < aMapData->mySupportedModes.Num(); ++modeIndex) {
+			const FMenuModeEntry& modeEntryData = aMapData->mySupportedModes[modeIndex];
 
-	for (int32 modeIndex = 0; modeIndex < aMapData->mySupportedModes.Num(); ++modeIndex) {
-		const FMenuModeEntry& modeEntryData = aMapData->mySupportedModes[modeIndex];
+			UUIGameModeItem* modeEntry = CreateWidget<UUIGameModeItem>(GetOwningPlayer(), myModeEntryWidgetClass);
+			if (!modeEntry) {
+				continue;
+			}
 
-		UUIGameModeItem* modeEntry = CreateWidget<UUIGameModeItem>(GetOwningPlayer(), myModeEntryWidgetClass);
-		if (!modeEntry) {
-			continue;
+			modeEntry->InitializeModeEntry(modeIndex, modeEntryData.myDisplayName, modeEntryData.IsPlayable());
+			modeEntry->myOnClicked.AddUniqueDynamic(this, &UUIMapListPanel::HandleModeEntryClicked);
+
+			myModeEntryWidgets.Add(modeEntry);
+			myModeListContainer->AddChild(modeEntry);
 		}
-
-		modeEntry->InitializeModeEntry(modeIndex, modeEntryData.myDisplayName, modeEntryData.IsPlayable());
-		modeEntry->myOnClicked.AddUniqueDynamic(this, &UUIMapListPanel::HandleModeEntryClicked);
-
-		myModeEntryWidgets.Add(modeEntry);
-		myModeListContainer->AddChild(modeEntry);
 	}
 }
 
@@ -180,57 +170,46 @@ void UUIMapListPanel::ClearModeList()
 
 void UUIMapListPanel::PreviewMap(int32 anEntryIndex)
 {
-	if (!IsValidMapIndex(anEntryIndex)) {
-		return;
-	}
+	if (IsValidMapIndex(anEntryIndex)) {
+		myPreviewedMapIndex = anEntryIndex;
+		UMapDataAsset* mapData = myAvailableMaps[myPreviewedMapIndex];
+		RefreshMapDetails(mapData);
 
-	myPreviewedMapIndex = anEntryIndex;
-	UMapDataAsset* mapData = myAvailableMaps[myPreviewedMapIndex];
-	RefreshMapDetails(mapData);
-
-	if (mySelectedMapIndex == INDEX_NONE) {
-		BuildModeList(mapData);
-		RefreshModeEntrySelection();
+		if (mySelectedMapIndex == INDEX_NONE) {
+			BuildModeList(mapData);
+			RefreshModeEntrySelection();
+		}
 	}
 }
 
 void UUIMapListPanel::SelectMap(int32 anEntryIndex)
 {
-	if (!IsValidMapIndex(anEntryIndex)) {
-		return;
+	if (IsValidMapIndex(anEntryIndex)) {
+		mySelectedMapIndex = anEntryIndex;
+		myPreviewedMapIndex = anEntryIndex;
+
+		UMapDataAsset* selectedMap = myAvailableMaps[mySelectedMapIndex];
+		mySelectedModeIndex = FindFirstPlayableModeIndex(selectedMap);
+
+		RefreshMapDetails(selectedMap);
+		BuildModeList(selectedMap);
+		RefreshMapEntrySelection();
+		RefreshModeEntrySelection();
+		RefreshStartState();
 	}
-
-	mySelectedMapIndex = anEntryIndex;
-	myPreviewedMapIndex = anEntryIndex;
-
-	UMapDataAsset* selectedMap = myAvailableMaps[mySelectedMapIndex];
-	mySelectedModeIndex = FindFirstPlayableModeIndex(selectedMap);
-
-	RefreshMapDetails(selectedMap);
-	BuildModeList(selectedMap);
-	RefreshMapEntrySelection();
-	RefreshModeEntrySelection();
-	RefreshStartState();
 }
 
 void UUIMapListPanel::SelectMode(int32 anEntryIndex)
 {
-	if (!IsValidMapIndex(mySelectedMapIndex)) {
-		return;
+	if (IsValidMapIndex(mySelectedMapIndex)) {
+		UMapDataAsset* selectedMap = myAvailableMaps[mySelectedMapIndex];
+		if (IsValidModeIndex(selectedMap, anEntryIndex)
+			&& selectedMap->mySupportedModes[anEntryIndex].IsPlayable()) {
+			mySelectedModeIndex = anEntryIndex;
+			RefreshModeEntrySelection();
+			RefreshStartState();
+		}
 	}
-
-	UMapDataAsset* selectedMap = myAvailableMaps[mySelectedMapIndex];
-	if (!IsValidModeIndex(selectedMap, anEntryIndex)) {
-		return;
-	}
-
-	if (!selectedMap->mySupportedModes[anEntryIndex].IsPlayable()) {
-		return;
-	}
-
-	mySelectedModeIndex = anEntryIndex;
-	RefreshModeEntrySelection();
-	RefreshStartState();
 }
 
 void UUIMapListPanel::RefreshMapDetails(const UMapDataAsset* aMapData)
@@ -279,13 +258,13 @@ int32 UUIMapListPanel::FindFirstPlayableModeIndex(const UMapDataAsset* aMapData)
 		return INDEX_NONE;
 	}
 
-	for (int32 modeIndex = 0; modeIndex < aMapData->mySupportedModes.Num(); ++modeIndex) {
+	int32 playableModeIndex = INDEX_NONE;
+	for (int32 modeIndex = 0; modeIndex < aMapData->mySupportedModes.Num() && playableModeIndex == INDEX_NONE; ++modeIndex) {
 		if (aMapData->mySupportedModes[modeIndex].IsPlayable()) {
-			return modeIndex;
+			playableModeIndex = modeIndex;
 		}
 	}
-
-	return INDEX_NONE;
+	return playableModeIndex;
 }
 
 bool UUIMapListPanel::IsValidMapIndex(int32 anEntryIndex) const

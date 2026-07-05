@@ -11,24 +11,23 @@
 FValkHUDData UUINode_GetHUDData::GetHUDData(APlayerController* const aPlayerController)
 {
 	FValkHUDData data;
-	const AValkPlayerPawn* const playerPawn = aPlayerController
-		? Cast<AValkPlayerPawn>(aPlayerController->GetPawn())
-		: nullptr;
-	if (!playerPawn) {
+	if (!aPlayerController) {
 		return data;
 	}
 
-	if (const UHealthComponent* const healthComponent = playerPawn->FindComponentByClass<UHealthComponent>()) {
-		data.myHealth = healthComponent->GetHealth();
-		data.myMaxHealth = healthComponent->GetMaxHealth();
-	}
-	if (const UWeaponComponent* const weaponComponent = playerPawn->FindComponentByClass<UWeaponComponent>()) {
-		data.myAmmo = weaponComponent->GetAmmoInMag();
-		data.myReserveAmmo = weaponComponent->GetReserveAmmo();
-		data.myIsReloading = weaponComponent->IsReloading();
-	}
-	if (const UInteractionComponent* const interactionComponent = playerPawn->FindComponentByClass<UInteractionComponent>()) {
-		data.myHasInteractable = interactionComponent->HasInteractable();
+	if (const AValkPlayerPawn* const playerPawn = Cast<AValkPlayerPawn>(aPlayerController->GetPawn())) {
+		if (const UHealthComponent* const healthComponent = playerPawn->FindComponentByClass<UHealthComponent>()) {
+			data.myHealth = healthComponent->GetHealth();
+			data.myMaxHealth = healthComponent->GetMaxHealth();
+		}
+		if (const UWeaponComponent* const weaponComponent = playerPawn->FindComponentByClass<UWeaponComponent>()) {
+			data.myAmmo = weaponComponent->GetAmmoInMag();
+			data.myReserveAmmo = weaponComponent->GetReserveAmmo();
+			data.myIsReloading = weaponComponent->IsReloading();
+		}
+		if (const UInteractionComponent* const interactionComponent = playerPawn->FindComponentByClass<UInteractionComponent>()) {
+			data.myHasInteractable = interactionComponent->HasInteractable();
+		}
 	}
 	return data;
 }

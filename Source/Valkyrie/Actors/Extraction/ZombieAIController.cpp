@@ -7,15 +7,19 @@
 
 void AZombieAIController::Attack(AActor* const aTarget)
 {
-	UWorld* const world = GetWorld();
-	if (!HasAuthority() || !world || !aTarget) {
+	if (!aTarget) {
+		return;
+	}
+	if (!HasAuthority()) {
 		return;
 	}
 
-	if (const float currentTime = world->GetTimeSeconds(); currentTime >= myLastAttackTime + myAttackCooldown) {
-		myLastAttackTime = currentTime;
-		if (UHealthComponent* const healthComponent = aTarget->FindComponentByClass<UHealthComponent>()) {
-			healthComponent->ApplyDamage(myDamagePerAttack, this);
+	if (const UWorld* const world = GetWorld()) {
+		if (const float currentTime = world->GetTimeSeconds(); currentTime >= myLastAttackTime + myAttackCooldown) {
+			myLastAttackTime = currentTime;
+			if (UHealthComponent* const healthComponent = aTarget->FindComponentByClass<UHealthComponent>()) {
+				healthComponent->ApplyDamage(myDamagePerAttack, this);
+			}
 		}
 	}
 }

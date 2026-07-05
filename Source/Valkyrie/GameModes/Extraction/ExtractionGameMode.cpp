@@ -93,21 +93,25 @@ void AExtractionGameMode::TickDefenseTimer()
 bool AExtractionGameMode::AreAllPlayersDead() const
 {
 	bool hasPlayer = false;
+	bool areAllPlayersDead = true;
 	for (FConstPlayerControllerIterator playerControllerIterator = GetWorld()->GetPlayerControllerIterator(); playerControllerIterator; ++playerControllerIterator) {
-		const APlayerController* playerController = playerControllerIterator->Get();
-		const APawn* pawn = playerController ? playerController->GetPawn() : nullptr;
-		const UHealthComponent* healthComponent = pawn ? pawn->FindComponentByClass<UHealthComponent>() : nullptr;
-		if (healthComponent) {
-			hasPlayer = true;
-			if (!healthComponent->IsDead()) {
-				return false;
+		if (const APlayerController* playerController = playerControllerIterator->Get()) {
+			if (const APawn* pawn = playerController->GetPawn()) {
+				if (const UHealthComponent* healthComponent = pawn->FindComponentByClass<UHealthComponent>()) {
+					hasPlayer = true;
+					if (!healthComponent->IsDead()) {
+						areAllPlayersDead = false;
+						break;
+					}
+				} else {
+					areAllPlayersDead = false;
+					break;
+				}
 			}
-		} else {
-			return false;
 		}
 	}
 
-	return hasPlayer;
+	return hasPlayer && areAllPlayersDead;
 }
 
 void AExtractionGameMode::FailExtraction()

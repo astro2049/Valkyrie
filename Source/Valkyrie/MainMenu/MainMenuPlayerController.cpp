@@ -28,18 +28,14 @@ void AMainMenuPlayerController::HandleStartRequested(UMapDataAsset* aMapData, FM
 
 void AMainMenuPlayerController::CreateMenuScreen()
 {
-	if (!myMenuScreenWidgetClass) {
-		return;
+	if (myMenuScreenWidgetClass) {
+		myMenuScreenWidget = CreateWidget<UUIMainMenu>(this, myMenuScreenWidgetClass);
+		if (myMenuScreenWidget) {
+			myMenuScreenWidget->myOnQuitRequested.AddUniqueDynamic(this, &AMainMenuPlayerController::HandleQuitRequested);
+			myMenuScreenWidget->myOnStartRequested.AddUniqueDynamic(this, &AMainMenuPlayerController::HandleStartRequested);
+			myMenuScreenWidget->AddToViewport(myMenuZOrder);
+		}
 	}
-
-	myMenuScreenWidget = CreateWidget<UUIMainMenu>(this, myMenuScreenWidgetClass);
-	if (!myMenuScreenWidget) {
-		return;
-	}
-
-	myMenuScreenWidget->myOnQuitRequested.AddUniqueDynamic(this, &AMainMenuPlayerController::HandleQuitRequested);
-	myMenuScreenWidget->myOnStartRequested.AddUniqueDynamic(this, &AMainMenuPlayerController::HandleStartRequested);
-	myMenuScreenWidget->AddToViewport(myMenuZOrder);
 }
 
 void AMainMenuPlayerController::ConfigureMenuInput()
@@ -56,12 +52,14 @@ void AMainMenuPlayerController::ConfigureMenuInput()
 
 void AMainMenuPlayerController::OpenSelectedMapMode(UMapDataAsset* aMapData, const FMenuModeEntry& aModeEntry)
 {
-	if (!aMapData || aMapData->myLevelName.IsNone() || !aModeEntry.IsPlayable()) {
+	if (!aMapData) {
 		return;
 	}
 
-	const FString gameModePath = aModeEntry.myGameModeClass->GetPathName();
-	const FString options = FString::Printf(TEXT("game=%s"), *gameModePath);
+	if (!aMapData->myLevelName.IsNone() && aModeEntry.IsPlayable()) {
+		const FString gameModePath = aModeEntry.myGameModeClass->GetPathName();
+		const FString options = FString::Printf(TEXT("game=%s"), *gameModePath);
 
-	UGameplayStatics::OpenLevel(this, aMapData->myLevelName, true, options);
+		UGameplayStatics::OpenLevel(this, aMapData->myLevelName, true, options);
+	}
 }

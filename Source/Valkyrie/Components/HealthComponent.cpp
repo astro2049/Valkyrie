@@ -27,12 +27,8 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::ApplyDamage(const float aDamage, AController* const aDamageInstigator)
 {
-	if (aDamage <= 0.f) {
-		return;
-	}
-	
-	if (GetOwner() && GetOwner()->HasAuthority()) {
-		if (!myIsDead) {
+	if (const AActor* const owner = GetOwner()) {
+		if (owner->HasAuthority() && aDamage > 0.f && !myIsDead) {
 			myHealth = FMath::Clamp(myHealth - aDamage, 0.f, myMaxHealth);
 			if (myHealth <= 0.f) {
 				myIsDead = true;
@@ -49,14 +45,13 @@ void UHealthComponent::ApplyDamage(const float aDamage, AController* const aDama
 
 void UHealthComponent::ResetHealth()
 {
-	const AActor* const owner = GetOwner();
-	if (!owner || !owner->HasAuthority()) {
-		return;
+	if (const AActor* const owner = GetOwner()) {
+		if (owner->HasAuthority()) {
+			myHealth = myMaxHealth;
+			myIsDead = false;
+			OnHealthChanged.Broadcast(myHealth, myMaxHealth);
+		}
 	}
-
-	myHealth = myMaxHealth;
-	myIsDead = false;
-	OnHealthChanged.Broadcast(myHealth, myMaxHealth);
 }
 
 void UHealthComponent::OnRep_Health() const

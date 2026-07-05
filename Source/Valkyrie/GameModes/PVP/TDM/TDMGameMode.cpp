@@ -19,26 +19,25 @@ void ATDMGameMode::HandleModePlayerKilled(
 	AController* const aKillerController
 )
 {
-	ATDMPlayerState* const victimPlayerState = aVictimController
-		? aVictimController->GetPlayerState<ATDMPlayerState>()
-		: nullptr;
-	if (victimPlayerState) {
-		victimPlayerState->AddDeath();
-	}
-
-	ATDMPlayerState* const killerPlayerState = aKillerController
-		? aKillerController->GetPlayerState<ATDMPlayerState>()
-		: nullptr;
-	if (!victimPlayerState || !killerPlayerState || victimPlayerState == killerPlayerState
-		|| victimPlayerState->GetTeamId() == killerPlayerState->GetTeamId()) {
+	if (!aVictimController) {
 		return;
 	}
 
-	killerPlayerState->AddKill();
-	if (ATDMGameState* const gameState = GetGameState<ATDMGameState>()) {
-		const int32 teamKills = gameState->AddTeamKill(killerPlayerState->GetTeamId());
-		if (teamKills >= GetScoreLimit()) {
-			EndPVPMatch(killerPlayerState->GetTeamId());
+	if (ATDMPlayerState* const victimPlayerState = aVictimController->GetPlayerState<ATDMPlayerState>()) {
+		victimPlayerState->AddDeath();
+		if (aKillerController) {
+			if (ATDMPlayerState* const killerPlayerState = aKillerController->GetPlayerState<ATDMPlayerState>()) {
+				if (victimPlayerState != killerPlayerState
+					&& victimPlayerState->GetTeamId() != killerPlayerState->GetTeamId()) {
+					killerPlayerState->AddKill();
+					if (ATDMGameState* const gameState = GetGameState<ATDMGameState>()) {
+						const int32 teamKills = gameState->AddTeamKill(killerPlayerState->GetTeamId());
+						if (teamKills >= GetScoreLimit()) {
+							EndPVPMatch(killerPlayerState->GetTeamId());
+						}
+					}
+				}
+			}
 		}
 	}
 }

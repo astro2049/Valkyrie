@@ -136,10 +136,7 @@ void AValkPlayerPawn::Server_SyncRotation_Implementation(const FRotator& aRotati
 
 void AValkPlayerPawn::Server_Interact_Implementation()
 {
-	const UHealthComponent* const healthComponent = FindComponentByClass<UHealthComponent>();
-	if (!myInteractionComponent || (healthComponent && healthComponent->IsDead())) {
-		return;
+	if (myInteractionComponent) {
+		myInteractionComponent->Interact();
 	}
-
-	myInteractionComponent->Interact();
 }

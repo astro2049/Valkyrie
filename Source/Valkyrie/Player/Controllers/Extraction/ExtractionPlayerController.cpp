@@ -36,13 +36,15 @@ void AExtractionPlayerController::OnPlayerDeath()
 
 void AExtractionPlayerController::ShowDeadOverlay()
 {
-	if (!IsLocalController() || myDeadOverlayWidget || !myDeadOverlayWidgetClass) {
+	if (!IsLocalController()) {
 		return;
 	}
 
-	myDeadOverlayWidget = CreateWidget<UUserWidget>(this, myDeadOverlayWidgetClass);
-	if (myDeadOverlayWidget) {
-		myDeadOverlayWidget->AddToViewport();
+	if (!myDeadOverlayWidget && myDeadOverlayWidgetClass) {
+		myDeadOverlayWidget = CreateWidget<UUserWidget>(this, myDeadOverlayWidgetClass);
+		if (myDeadOverlayWidget) {
+			myDeadOverlayWidget->AddToViewport();
+		}
 	}
 }
 

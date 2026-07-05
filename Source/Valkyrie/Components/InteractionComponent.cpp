@@ -9,19 +9,25 @@ UInteractionComponent::UInteractionComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UInteractionComponent::SetInteractable(AActor* anInteractableActor)
+void UInteractionComponent::SetInteractable(AActor* const anInteractableActor)
 {
-	if (anInteractableActor) {
-		if (UInteractableComponent* interactable = anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
-			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::SetInteractable"));
-			myInteractableComponent = interactable;
-		}
+	if (!anInteractableActor) {
+		return;
+	}
+
+	if (UInteractableComponent* const interactableComponent = anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
+		UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::SetInteractable"));
+		myInteractableComponent = interactableComponent;
 	}
 }
 
-void UInteractionComponent::ClearInteractable(AActor* anInteractableActor)
+void UInteractionComponent::ClearInteractable(AActor* const anInteractableActor)
 {
-	if (anInteractableActor) {
+	if (!anInteractableActor) {
+		return;
+	}
+
+	if (myInteractableComponent.IsValid()) {
 		if (myInteractableComponent.Get() == anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::ClearInteractable"));
 			myInteractableComponent.Reset();
@@ -31,8 +37,8 @@ void UInteractionComponent::ClearInteractable(AActor* anInteractableActor)
 
 void UInteractionComponent::Interact() const
 {
-	if (UInteractableComponent* interactable = myInteractableComponent.Get()) {
+	if (UInteractableComponent* const interactableComponent = myInteractableComponent.Get()) {
 		UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::Interact"));
-		interactable->Interact();
+		interactableComponent->Interact();
 	}
 }

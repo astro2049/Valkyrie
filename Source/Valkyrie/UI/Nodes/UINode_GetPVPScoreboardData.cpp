@@ -27,56 +27,58 @@ void UUINode_GetPVPScoreboardData::GetPVPScoreboardData(
 	someTeamARows.Reset();
 	someTeamBRows.Reset();
 
-	const UWorld* const world = aPlayerController ? aPlayerController->GetWorld() : nullptr;
-	const AValkGameState* const gameState = world ? world->GetGameState<AValkGameState>() : nullptr;
-	if (!gameState) {
-		return;
+	if (aPlayerController) {
+		if (const UWorld* const world = aPlayerController->GetWorld()) {
+			if (const AValkGameState* const gameState = world->GetGameState<AValkGameState>()) {
+				if (const AKillConfirmedGameState* const killConfirmedGameState = Cast<AKillConfirmedGameState>(gameState)) {
+					aTeamAScore = killConfirmedGameState->GetTeamAConfirms();
+					aTeamBScore = killConfirmedGameState->GetTeamBConfirms();
+					aShowConfirms = true;
+				} else if (const ATDMGameState* const tdmGameState = Cast<ATDMGameState>(gameState)) {
+					aTeamAScore = tdmGameState->GetTeamAKills();
+					aTeamBScore = tdmGameState->GetTeamBKills();
+				}
+
+				for (const APlayerState* const playerState : gameState->PlayerArray) {
+					const AValkPlayerState* const pvpPlayerState = Cast<AValkPlayerState>(playerState);
+					if (!pvpPlayerState) {
+						continue;
+					}
+
+					FValkScoreboardRowData rowData;
+					rowData.myPlayerName = pvpPlayerState->GetPlayerName();
+					if (const AKillConfirmedPlayerState* const killConfirmedPlayerState = Cast<AKillConfirmedPlayerState>(playerState)) {
+						rowData.myKills = killConfirmedPlayerState->GetKills();
+						rowData.myDeaths = killConfirmedPlayerState->GetDeaths();
+						rowData.myConfirms = killConfirmedPlayerState->GetConfirms();
+					} else if (const ATDMPlayerState* const tdmPlayerState = Cast<ATDMPlayerState>(playerState)) {
+						rowData.myKills = tdmPlayerState->GetKills();
+						rowData.myDeaths = tdmPlayerState->GetDeaths();
+					} else {
+						continue;
+					}
+
+					if (pvpPlayerState->GetTeamId() == EValkTeamId::TeamA) {
+						someTeamARows.Add(MoveTemp(rowData));
+					} else if (pvpPlayerState->GetTeamId() == EValkTeamId::TeamB) {
+						someTeamBRows.Add(MoveTemp(rowData));
+					}
+				}
+
+				auto sortRows = [](const FValkScoreboardRowData& aLeft, const FValkScoreboardRowData& aRight) {
+					bool isLeftBeforeRight = false;
+					if (aLeft.myKills != aRight.myKills) {
+						isLeftBeforeRight = aLeft.myKills > aRight.myKills;
+					} else if (aLeft.myDeaths != aRight.myDeaths) {
+						isLeftBeforeRight = aLeft.myDeaths < aRight.myDeaths;
+					} else {
+						isLeftBeforeRight = aLeft.myPlayerName < aRight.myPlayerName;
+					}
+					return isLeftBeforeRight;
+				};
+				someTeamARows.Sort(sortRows);
+				someTeamBRows.Sort(sortRows);
+			}
+		}
 	}
-
-	if (const AKillConfirmedGameState* const killConfirmedGameState = Cast<AKillConfirmedGameState>(gameState)) {
-		aTeamAScore = killConfirmedGameState->GetTeamAConfirms();
-		aTeamBScore = killConfirmedGameState->GetTeamBConfirms();
-		aShowConfirms = true;
-	} else if (const ATDMGameState* const tdmGameState = Cast<ATDMGameState>(gameState)) {
-		aTeamAScore = tdmGameState->GetTeamAKills();
-		aTeamBScore = tdmGameState->GetTeamBKills();
-	}
-
-	for (const APlayerState* const playerState : gameState->PlayerArray) {
-		const AValkPlayerState* const pvpPlayerState = Cast<AValkPlayerState>(playerState);
-		if (!pvpPlayerState) {
-			continue;
-		}
-
-		FValkScoreboardRowData rowData;
-		rowData.myPlayerName = pvpPlayerState->GetPlayerName();
-		if (const AKillConfirmedPlayerState* const killConfirmedPlayerState = Cast<AKillConfirmedPlayerState>(playerState)) {
-			rowData.myKills = killConfirmedPlayerState->GetKills();
-			rowData.myDeaths = killConfirmedPlayerState->GetDeaths();
-			rowData.myConfirms = killConfirmedPlayerState->GetConfirms();
-		} else if (const ATDMPlayerState* const tdmPlayerState = Cast<ATDMPlayerState>(playerState)) {
-			rowData.myKills = tdmPlayerState->GetKills();
-			rowData.myDeaths = tdmPlayerState->GetDeaths();
-		} else {
-			continue;
-		}
-
-		if (pvpPlayerState->GetTeamId() == EValkTeamId::TeamA) {
-			someTeamARows.Add(MoveTemp(rowData));
-		} else if (pvpPlayerState->GetTeamId() == EValkTeamId::TeamB) {
-			someTeamBRows.Add(MoveTemp(rowData));
-		}
-	}
-
-	auto sortRows = [](const FValkScoreboardRowData& aLeft, const FValkScoreboardRowData& aRight) {
-		if (aLeft.myKills != aRight.myKills) {
-			return aLeft.myKills > aRight.myKills;
-		}
-		if (aLeft.myDeaths != aRight.myDeaths) {
-			return aLeft.myDeaths < aRight.myDeaths;
-		}
-		return aLeft.myPlayerName < aRight.myPlayerName;
-	};
-	someTeamARows.Sort(sortRows);
-	someTeamBRows.Sort(sortRows);
 }

@@ -11,12 +11,15 @@ FValkTDMData UUINode_GetTDMData::GetTDMData(APlayerController* const aPlayerCont
 {
 	FValkTDMData data;
 	data.myWinningTeamId = EValkTeamId::None;
-	const UWorld* const world = aPlayerController ? aPlayerController->GetWorld() : nullptr;
-	if (const ATDMGameState* const gameState = world ? world->GetGameState<ATDMGameState>() : nullptr) {
-		data.myTeamAScore = gameState->GetTeamAKills();
-		data.myTeamBScore = gameState->GetTeamBKills();
-		data.myMatchEnded = gameState->HasMatchEnded();
-		data.myWinningTeamId = gameState->GetWinningTeamId();
+	if (aPlayerController) {
+		if (const UWorld* const world = aPlayerController->GetWorld()) {
+			if (const ATDMGameState* const gameState = world->GetGameState<ATDMGameState>()) {
+				data.myTeamAScore = gameState->GetTeamAKills();
+				data.myTeamBScore = gameState->GetTeamBKills();
+				data.myMatchEnded = gameState->HasMatchEnded();
+				data.myWinningTeamId = gameState->GetWinningTeamId();
+			}
+		}
 	}
 	return data;
 }

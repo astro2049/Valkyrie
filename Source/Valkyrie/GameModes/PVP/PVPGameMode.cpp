@@ -16,8 +16,10 @@ APVPGameMode::APVPGameMode()
 
 void APVPGameMode::PostLogin(APlayerController* const aNewPlayer)
 {
-	if (AValkPlayerState* const playerState = aNewPlayer ? aNewPlayer->GetPlayerState<AValkPlayerState>() : nullptr) {
-		playerState->SetTeamId(GetBalancedTeamId());
+	if (aNewPlayer) {
+		if (AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>()) {
+			playerState->SetTeamId(GetBalancedTeamId());
+		}
 	}
 
 	Super::PostLogin(aNewPlayer);
@@ -26,12 +28,10 @@ void APVPGameMode::PostLogin(APlayerController* const aNewPlayer)
 void APVPGameMode::EndPVPMatch(const EValkTeamId aWinningTeamId)
 {
 	AValkGameState* const gameState = GetGameState<AValkGameState>();
-	if (!gameState || gameState->HasMatchEnded()) {
-		return;
+	if (gameState && !gameState->HasMatchEnded()) {
+		gameState->SetWinningTeamId(aWinningTeamId);
+		ScheduleReturnToMainMenu();
 	}
-
-	gameState->SetWinningTeamId(aWinningTeamId);
-	ScheduleReturnToMainMenu();
 }
 
 EValkTeamId APVPGameMode::GetBalancedTeamId() const
@@ -54,41 +54,43 @@ EValkTeamId APVPGameMode::GetBalancedTeamId() const
 
 void APVPGameMode::OnPlayerDeath(AController* const aKillerController, AController* const aVictimController)
 {
+	if (!aVictimController) {
+		return;
+	}
+
 	Super::OnPlayerDeath(aKillerController, aVictimController);
 
 	const AValkGameState* const gameState = GetGameState<AValkGameState>();
-	if (!aVictimController || (gameState && gameState->HasMatchEnded())) {
-		return;
+	if (!gameState || !gameState->HasMatchEnded()) {
+		HandleModePlayerKilled(aVictimController, aKillerController);
+		if (!gameState || !gameState->HasMatchEnded()) {
+			FTimerDelegate respawnDelegate;
+			respawnDelegate.BindUObject(this, &APVPGameMode::RespawnPlayer, aVictimController);
+			FTimerHandle respawnTimerHandle;
+			GetWorldTimerManager().SetTimer(
+				respawnTimerHandle,
+				respawnDelegate,
+				myRespawnDelay,
+				false
+			);
+		}
 	}
-
-	HandleModePlayerKilled(aVictimController, aKillerController);
-	if (gameState && gameState->HasMatchEnded()) {
-		return;
-	}
-
-	FTimerDelegate respawnDelegate;
-	respawnDelegate.BindUObject(this, &APVPGameMode::RespawnPlayer, aVictimController);
-	FTimerHandle respawnTimerHandle;
-	GetWorldTimerManager().SetTimer(
-		respawnTimerHandle,
-		respawnDelegate,
-		myRespawnDelay,
-		false
-	);
 }
 
 void APVPGameMode::RespawnPlayer(AController* const aController)
 {
-	const AValkGameState* const gameState = GetGameState<AValkGameState>();
-	if (!aController || (gameState && gameState->HasMatchEnded())) {
+	if (!aController) {
 		return;
 	}
 
-	APawn* const oldPawn = aController->GetPawn();
-	aController->UnPossess();
-	if (oldPawn) {
-		oldPawn->Destroy();
+	const AValkGameState* const gameState = GetGameState<AValkGameState>();
+	if (!gameState || !gameState->HasMatchEnded()) {
+		APawn* const oldPawn = aController->GetPawn();
+		aController->UnPossess();
+		if (oldPawn) {
+			oldPawn->Destroy();
+		}
+		RestartPlayer(aController);
 	}
-	RestartPlayer(aController);
 }
 

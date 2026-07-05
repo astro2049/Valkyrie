@@ -15,7 +15,7 @@ class VALKYRIE_API AKillConfirmedGameMode : public APVPGameMode
 
 public:
 	AKillConfirmedGameMode();
-	bool ConfirmTag(APawn* aPlayerPawn);
+	bool ConfirmTag(const APawn* aPlayerPawn);
 
 protected:
 	virtual void HandleModePlayerKilled(AController* aVictimController, AController* aKillerController) override;

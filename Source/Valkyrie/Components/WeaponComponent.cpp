@@ -55,54 +55,58 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 {
 	const UWorld* const world = GetWorld();
 	const AActor* const owner = GetOwner();
-	const UHealthComponent* const ownerHealth = owner ? owner->FindComponentByClass<UHealthComponent>() : nullptr;
-	if (!world || !owner || (ownerHealth && ownerHealth->IsDead()) || myIsReloading || myAmmoInMag <= 0 || aTraceDirection.IsNearlyZero()) {
-		return;
-	}
+	if (world && owner) {
+		if (const UHealthComponent* const healthComponent = owner->FindComponentByClass<UHealthComponent>()) {
+			if (!healthComponent->IsDead() && !myIsReloading && myAmmoInMag > 0 && !aTraceDirection.IsNearlyZero()) {
+				const float now = world->GetTimeSeconds();
+				if (now - myLastFiredTime >= myFireInterval) {
+					myLastFiredTime = now;
+					myAmmoInMag = FMath::Max(0, myAmmoInMag - 1);
 
-	const float now = world->GetTimeSeconds();
-	if (now - myLastFiredTime >= myFireInterval) {
-		myLastFiredTime = now;
-		myAmmoInMag = FMath::Max(0, myAmmoInMag - 1);
+					// line trace
+					const FVector start = aTraceStart;
+					const FVector end = start + aTraceDirection.GetSafeNormal() * myTraceDistance;
+					FHitResult hitResult;
+					FCollisionQueryParams params;
+					params.AddIgnoredActor(owner);
+					const bool hasHit = world->LineTraceSingleByChannel(
+						hitResult,
+						start,
+						end,
+						ECC_Visibility,
+						params
+					);
+					if (hasHit) {
+						if (const AActor* hitActor = hitResult.GetActor()) {
+							if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
+								if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
+									health->ApplyDamage(myDamage, ownerPawn->GetController());
+								} else {
+									health->ApplyDamage(myDamage);
+								}
+							}
+						}
+					}
 
-		// line trace
-		const FVector start = aTraceStart;
-		const FVector end = start + aTraceDirection.GetSafeNormal() * myTraceDistance;
-		FHitResult hitResult;
-		FCollisionQueryParams params;
-		params.AddIgnoredActor(owner);
-		const bool hasHit = world->LineTraceSingleByChannel(
-			hitResult,
-			start,
-			end,
-			ECC_Visibility,
-			params
-		);
-		if (hasHit) {
-			if (AActor* hitActor = hitResult.GetActor()) {
-				if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
-					const APawn* const ownerPawn = Cast<APawn>(owner);
-					health->ApplyDamage(myDamage, ownerPawn ? ownerPawn->GetController() : nullptr);
+					// sound
+					if (myFireSound) {
+						UGameplayStatics::PlaySoundAtLocation(world, myFireSound, start);
+					}
+					// debug trace
+					if (myDrawDebugTrace) {
+						DrawDebugLine(
+							world,
+							start,
+							hasHit ? hitResult.ImpactPoint : end,
+							hasHit ? FColor::Green : FColor::Red,
+							false,
+							1.0f,
+							0,
+							1.5f
+						);
+					}
 				}
 			}
-		}
-
-		// sound
-		if (myFireSound) {
-			UGameplayStatics::PlaySoundAtLocation(world, myFireSound, start);
-		}
-		// debug trace
-		if (myDrawDebugTrace) {
-			DrawDebugLine(
-				world,
-				start,
-				hasHit ? hitResult.ImpactPoint : end,
-				hasHit ? FColor::Green : FColor::Red,
-				false,
-				1.0f,
-				0,
-				1.5f
-			);
 		}
 	}
 }
@@ -116,34 +120,37 @@ void UWeaponComponent::Server_Reload_Implementation()
 {
 	const UWorld* const world = GetWorld();
 	const AActor* const owner = GetOwner();
-	const UHealthComponent* const ownerHealth = owner ? owner->FindComponentByClass<UHealthComponent>() : nullptr;
-	if (!world || (ownerHealth && ownerHealth->IsDead()) || myIsReloading || myAmmoInMag >= myMagazineSize || myReserveAmmo <= 0) {
-		return;
-	}
-
-	myIsReloading = true;
-	if (myReloadDuration > 0.f) {
-		world->GetTimerManager().SetTimer(
-			myReloadTimerHandle,
-			this,
-			&UWeaponComponent::FinishReload,
-			myReloadDuration,
-			false
-		);
-	} else {
-		FinishReload();
+	if (world && owner) {
+		if (const UHealthComponent* const ownerHealth = owner->FindComponentByClass<UHealthComponent>()) {
+			if (!ownerHealth->IsDead() &&
+				!myIsReloading &&
+				myAmmoInMag < myMagazineSize &&
+				myReserveAmmo > 0) {
+				myIsReloading = true;
+				if (myReloadDuration > 0.f) {
+					world->GetTimerManager().SetTimer(
+						myReloadTimerHandle,
+						this,
+						&UWeaponComponent::FinishReload,
+						myReloadDuration,
+						false
+					);
+				} else {
+					FinishReload();
+				}
+			}
+		}
 	}
 }
 
 void UWeaponComponent::FinishReload()
 {
-	const AActor* const owner = GetOwner();
-	if (!owner || !owner->HasAuthority() || !myIsReloading) {
-		return;
+	if (const AActor* const owner = GetOwner()) {
+		if (owner->HasAuthority() && myIsReloading) {
+			const int32 ammoToLoad = FMath::Min(myMagazineSize - myAmmoInMag, myReserveAmmo);
+			myAmmoInMag += ammoToLoad;
+			myReserveAmmo -= ammoToLoad;
+			myIsReloading = false;
+		}
 	}
-
-	const int32 ammoToLoad = FMath::Min(myMagazineSize - myAmmoInMag, myReserveAmmo);
-	myAmmoInMag += ammoToLoad;
-	myReserveAmmo -= ammoToLoad;
-	myIsReloading = false;
 }

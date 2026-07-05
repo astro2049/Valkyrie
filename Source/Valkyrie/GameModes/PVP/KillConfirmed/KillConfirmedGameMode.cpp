@@ -16,22 +16,27 @@ AKillConfirmedGameMode::AKillConfirmedGameMode()
 	PlayerStateClass = AKillConfirmedPlayerState::StaticClass();
 }
 
-bool AKillConfirmedGameMode::ConfirmTag(APawn* const aPlayerPawn)
+bool AKillConfirmedGameMode::ConfirmTag(const APawn* const aPlayerPawn)
 {
-	AKillConfirmedGameState* const gameState = GetGameState<AKillConfirmedGameState>();
-	AKillConfirmedPlayerState* const playerState = aPlayerPawn && aPlayerPawn->GetController()
-		? aPlayerPawn->GetController()->GetPlayerState<AKillConfirmedPlayerState>()
-		: nullptr;
-	if (!gameState || gameState->HasMatchEnded() || !playerState) {
+	if (!aPlayerPawn) {
 		return false;
 	}
 
-	playerState->AddConfirm();
-	const int32 teamConfirms = gameState->AddTeamConfirm(playerState->GetTeamId());
-	if (teamConfirms >= GetScoreLimit()) {
-		EndPVPMatch(playerState->GetTeamId());
+	bool hasConfirmed = false;
+	AKillConfirmedGameState* const gameState = GetGameState<AKillConfirmedGameState>();
+	if (const AController* const playerController = aPlayerPawn->GetController()) {
+		if (AKillConfirmedPlayerState* const playerState = playerController->GetPlayerState<AKillConfirmedPlayerState>()) {
+			if (gameState && !gameState->HasMatchEnded()) {
+				playerState->AddConfirm();
+				const int32 teamConfirms = gameState->AddTeamConfirm(playerState->GetTeamId());
+				if (teamConfirms >= GetScoreLimit()) {
+					EndPVPMatch(playerState->GetTeamId());
+				}
+				hasConfirmed = true;
+			}
+		}
 	}
-	return true;
+	return hasConfirmed;
 }
 
 void AKillConfirmedGameMode::HandleModePlayerKilled(
@@ -39,28 +44,27 @@ void AKillConfirmedGameMode::HandleModePlayerKilled(
 	AController* const aKillerController
 )
 {
-	AKillConfirmedPlayerState* const victimPlayerState = aVictimController
-		? aVictimController->GetPlayerState<AKillConfirmedPlayerState>()
-		: nullptr;
-	if (victimPlayerState) {
-		victimPlayerState->AddDeath();
-	}
-
-	AKillConfirmedPlayerState* const killerPlayerState = aKillerController
-		? aKillerController->GetPlayerState<AKillConfirmedPlayerState>()
-		: nullptr;
-	if (!victimPlayerState || !killerPlayerState || victimPlayerState == killerPlayerState
-		|| victimPlayerState->GetTeamId() == killerPlayerState->GetTeamId()) {
+	if (!aVictimController) {
 		return;
 	}
 
-	killerPlayerState->AddKill();
-	if (myTagClass && aVictimController->GetPawn()) {
-		if (AKillConfirmedTag* const tag = GetWorld()->SpawnActor<AKillConfirmedTag>(
-			myTagClass,
-			aVictimController->GetPawn()->GetActorTransform()
-		)) {
-			tag->SetDroppedTeamId(victimPlayerState->GetTeamId());
+	if (AKillConfirmedPlayerState* const victimPlayerState = aVictimController->GetPlayerState<AKillConfirmedPlayerState>()) {
+		victimPlayerState->AddDeath();
+		if (aKillerController) {
+			if (AKillConfirmedPlayerState* const killerPlayerState = aKillerController->GetPlayerState<AKillConfirmedPlayerState>()) {
+				if (victimPlayerState != killerPlayerState
+					&& victimPlayerState->GetTeamId() != killerPlayerState->GetTeamId()) {
+					killerPlayerState->AddKill();
+					if (myTagClass && aVictimController->GetPawn()) {
+						if (AKillConfirmedTag* const tag = GetWorld()->SpawnActor<AKillConfirmedTag>(
+							myTagClass,
+							aVictimController->GetPawn()->GetActorTransform()
+						)) {
+							tag->SetDroppedTeamId(victimPlayerState->GetTeamId());
+						}
+					}
+				}
+			}
 		}
 	}
 }

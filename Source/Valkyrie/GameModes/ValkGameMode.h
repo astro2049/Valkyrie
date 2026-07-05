@@ -24,7 +24,6 @@ protected:
 	void ScheduleReturnToMainMenu();
 
 private:
-	void BindPlayerDeath(AController* aController);
 	void ReturnPlayersToMainMenu() const;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

@@ -9,10 +9,13 @@
 FValkExtractionData UUINode_GetExtractionData::GetExtractionData(APlayerController* const aPlayerController)
 {
 	FValkExtractionData data;
-	const UWorld* const world = aPlayerController ? aPlayerController->GetWorld() : nullptr;
-	if (const AExtractionGameState* const gameState = world ? world->GetGameState<AExtractionGameState>() : nullptr) {
-		data.myCombatSliceState = gameState->GetCombatSliceState();
-		data.myDefenseTimeRemaining = gameState->GetDefenseTimeRemaining();
+	if (aPlayerController) {
+		if (const UWorld* const world = aPlayerController->GetWorld()) {
+			if (const AExtractionGameState* const gameState = world->GetGameState<AExtractionGameState>()) {
+				data.myCombatSliceState = gameState->GetCombatSliceState();
+				data.myDefenseTimeRemaining = gameState->GetDefenseTimeRemaining();
+			}
+		}
 	}
 	return data;
 }

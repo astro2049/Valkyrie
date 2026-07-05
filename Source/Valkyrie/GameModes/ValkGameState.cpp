@@ -14,10 +14,12 @@ void AValkGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 void AValkGameState::SetWinningTeamId(const EValkTeamId aTeamId)
 {
-	if (!HasAuthority() || myMatchEnded) {
+	if (!HasAuthority()) {
 		return;
 	}
 
-	myWinningTeamId = aTeamId;
-	myMatchEnded = true;
+	if (!myMatchEnded) {
+		myWinningTeamId = aTeamId;
+		myMatchEnded = true;
+	}
 }

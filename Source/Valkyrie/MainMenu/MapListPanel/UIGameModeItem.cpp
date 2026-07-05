@@ -38,11 +38,9 @@ void UUIGameModeItem::NativeDestruct()
 
 void UUIGameModeItem::HandleButtonClicked()
 {
-	if (!myIsPlayable) {
-		return;
+	if (myIsPlayable) {
+		myOnClicked.Broadcast(myEntryIndex);
 	}
-
-	myOnClicked.Broadcast(myEntryIndex);
 }
 
 void UUIGameModeItem::BindButton()
