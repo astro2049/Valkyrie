@@ -5,7 +5,7 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/GameModes/Extraction/ExtractionGameMode.h"
-#include "Valkyrie/Actors/Player/ValkPlayerPawn.h"
+#include "Valkyrie/Actors/Player/ValkPlayerCharacter.h"
 
 AExtractionZone::AExtractionZone()
 {
@@ -42,7 +42,7 @@ void AExtractionZone::HandlePlayerEntered(AActor* anOtherActor)
 		return;
 	}
 
-	if (Cast<AValkPlayerPawn>(anOtherActor)) {
+	if (Cast<AValkPlayerCharacter>(anOtherActor)) {
 		if (const UWorld* const world = GetWorld()) {
 			if (AExtractionGameMode* extractionGameMode = world->GetAuthGameMode<AExtractionGameMode>()) {
 				extractionGameMode->CompleteExtraction();

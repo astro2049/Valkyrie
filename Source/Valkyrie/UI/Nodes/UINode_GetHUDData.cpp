@@ -3,7 +3,7 @@
 #include "UINode_GetHUDData.h"
 
 #include "GameFramework/PlayerController.h"
-#include "Valkyrie/Actors/Player/ValkPlayerPawn.h"
+#include "Valkyrie/Actors/Player/ValkPlayerCharacter.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
@@ -15,17 +15,17 @@ FValkHUDData UUINode_GetHUDData::GetHUDData(APlayerController* const aPlayerCont
 		return data;
 	}
 
-	if (const AValkPlayerPawn* const playerPawn = Cast<AValkPlayerPawn>(aPlayerController->GetPawn())) {
-		if (const UHealthComponent* const healthComponent = playerPawn->FindComponentByClass<UHealthComponent>()) {
+	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(aPlayerController->GetPawn())) {
+		if (const UHealthComponent* const healthComponent = playerCharacter->FindComponentByClass<UHealthComponent>()) {
 			data.myHealth = healthComponent->GetHealth();
 			data.myMaxHealth = healthComponent->GetMaxHealth();
 		}
-		if (const UWeaponComponent* const weaponComponent = playerPawn->FindComponentByClass<UWeaponComponent>()) {
+		if (const UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>()) {
 			data.myAmmo = weaponComponent->GetAmmoInMag();
 			data.myReserveAmmo = weaponComponent->GetReserveAmmo();
 			data.myIsReloading = weaponComponent->IsReloading();
 		}
-		if (const UInteractionComponent* const interactionComponent = playerPawn->FindComponentByClass<UInteractionComponent>()) {
+		if (const UInteractionComponent* const interactionComponent = playerCharacter->FindComponentByClass<UInteractionComponent>()) {
 			data.myHasInteractable = interactionComponent->HasInteractable();
 		}
 	}

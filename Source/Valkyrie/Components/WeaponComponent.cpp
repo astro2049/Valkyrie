@@ -44,7 +44,7 @@ void UWeaponComponent::Fire()
 		if (const APlayerController* const playerController = Cast<APlayerController>(ownerPawn->GetController())) {
 			if (const APlayerCameraManager* const playerCameraManager = playerController->PlayerCameraManager) {
 				const FVector traceStart = playerCameraManager->GetCameraLocation();
-				const FVector traceDirection = playerCameraManager->GetActorForwardVector();
+				const FVector traceDirection = playerCameraManager->GetCameraRotation().Vector();
 				Server_TraceFire(traceStart, traceDirection);
 			}
 		}
