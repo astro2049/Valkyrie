@@ -76,11 +76,13 @@ void AValkPlayerController::SetupInputComponent()
 
 void AValkPlayerController::OnDied(AController* const aKillerController)
 {
-	if (HasAuthority()) {
-		if (const UWorld* const world = GetWorld()) {
-			if (AValkGameMode* const gameMode = world->GetAuthGameMode<AValkGameMode>()) {
-				gameMode->OnPlayerDied(aKillerController, this);
-			}
+	if (!HasAuthority()) {
+		return;
+	}
+
+	if (const UWorld* const world = GetWorld()) {
+		if (AValkGameMode* const gameMode = world->GetAuthGameMode<AValkGameMode>()) {
+			gameMode->OnPlayerDied(aKillerController, this);
 		}
 	}
 }
@@ -109,7 +111,7 @@ void AValkPlayerController::OnPlayerRespawned()
 	if (!IsLocalController()) {
 		return;
 	}
-	
+
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);
 }
