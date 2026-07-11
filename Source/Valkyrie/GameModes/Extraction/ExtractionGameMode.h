@@ -29,7 +29,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void OnPlayerDeath(AController* aKillerController, AController* aVictimController) override;
+	virtual void OnPlayerDied(AController* aKillerController, AController* aVictimController) override;
 
 private:
 	void TickDefenseTimer();

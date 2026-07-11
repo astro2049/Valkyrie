@@ -16,9 +16,8 @@ public:
 	AValkGameMode();
 	virtual void PostLogin(APlayerController* aNewPlayer) override;
 	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
-	virtual void RestartPlayer(AController* aNewPlayer) override;
 
-	virtual void OnPlayerDeath(AController* aKillerController, AController* aVictimController);
+	virtual void OnPlayerDied(AController* aKillerController, AController* aVictimController);
 
 protected:
 	void ScheduleReturnToMainMenu();

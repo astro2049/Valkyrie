@@ -68,12 +68,12 @@ void AExtractionGameMode::CompleteExtraction()
 	ScheduleReturnToMainMenu();
 }
 
-void AExtractionGameMode::OnPlayerDeath(
+void AExtractionGameMode::OnPlayerDied(
 	AController* const aKillerController,
 	AController* const aVictimController
 )
 {
-	Super::OnPlayerDeath(aKillerController, aVictimController);
+	Super::OnPlayerDied(aKillerController, aVictimController);
 
 	if (AreAllPlayersDead()) {
 		FailExtraction();

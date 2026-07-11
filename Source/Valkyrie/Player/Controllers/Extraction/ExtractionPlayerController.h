@@ -14,7 +14,7 @@ class VALKYRIE_API AExtractionPlayerController : public AValkPlayerController
 	GENERATED_BODY()
 
 protected:
-	virtual void OnPlayerDeath() override;
+	virtual void OnPlayerDied() override;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myDeadOverlayWidgetClass;

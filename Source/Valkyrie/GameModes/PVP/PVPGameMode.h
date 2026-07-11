@@ -18,7 +18,7 @@ public:
 	virtual void PostLogin(APlayerController* aNewPlayer) override;
 
 protected:
-	virtual void OnPlayerDeath(AController* aKillerController, AController* aVictimController) override;
+	virtual void OnPlayerDied(AController* aKillerController, AController* aVictimController) override;
 	virtual void HandleModePlayerKilled(AController* aVictimController, AController* aKillerController) PURE_VIRTUAL(APVPGameMode::HandleModePlayerKilled, );
 	void EndPVPMatch(EValkTeamId aWinningTeamId);
 	int32 GetScoreLimit() const { return myScoreLimit; }

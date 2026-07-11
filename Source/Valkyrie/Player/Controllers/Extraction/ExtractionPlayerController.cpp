@@ -4,13 +4,13 @@
 
 #include "Blueprint/UserWidget.h"
 
-void AExtractionPlayerController::OnPlayerDeath()
+void AExtractionPlayerController::OnPlayerDied()
 {
 	if (!IsLocalController()) {
 		return;
 	}
 
-	Super::OnPlayerDeath();
+	Super::OnPlayerDied();
 	if (!myDeadOverlayWidget && myDeadOverlayWidgetClass) {
 		myDeadOverlayWidget = CreateWidget<UUserWidget>(this, myDeadOverlayWidgetClass);
 		if (myDeadOverlayWidget) {

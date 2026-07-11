@@ -21,6 +21,7 @@ public:
 	AValkPlayerCharacter();
 
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
+	void OnDied(AController* aDamageInstigator) const;
 
 private:
 	void HandleMove(const FInputActionValue& anInputValue);

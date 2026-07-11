@@ -6,9 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-class AController;
-
-DECLARE_MULTICAST_DELEGATE_OneParam(FHealthDeath, AController*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FHealthChanged,
 	float, aHealth,
@@ -32,11 +29,10 @@ public:
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool IsDead() const { return myIsDead; }
 
-	FHealthDeath myOnHealthDeath; // for authoritative game mode rules
 	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
 	FHealthChanged OnHealthChanged; // for health bar presenter component (Blueprint)
 	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
-	FDeath OnDeath; // for player controller
+	FDeath OnDeath; // for Blueprint presentation
 
 private:
 	virtual void BeginPlay() override;

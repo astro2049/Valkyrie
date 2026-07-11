@@ -3,6 +3,7 @@
 #include "HealthComponent.h"
 
 #include "Net/UnrealNetwork.h"
+#include "Valkyrie/Player/ValkPlayerCharacter.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -36,7 +37,9 @@ void UHealthComponent::ApplyDamage(const float aDamage, AController* const aDama
 
 			OnHealthChanged.Broadcast(myHealth, myMaxHealth);
 			if (myIsDead) {
-				myOnHealthDeath.Broadcast(aDamageInstigator);
+				if (AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
+					playerCharacter->OnDied(aDamageInstigator);
+				}
 				OnDeath.Broadcast();
 			}
 		}

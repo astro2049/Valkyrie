@@ -52,13 +52,13 @@ EValkTeamId APVPGameMode::GetBalancedTeamId() const
 	return teamAPlayerCount <= teamBPlayerCount ? EValkTeamId::TeamA : EValkTeamId::TeamB;
 }
 
-void APVPGameMode::OnPlayerDeath(AController* const aKillerController, AController* const aVictimController)
+void APVPGameMode::OnPlayerDied(AController* const aKillerController, AController* const aVictimController)
 {
 	if (!aVictimController) {
 		return;
 	}
 
-	Super::OnPlayerDeath(aKillerController, aVictimController);
+	Super::OnPlayerDied(aKillerController, aVictimController);
 
 	const AValkGameState* const gameState = GetGameState<AValkGameState>();
 	if (!gameState || !gameState->HasMatchEnded()) {
@@ -91,6 +91,8 @@ void APVPGameMode::RespawnPlayer(AController* const aController)
 			oldPawn->Destroy();
 		}
 		RestartPlayer(aController);
+		if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(aController)) {
+			playerController->Client_OnPlayerRespawned();
+		}
 	}
 }
-

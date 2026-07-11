@@ -6,28 +6,39 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
+#include "Valkyrie/GameModes/ValkGameMode.h"
 
 void AValkPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetInputGameOnly();
-	AddInputMappingContext();
-	OnPossessedPawnChanged.AddUniqueDynamic(
-		this,
-		&AValkPlayerController::OnPawnChanged
-	);
-
 	if (!IsLocalController()) {
 		return;
 	}
 
+	// I. input
+	// I.1. add input mapping context
+	if (myInputMappingContext) {
+		if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
+			if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
+				inputSubsystem->AddMappingContext(myInputMappingContext, 0);
+			}
+		}
+	}
+	// I.2. set input mode to game only
+	bShowMouseCursor = false;
+	const FInputModeGameOnly inputMode;
+	SetInputMode(inputMode);
+
+	// II. UI
+	// II.1. add HUD to viewport
 	if (myHUDWidgetClass) {
 		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
 		if (myHUDWidget) {
 			myHUDWidget->AddToViewport();
 		}
 	}
+	// II.2. add scoreboard to viewport
 	if (myScoreboardWidgetClass) {
 		myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
 		if (myScoreboardWidget) {
@@ -63,12 +74,28 @@ void AValkPlayerController::SetupInputComponent()
 	}
 }
 
-void AValkPlayerController::Client_OnPlayerDeath_Implementation()
+void AValkPlayerController::OnDied(AController* const aKillerController)
 {
-	OnPlayerDeath();
+	if (HasAuthority()) {
+		if (const UWorld* const world = GetWorld()) {
+			if (AValkGameMode* const gameMode = world->GetAuthGameMode<AValkGameMode>()) {
+				gameMode->OnPlayerDied(aKillerController, this);
+			}
+		}
+	}
 }
 
-void AValkPlayerController::OnPlayerDeath()
+void AValkPlayerController::Client_OnPlayerDied_Implementation()
+{
+	OnPlayerDied();
+}
+
+void AValkPlayerController::Client_OnPlayerRespawned_Implementation()
+{
+	OnPlayerRespawned();
+}
+
+void AValkPlayerController::OnPlayerDied()
 {
 	if (!IsLocalController()) {
 		return;
@@ -77,12 +104,12 @@ void AValkPlayerController::OnPlayerDeath()
 	SetIgnoreMoveInput(true);
 }
 
-void AValkPlayerController::OnPawnChanged(APawn* const, APawn* const)
+void AValkPlayerController::OnPlayerRespawned()
 {
 	if (!IsLocalController()) {
 		return;
 	}
-
+	
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);
 }
@@ -107,30 +134,4 @@ void AValkPlayerController::HideScoreboard()
 	if (myScoreboardWidget) {
 		myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
-}
-
-void AValkPlayerController::AddInputMappingContext() const
-{
-	if (!IsLocalController()) {
-		return;
-	}
-
-	if (myInputMappingContext) {
-		if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
-			if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
-				inputSubsystem->AddMappingContext(myInputMappingContext, 0);
-			}
-		}
-	}
-}
-
-void AValkPlayerController::SetInputGameOnly()
-{
-	if (!IsLocalController()) {
-		return;
-	}
-
-	bShowMouseCursor = false;
-	const FInputModeGameOnly inputMode;
-	SetInputMode(inputMode);
 }

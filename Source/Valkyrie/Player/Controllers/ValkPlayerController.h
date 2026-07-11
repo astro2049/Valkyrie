@@ -16,33 +16,39 @@ class VALKYRIE_API AValkPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	void OnDied(AController* aKillerController = nullptr);
+
 	UFUNCTION(Client, Reliable)
-	void Client_OnPlayerDeath();
+	void Client_OnPlayerDied();
+	UFUNCTION(Client, Reliable)
+	void Client_OnPlayerRespawned();
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-	virtual void OnPlayerDeath();
-
-	void AddInputMappingContext() const;
-	void SetInputGameOnly();
+	virtual void OnPlayerDied();
+	virtual void OnPlayerRespawned();
 
 private:
-	UFUNCTION()
-	void OnPawnChanged(APawn* anOldPawn, APawn* aNewPawn);
 	void ShowScoreboard();
 	void HideScoreboard();
 
+	// input
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputMappingContext> myInputMappingContext{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUserWidget> myHUDWidgetClass;
+	TObjectPtr<UInputAction> myInputActionOpenScoreboard{nullptr};
+	
+	// HUD
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myHUDWidget{nullptr};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TObjectPtr<UInputAction> myInputActionOpenScoreboard{nullptr};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUserWidget> myScoreboardWidgetClass;
+	// Scoreboard
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myScoreboardWidget{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	// UI Classes
+	TSubclassOf<UUserWidget> myHUDWidgetClass;
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UUserWidget> myScoreboardWidgetClass;
+
 };

@@ -3,7 +3,7 @@
 #include "UINode_GetHUDData.h"
 
 #include "GameFramework/PlayerController.h"
-#include "Valkyrie/Actors/Player/ValkPlayerCharacter.h"
+#include "Valkyrie/Player/ValkPlayerCharacter.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"

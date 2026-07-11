@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
 {
@@ -63,6 +64,13 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 				&AValkPlayerCharacter::HandleInteract
 			);
 		}
+	}
+}
+
+void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
+{
+	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
+		playerController->OnDied(aDamageInstigator);
 	}
 }
 

@@ -4,7 +4,6 @@
 
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
-#include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/States/ValkPlayerState.h"
 
@@ -88,25 +87,6 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 	return selectedPlayerStart;
 }
 
-void AValkGameMode::RestartPlayer(AController* const aNewPlayer)
-{
-	Super::RestartPlayer(aNewPlayer);
-
-	if (!aNewPlayer) {
-		return;
-	}
-
-	if (const APawn* const pawn = aNewPlayer->GetPawn()) {
-		if (UHealthComponent* const healthComponent = pawn->FindComponentByClass<UHealthComponent>()) {
-			healthComponent->myOnHealthDeath.AddUObject(
-				this,
-				&AValkGameMode::OnPlayerDeath,
-				aNewPlayer
-			);
-		}
-	}
-}
-
 void AValkGameMode::ScheduleReturnToMainMenu()
 {
 	if (!GetWorldTimerManager().IsTimerActive(myReturnTimerHandle)) {
@@ -120,10 +100,10 @@ void AValkGameMode::ScheduleReturnToMainMenu()
 	}
 }
 
-void AValkGameMode::OnPlayerDeath(AController* const, AController* const aVictimController)
+void AValkGameMode::OnPlayerDied(AController* const, AController* const aVictimController)
 {
 	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(aVictimController)) {
-		playerController->Client_OnPlayerDeath();
+		playerController->Client_OnPlayerDied();
 	}
 }
 
