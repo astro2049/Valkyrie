@@ -2,12 +2,13 @@
 
 #include "WeaponComponent.h"
 
+#include "Valkyrie/Actors/Gun/GunActor.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 UWeaponComponent::UWeaponComponent()
@@ -20,8 +21,9 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UWeaponComponent, myAmmoInMag);
-	DOREPLIFETIME(UWeaponComponent, myReserveAmmo);
+	DOREPLIFETIME(UWeaponComponent, myPrimaryGunActor);
+	DOREPLIFETIME(UWeaponComponent, mySecondaryGunActor);
+	DOREPLIFETIME(UWeaponComponent, myCurrentWeaponSlot);
 	DOREPLIFETIME(UWeaponComponent, myIsReloading);
 }
 
@@ -29,13 +31,19 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	myMagazineSize = FMath::Max(myMagazineSize, 1);
-	myAmmoInMag = FMath::Clamp(myAmmoInMag, 0, myMagazineSize);
-	myReserveAmmo = FMath::Max(myReserveAmmo, 0);
-	myReloadDuration = FMath::Max(myReloadDuration, 0.f);
-	myIsReloading = false;
-	myFireInterval = myRPM > 0.f ? 60.f / myRPM : 0.f;
+void UWeaponComponent::InitializeGuns(
+	TSubclassOf<AGunActor> aPrimaryGunType,
+	TSubclassOf<AGunActor> aSecondaryGunType
+)
+{
+	if (const AActor* const owner = GetOwner()) {
+		if (owner->HasAuthority()) {
+			SpawnGunActors(aPrimaryGunType, aSecondaryGunType);
+			SetCurrentGun(EValkWeaponSlot::Primary);
+		}
+	}
 }
 
 void UWeaponComponent::Fire()
@@ -57,15 +65,14 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 	const AActor* const owner = GetOwner();
 	if (world && owner) {
 		if (const UHealthComponent* const healthComponent = owner->FindComponentByClass<UHealthComponent>()) {
-			if (!healthComponent->IsDead() && !myIsReloading && myAmmoInMag > 0 && !aTraceDirection.IsNearlyZero()) {
+			if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
 				const float now = world->GetTimeSeconds();
-				if (now - myLastFiredTime >= myFireInterval) {
-					myLastFiredTime = now;
-					myAmmoInMag = FMath::Max(0, myAmmoInMag - 1);
+				if (!healthComponent->IsDead() && !myIsReloading && !aTraceDirection.IsNearlyZero() && currentGunActor->CanFire(now)) {
+					currentGunActor->ConsumeAmmo(now);
 
 					// line trace
 					const FVector start = aTraceStart;
-					const FVector end = start + aTraceDirection.GetSafeNormal() * myTraceDistance;
+					const FVector end = start + aTraceDirection.GetSafeNormal() * currentGunActor->GetTraceDistance();
 					FHitResult hitResult;
 					FCollisionQueryParams params;
 					params.AddIgnoredActor(owner);
@@ -80,18 +87,15 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 						if (const AActor* hitActor = hitResult.GetActor()) {
 							if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
 								if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
-									health->ApplyDamage(myDamage, ownerPawn->GetController());
+									health->ApplyDamage(currentGunActor->GetDamage(), ownerPawn->GetController());
 								} else {
-									health->ApplyDamage(myDamage);
+									health->ApplyDamage(currentGunActor->GetDamage());
 								}
 							}
 						}
 					}
 
-					// sound
-					if (myFireSound) {
-						UGameplayStatics::PlaySoundAtLocation(world, myFireSound, start);
-					}
+					Multicast_PlayFirePresentation(currentGunActor);
 					// debug trace
 					if (myDrawDebugTrace) {
 						DrawDebugLine(
@@ -122,17 +126,20 @@ void UWeaponComponent::Server_Reload_Implementation()
 	const AActor* const owner = GetOwner();
 	if (world && owner) {
 		if (const UHealthComponent* const ownerHealth = owner->FindComponentByClass<UHealthComponent>()) {
+			AGunActor* const currentGunActor = GetCurrentGunActor();
 			if (!ownerHealth->IsDead() &&
 				!myIsReloading &&
-				myAmmoInMag < myMagazineSize &&
-				myReserveAmmo > 0) {
+				currentGunActor &&
+				currentGunActor->CanReload()) {
 				myIsReloading = true;
-				if (myReloadDuration > 0.f) {
+				Multicast_PlayReloadPresentation(currentGunActor);
+				const float reloadDuration = currentGunActor->GetReloadDuration();
+				if (reloadDuration > 0.f) {
 					world->GetTimerManager().SetTimer(
 						myReloadTimerHandle,
 						this,
 						&UWeaponComponent::FinishReload,
-						myReloadDuration,
+						reloadDuration,
 						false
 					);
 				} else {
@@ -143,14 +150,120 @@ void UWeaponComponent::Server_Reload_Implementation()
 	}
 }
 
+void UWeaponComponent::EquipPrimaryGun()
+{
+	Server_EquipGun(EValkWeaponSlot::Primary);
+}
+
+void UWeaponComponent::EquipSecondaryGun()
+{
+	Server_EquipGun(EValkWeaponSlot::Secondary);
+}
+
+void UWeaponComponent::Server_EquipGun_Implementation(const EValkWeaponSlot aWeaponSlot)
+{
+	if (aWeaponSlot != myCurrentWeaponSlot) {
+		CancelReload();
+		SetCurrentGun(aWeaponSlot);
+	}
+}
+
+void UWeaponComponent::Multicast_PlayFirePresentation_Implementation(AGunActor* aGunActor)
+{
+	if (aGunActor) {
+		aGunActor->PlayFirePresentation();
+	}
+}
+
+void UWeaponComponent::Multicast_PlayReloadPresentation_Implementation(AGunActor* aGunActor)
+{
+	if (aGunActor) {
+		aGunActor->PlayReloadPresentation();
+	}
+}
+
+void UWeaponComponent::OnRep_GunState()
+{
+	UpdateGunVisibility();
+}
+
+void UWeaponComponent::SpawnGunActors(
+	TSubclassOf<AGunActor> aPrimaryGunType,
+	TSubclassOf<AGunActor> aSecondaryGunType
+)
+{
+	if (UWorld* const world = GetWorld()) {
+		if (aPrimaryGunType) {
+			myPrimaryGunActor = world->SpawnActor<AGunActor>(aPrimaryGunType);
+			if (myPrimaryGunActor) {
+				myPrimaryGunActor->InitializeRuntimeState();
+				if (ACharacter* const ownerCharacter = Cast<ACharacter>(GetOwner())) {
+					myPrimaryGunActor->AttachToCharacter(ownerCharacter);
+				}
+			}
+		}
+		if (aSecondaryGunType) {
+			mySecondaryGunActor = world->SpawnActor<AGunActor>(aSecondaryGunType);
+			if (mySecondaryGunActor) {
+				mySecondaryGunActor->InitializeRuntimeState();
+				if (ACharacter* const ownerCharacter = Cast<ACharacter>(GetOwner())) {
+					mySecondaryGunActor->AttachToCharacter(ownerCharacter);
+				}
+			}
+		}
+	}
+}
+
+AGunActor* UWeaponComponent::GetCurrentGunActor() const
+{
+	if (myCurrentWeaponSlot == EValkWeaponSlot::Primary) {
+		return myPrimaryGunActor;
+	}
+	if (myCurrentWeaponSlot == EValkWeaponSlot::Secondary) {
+		return mySecondaryGunActor;
+	}
+	return nullptr;
+}
+
+void UWeaponComponent::SetCurrentGun(const EValkWeaponSlot aWeaponSlot)
+{
+	myCurrentWeaponSlot = aWeaponSlot;
+	UpdateGunVisibility();
+}
+
+void UWeaponComponent::UpdateGunVisibility() const
+{
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	if (myPrimaryGunActor) {
+		const bool shouldShowPrimary = currentGunActor == myPrimaryGunActor;
+		myPrimaryGunActor->SetActorHiddenInGame(!shouldShowPrimary);
+		myPrimaryGunActor->SetActorEnableCollision(shouldShowPrimary);
+	}
+	if (mySecondaryGunActor) {
+		const bool shouldShowSecondary = currentGunActor == mySecondaryGunActor;
+		mySecondaryGunActor->SetActorHiddenInGame(!shouldShowSecondary);
+		mySecondaryGunActor->SetActorEnableCollision(shouldShowSecondary);
+	}
+}
+
+void UWeaponComponent::CancelReload()
+{
+	if (myIsReloading) {
+		if (UWorld* const world = GetWorld()) {
+			world->GetTimerManager().ClearTimer(myReloadTimerHandle);
+		}
+		myIsReloading = false;
+	}
+}
+
 void UWeaponComponent::FinishReload()
 {
 	if (const AActor* const owner = GetOwner()) {
-		if (owner->HasAuthority() && myIsReloading) {
-			const int32 ammoToLoad = FMath::Min(myMagazineSize - myAmmoInMag, myReserveAmmo);
-			myAmmoInMag += ammoToLoad;
-			myReserveAmmo -= ammoToLoad;
-			myIsReloading = false;
+		if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
+			if (owner->HasAuthority() && myIsReloading) {
+				currentGunActor->ApplyReloadAmmo();
+				myIsReloading = false;
+			}
 		}
 	}
 }

@@ -19,6 +19,15 @@ AValkPlayerCharacter::AValkPlayerCharacter()
 	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
 }
 
+void AValkPlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (myWeaponComponent) {
+		myWeaponComponent->InitializeGuns(myPrimaryGunType, mySecondaryGunType);
+	}
+}
+
 void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(aPlayerInputComponent);
@@ -62,6 +71,22 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 				ETriggerEvent::Started,
 				this,
 				&AValkPlayerCharacter::HandleInteract
+			);
+		}
+		if (myPrimaryWeaponAction) {
+			enhancedInputComponent->BindAction(
+				myPrimaryWeaponAction,
+				ETriggerEvent::Started,
+				this,
+				&AValkPlayerCharacter::HandleEquipPrimaryGun
+			);
+		}
+		if (mySecondaryWeaponAction) {
+			enhancedInputComponent->BindAction(
+				mySecondaryWeaponAction,
+				ETriggerEvent::Started,
+				this,
+				&AValkPlayerCharacter::HandleEquipSecondaryGun
 			);
 		}
 	}
@@ -111,6 +136,20 @@ void AValkPlayerCharacter::HandleReload()
 void AValkPlayerCharacter::HandleInteract()
 {
 	Server_Interact();
+}
+
+void AValkPlayerCharacter::HandleEquipPrimaryGun()
+{
+	if (myWeaponComponent) {
+		myWeaponComponent->EquipPrimaryGun();
+	}
+}
+
+void AValkPlayerCharacter::HandleEquipSecondaryGun()
+{
+	if (myWeaponComponent) {
+		myWeaponComponent->EquipSecondaryGun();
+	}
 }
 
 void AValkPlayerCharacter::Server_Interact_Implementation()

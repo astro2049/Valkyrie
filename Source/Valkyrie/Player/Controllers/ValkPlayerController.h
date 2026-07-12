@@ -50,5 +50,4 @@ private:
 	TSubclassOf<UUserWidget> myHUDWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myScoreboardWidgetClass;
-
 };

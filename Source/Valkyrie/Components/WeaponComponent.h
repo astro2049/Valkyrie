@@ -7,6 +7,15 @@
 #include "TimerManager.h"
 #include "WeaponComponent.generated.h"
 
+class AGunActor;
+
+UENUM(BlueprintType)
+enum class EValkWeaponSlot : uint8
+{
+	Primary,
+	Secondary
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class VALKYRIE_API UWeaponComponent : public UActorComponent
 {
@@ -15,13 +24,14 @@ class VALKYRIE_API UWeaponComponent : public UActorComponent
 public:
 	UWeaponComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
+
 	void Fire();
 	void Reload();
+	void EquipPrimaryGun();
+	void EquipSecondaryGun();
+	void InitializeGuns(TSubclassOf<AGunActor> aPrimaryGunType, TSubclassOf<AGunActor> aSecondaryGunType);
 
-	int32 GetAmmoInMag() const { return myAmmoInMag; }
-	int32 GetReserveAmmo() const { return myReserveAmmo; }
-	int32 GetMagazineSize() const { return myMagazineSize; }
+	AGunActor* GetCurrentGunActor() const;
 	bool IsReloading() const { return myIsReloading; }
 
 private:
@@ -31,31 +41,31 @@ private:
 	void Server_TraceFire(FVector aTraceStart, FVector aTraceDirection);
 	UFUNCTION(Server, Reliable)
 	void Server_Reload();
+	UFUNCTION(Server, Reliable)
+	void Server_EquipGun(EValkWeaponSlot aWeaponSlot);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayFirePresentation(AGunActor* aGunActor);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayReloadPresentation(AGunActor* aGunActor);
+	UFUNCTION()
+	void OnRep_GunState();
+
+	void SpawnGunActors(TSubclassOf<AGunActor> aPrimaryGunType, TSubclassOf<AGunActor> aSecondaryGunType);
+	void SetCurrentGun(EValkWeaponSlot aWeaponSlot);
+	void UpdateGunVisibility() const;
+	void CancelReload();
 	void FinishReload();
 
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	float myDamage{25.f};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	float myRPM{600.f};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	int32 myMagazineSize{30};
-	UPROPERTY(Replicated, EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	int32 myAmmoInMag{30};
-	UPROPERTY(Replicated, EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	int32 myReserveAmmo{90};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	float myReloadDuration{2.f};
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	bool myIsReloading{false};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	float myTraceDistance{1000.f};
-
-	float myFireInterval{-1.f};
-	float myLastFiredTime{-1.f};
 	FTimerHandle myReloadTimerHandle;
 
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
-	USoundBase* myFireSound{nullptr};
+	UPROPERTY(ReplicatedUsing=OnRep_GunState)
+	TObjectPtr<AGunActor> myPrimaryGunActor{nullptr};
+	UPROPERTY(ReplicatedUsing=OnRep_GunState)
+	TObjectPtr<AGunActor> mySecondaryGunActor{nullptr};
+	UPROPERTY(ReplicatedUsing=OnRep_GunState)
+	EValkWeaponSlot myCurrentWeaponSlot{EValkWeaponSlot::Primary};
+	UPROPERTY(Replicated)
+	bool myIsReloading{false};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	bool myDrawDebugTrace{true};
 };
