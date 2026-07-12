@@ -11,6 +11,7 @@
 
 struct FInputActionValue;
 class UInputAction;
+class AGunActor;
 
 UCLASS(Blueprintable)
 class VALKYRIE_API AValkPlayerCharacter : public ACharacter
@@ -24,11 +25,15 @@ public:
 	void OnDied(AController* aDamageInstigator) const;
 
 private:
+	virtual void BeginPlay() override;
+
 	void HandleMove(const FInputActionValue& anInputValue);
 	void HandleLook(const FInputActionValue& anInputValue);
 	void HandleFire();
 	void HandleReload();
 	void HandleInteract();
+	void HandleEquipPrimaryGun();
+	void HandleEquipSecondaryGun();
 
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
@@ -43,6 +48,14 @@ private:
 	TObjectPtr<UInputAction> myReloadAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myInteractAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> myPrimaryWeaponAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> mySecondaryWeaponAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<AGunActor> myPrimaryGunType;
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<AGunActor> mySecondaryGunType;
 
 	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
 	TObjectPtr<UHealthComponent> myHealthComponent;

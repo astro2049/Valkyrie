@@ -4,6 +4,7 @@
 
 #include "GameFramework/PlayerController.h"
 #include "Valkyrie/Player/ValkPlayerCharacter.h"
+#include "Valkyrie/Actors/Gun/GunActor.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
@@ -21,8 +22,10 @@ FValkHUDData UUINode_GetHUDData::GetHUDData(APlayerController* const aPlayerCont
 			data.myMaxHealth = healthComponent->GetMaxHealth();
 		}
 		if (const UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>()) {
-			data.myAmmo = weaponComponent->GetAmmoInMag();
-			data.myReserveAmmo = weaponComponent->GetReserveAmmo();
+			if (const AGunActor* const currentGunActor = weaponComponent->GetCurrentGunActor()) {
+				data.myAmmo = currentGunActor->GetAmmoInMag();
+				data.myReserveAmmo = currentGunActor->GetReserveAmmo();
+			}
 			data.myIsReloading = weaponComponent->IsReloading();
 		}
 		if (const UInteractionComponent* const interactionComponent = playerCharacter->FindComponentByClass<UInteractionComponent>()) {
