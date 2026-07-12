@@ -5,7 +5,7 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Valkyrie/Common/ValkTypes.h"
-#include "Valkyrie/GameModes/PVP/TDM/TDMGameState.h"
+#include "Valkyrie/GameModes/TDM/TDMGameState.h"
 
 FValkTDMData UUINode_GetTDMData::GetTDMData(APlayerController* const aPlayerController)
 {

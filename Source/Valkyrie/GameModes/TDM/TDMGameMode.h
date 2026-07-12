@@ -5,26 +5,24 @@
 #include "CoreMinimal.h"
 #include "Valkyrie/Common/ValkTypes.h"
 #include "Valkyrie/GameModes/ValkGameMode.h"
-#include "PVPGameMode.generated.h"
+#include "TDMGameMode.generated.h"
 
-UCLASS(Abstract)
-class VALKYRIE_API APVPGameMode : public AValkGameMode
+UCLASS()
+class VALKYRIE_API ATDMGameMode : public AValkGameMode
 {
 	GENERATED_BODY()
 
 public:
-	APVPGameMode();
-
+	ATDMGameMode();
 	virtual void PostLogin(APlayerController* aNewPlayer) override;
 
 protected:
 	virtual void OnPlayerDied(AController* aKillerController, AController* aVictimController) override;
-	virtual void HandleModePlayerKilled(AController* aVictimController, AController* aKillerController) PURE_VIRTUAL(APVPGameMode::HandleModePlayerKilled, );
-	void EndPVPMatch(EValkTeamId aWinningTeamId);
-	int32 GetScoreLimit() const { return myScoreLimit; }
 
 private:
 	EValkTeamId GetBalancedTeamId() const;
+	void HandlePlayerKilled(AController* aVictimController, AController* aKillerController);
+	void EndTDMMatch(EValkTeamId aWinningTeamId);
 	void RespawnPlayer(AController* aController);
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
