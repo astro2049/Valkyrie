@@ -23,7 +23,7 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UWeaponComponent, myPrimaryGunActor);
 	DOREPLIFETIME(UWeaponComponent, mySecondaryGunActor);
-	DOREPLIFETIME(UWeaponComponent, myCurrentWeaponSlot);
+	DOREPLIFETIME(UWeaponComponent, myCurrentSlot);
 	DOREPLIFETIME(UWeaponComponent, myIsReloading);
 }
 
@@ -162,7 +162,7 @@ void UWeaponComponent::EquipSecondaryGun()
 
 void UWeaponComponent::Server_EquipGun_Implementation(const EValkWeaponSlot aWeaponSlot)
 {
-	if (aWeaponSlot != myCurrentWeaponSlot) {
+	if (aWeaponSlot != myCurrentSlot) {
 		CancelReload();
 		SetCurrentGun(aWeaponSlot);
 	}
@@ -216,10 +216,10 @@ void UWeaponComponent::SpawnGunActors(
 
 AGunActor* UWeaponComponent::GetCurrentGunActor() const
 {
-	if (myCurrentWeaponSlot == EValkWeaponSlot::Primary) {
+	if (myCurrentSlot == EValkWeaponSlot::Primary) {
 		return myPrimaryGunActor;
 	}
-	if (myCurrentWeaponSlot == EValkWeaponSlot::Secondary) {
+	if (myCurrentSlot == EValkWeaponSlot::Secondary) {
 		return mySecondaryGunActor;
 	}
 	return nullptr;
@@ -227,7 +227,7 @@ AGunActor* UWeaponComponent::GetCurrentGunActor() const
 
 void UWeaponComponent::SetCurrentGun(const EValkWeaponSlot aWeaponSlot)
 {
-	myCurrentWeaponSlot = aWeaponSlot;
+	myCurrentSlot = aWeaponSlot;
 	UpdateGunVisibility();
 }
 

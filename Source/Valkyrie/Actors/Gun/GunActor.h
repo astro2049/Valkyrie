@@ -49,7 +49,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UParticleSystem> myMuzzleFlash{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	FName myHandSocketName{"weapon_socket"};
+	FName myHandSocketName{"HandGrip_R"};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	FName myMuzzleSocketName{"muzzle"};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
