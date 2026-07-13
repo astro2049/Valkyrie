@@ -33,6 +33,8 @@ public:
 
 	AGunActor* GetCurrentGunActor() const;
 	bool IsReloading() const { return myIsReloading; }
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
+	EValkWeaponSlot GetCurrentSlot() const { return myCurrentSlot; }
 
 private:
 	virtual void BeginPlay() override;
@@ -63,7 +65,7 @@ private:
 	UPROPERTY(ReplicatedUsing=OnRep_GunState)
 	TObjectPtr<AGunActor> mySecondaryGunActor{nullptr};
 	UPROPERTY(ReplicatedUsing=OnRep_GunState)
-	EValkWeaponSlot myCurrentWeaponSlot{EValkWeaponSlot::Primary};
+	EValkWeaponSlot myCurrentSlot{EValkWeaponSlot::Primary};
 	UPROPERTY(Replicated)
 	bool myIsReloading{false};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
