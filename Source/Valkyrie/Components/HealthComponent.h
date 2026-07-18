@@ -6,13 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
-	FHealthChanged,
-	float, aHealth,
-	float, aMaxHealth
-);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDeath);
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class VALKYRIE_API UHealthComponent : public UActorComponent
 {
@@ -22,30 +15,20 @@ public:
 	UHealthComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-	void ApplyDamage(float aDamage, AController* aDamageInstigator = nullptr);
+	bool ApplyDamage(float aDamage);
 	void ResetHealth();
 	float GetHealth() const { return myHealth; }
 	float GetMaxHealth() const { return myMaxHealth; }
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool IsDead() const { return myIsDead; }
 
-	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
-	FHealthChanged OnHealthChanged; // for health bar presenter component (Blueprint)
-	UPROPERTY(BlueprintAssignable, Category="Valkyrie")
-	FDeath OnDeath; // for Blueprint presentation
-
 private:
 	virtual void BeginPlay() override;
-	
-	UFUNCTION()
-	void OnRep_Health() const;
-	UFUNCTION()
-	void OnRep_IsDead() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myMaxHealth{100.f};
-	UPROPERTY(ReplicatedUsing=OnRep_Health, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myHealth{100.f};
-	UPROPERTY(ReplicatedUsing=OnRep_IsDead, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	bool myIsDead{false};
 };

@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GunDataAsset.h"
+#include "Components/ArrowComponent.h"
 #include "GunActor.generated.h"
 
 class UGunDataAsset;
 class UParticleSystem;
+class USceneComponent;
 class USoundBase;
 class ACharacter;
 
@@ -19,10 +21,9 @@ class VALKYRIE_API AGunActor : public AActor
 
 public:
 	AGunActor();
+	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	void InitializeRuntimeState();
-	void AttachToCharacter(ACharacter* aCharacter);
+	
 	bool CanFire(float aNow) const;
 	void ConsumeAmmo(float aNow);
 	bool CanReload() const;
@@ -30,6 +31,7 @@ public:
 	void PlayFirePresentation() const;
 	void PlayReloadPresentation() const;
 
+	// Getters
 	float GetDamage() const { return myGunDataAsset ? myGunDataAsset->myDamage : 0.f; }
 	float GetTraceDistance() const { return myGunDataAsset ? myGunDataAsset->myTraceDistance : 0.f; }
 	float GetReloadDuration() const { return myGunDataAsset ? myGunDataAsset->myReloadDuration : 0.f; }
@@ -38,27 +40,29 @@ public:
 	int32 GetMagazineSize() const { return myGunDataAsset ? myGunDataAsset->myMagazineSize : 0; }
 
 private:
-	FTransform GetMuzzleTransform() const;
-
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UGunDataAsset> myGunDataAsset{nullptr};
+	
+	// Presentations
+	// fire
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<USoundBase> myFireSound{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	// reload
 	TObjectPtr<USoundBase> myReloadSound{nullptr};
+	// muzzle flash
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TObjectPtr<UParticleSystem> myMuzzleFlash{nullptr};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	FName myHandSocketName{"HandGrip_R"};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	FName myMuzzleSocketName{"muzzle"};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	FTransform myAttachTransform{FTransform::Identity};
+	TObjectPtr<UParticleSystem> myMuzzleFlashParticle{nullptr};
 
+	// States
 	UPROPERTY(Replicated)
 	int32 myAmmoInMag{0};
 	UPROPERTY(Replicated)
 	int32 myReserveAmmo{0};
-
 	float myLastFiredTime{-1.f};
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<USceneComponent> myRootComponent{nullptr};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UArrowComponent> myMuzzleArrowComponent{nullptr};
 };

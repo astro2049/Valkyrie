@@ -3,9 +3,8 @@
 
 #include "GunActor.h"
 
-#include "Components/MeshComponent.h"
+#include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -14,6 +13,22 @@ AGunActor::AGunActor()
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 	SetReplicateMovement(true);
+
+	myRootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	RootComponent = myRootComponent;
+	myMuzzleArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("MuzzleArrowComponent"));
+	myMuzzleArrowComponent->SetupAttachment(RootComponent);
+}
+
+void AGunActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HasAuthority() && myGunDataAsset) {
+		myAmmoInMag = FMath::Max(myGunDataAsset->myMagazineSize, 1);
+		myReserveAmmo = FMath::Max(myGunDataAsset->myInitialReserveAmmo, 0);
+		myLastFiredTime = -1.f;
+	}
 }
 
 void AGunActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -22,30 +37,6 @@ void AGunActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 
 	DOREPLIFETIME(AGunActor, myAmmoInMag);
 	DOREPLIFETIME(AGunActor, myReserveAmmo);
-}
-
-void AGunActor::InitializeRuntimeState()
-{
-	if (myGunDataAsset) {
-		myAmmoInMag = FMath::Max(myGunDataAsset->myMagazineSize, 1);
-		myReserveAmmo = FMath::Max(myGunDataAsset->myInitialReserveAmmo, 0);
-		myLastFiredTime = -1.f;
-	}
-}
-
-void AGunActor::AttachToCharacter(ACharacter* const aCharacter)
-{
-	if (aCharacter) {
-		if (USkeletalMeshComponent* const characterMesh = aCharacter->GetMesh()) {
-			AttachToComponent(
-				characterMesh,
-				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-				myHandSocketName
-			);
-			SetActorRelativeTransform(myAttachTransform);
-			SetOwner(aCharacter);
-		}
-	}
 }
 
 bool AGunActor::CanFire(const float aNow) const
@@ -82,12 +73,14 @@ void AGunActor::ApplyReloadAmmo()
 
 void AGunActor::PlayFirePresentation() const
 {
-	const FTransform muzzleTransform = GetMuzzleTransform();
-	if (myFireSound) {
-		UGameplayStatics::PlaySoundAtLocation(this, myFireSound, muzzleTransform.GetLocation());
-	}
-	if (myMuzzleFlash) {
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), myMuzzleFlash, muzzleTransform);
+	if (myMuzzleArrowComponent) {
+		const FTransform muzzleTransform = myMuzzleArrowComponent->GetComponentTransform();
+		if (myFireSound) {
+			UGameplayStatics::PlaySoundAtLocation(this, myFireSound, muzzleTransform.GetLocation());
+		}
+		if (myMuzzleFlashParticle) {
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), myMuzzleFlashParticle, muzzleTransform);
+		}
 	}
 }
 
@@ -96,18 +89,4 @@ void AGunActor::PlayReloadPresentation() const
 	if (myReloadSound) {
 		UGameplayStatics::PlaySoundAtLocation(this, myReloadSound, GetActorLocation());
 	}
-}
-
-FTransform AGunActor::GetMuzzleTransform() const
-{
-	FTransform muzzleTransform = GetActorTransform();
-	TArray<UMeshComponent*> meshComponents;
-	GetComponents(meshComponents);
-	for (const UMeshComponent* const meshComponent : meshComponents) {
-		if (meshComponent && meshComponent->DoesSocketExist(myMuzzleSocketName)) {
-			muzzleTransform = meshComponent->GetSocketTransform(myMuzzleSocketName);
-			break;
-		}
-	}
-	return muzzleTransform;
 }

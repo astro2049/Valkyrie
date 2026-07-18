@@ -29,7 +29,6 @@ public:
 	void Reload();
 	void EquipPrimaryGun();
 	void EquipSecondaryGun();
-	void InitializeGuns(TSubclassOf<AGunActor> aPrimaryGunType, TSubclassOf<AGunActor> aSecondaryGunType);
 
 	AGunActor* GetCurrentGunActor() const;
 	bool IsReloading() const { return myIsReloading; }
@@ -52,7 +51,7 @@ private:
 	UFUNCTION()
 	void OnRep_GunState();
 
-	void SpawnGunActors(TSubclassOf<AGunActor> aPrimaryGunType, TSubclassOf<AGunActor> aSecondaryGunType);
+	void SpawnGunActors();
 	void SetCurrentGun(EValkWeaponSlot aWeaponSlot);
 	void UpdateGunVisibility() const;
 	void CancelReload();
@@ -70,4 +69,10 @@ private:
 	bool myIsReloading{false};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	bool myDrawDebugTrace{true};
+
+	// primary and secondary gun types
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<AGunActor> myPrimaryGunType;
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<AGunActor> mySecondaryGunType;
 };

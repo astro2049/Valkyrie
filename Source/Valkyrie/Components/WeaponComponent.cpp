@@ -5,11 +5,12 @@
 #include "Valkyrie/Actors/Gun/GunActor.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Valkyrie/Actors/TargetPawn.h"
+#include "Valkyrie/Player/ValkPlayerCharacter.h"
 
 UWeaponComponent::UWeaponComponent()
 {
@@ -31,16 +32,10 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void UWeaponComponent::InitializeGuns(
-	TSubclassOf<AGunActor> aPrimaryGunType,
-	TSubclassOf<AGunActor> aSecondaryGunType
-)
-{
+	
 	if (const AActor* const owner = GetOwner()) {
 		if (owner->HasAuthority()) {
-			SpawnGunActors(aPrimaryGunType, aSecondaryGunType);
+			SpawnGunActors();
 			SetCurrentGun(EValkWeaponSlot::Primary);
 		}
 	}
@@ -84,12 +79,19 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 						params
 					);
 					if (hasHit) {
-						if (const AActor* hitActor = hitResult.GetActor()) {
+						if (AActor* const hitActor = hitResult.GetActor()) {
 							if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
+								AController* damageInstigator = nullptr;
 								if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
-									health->ApplyDamage(currentGunActor->GetDamage(), ownerPawn->GetController());
-								} else {
-									health->ApplyDamage(currentGunActor->GetDamage());
+									damageInstigator = ownerPawn->GetController();
+								}
+								if (health->ApplyDamage(currentGunActor->GetDamage())) {
+									if (AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(hitActor)) {
+										playerCharacter->OnDied(damageInstigator);
+									}
+									if (ATargetPawn* const targetPawn = Cast<ATargetPawn>(hitActor)) {
+										targetPawn->OnDied();
+									}
 								}
 							}
 						}
@@ -187,27 +189,22 @@ void UWeaponComponent::OnRep_GunState()
 	UpdateGunVisibility();
 }
 
-void UWeaponComponent::SpawnGunActors(
-	TSubclassOf<AGunActor> aPrimaryGunType,
-	TSubclassOf<AGunActor> aSecondaryGunType
-)
+void UWeaponComponent::SpawnGunActors()
 {
 	if (UWorld* const world = GetWorld()) {
-		if (aPrimaryGunType) {
-			myPrimaryGunActor = world->SpawnActor<AGunActor>(aPrimaryGunType);
-			if (myPrimaryGunActor) {
-				myPrimaryGunActor->InitializeRuntimeState();
-				if (ACharacter* const ownerCharacter = Cast<ACharacter>(GetOwner())) {
-					myPrimaryGunActor->AttachToCharacter(ownerCharacter);
+		if (AValkPlayerCharacter* const ownerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
+			FActorSpawnParameters spawnParams;
+			spawnParams.Owner = ownerCharacter;
+			if (myPrimaryGunType) {
+				myPrimaryGunActor = world->SpawnActor<AGunActor>(myPrimaryGunType, FTransform::Identity, spawnParams);
+				if (myPrimaryGunActor) {
+					ownerCharacter->AttachGun(myPrimaryGunActor);
 				}
 			}
-		}
-		if (aSecondaryGunType) {
-			mySecondaryGunActor = world->SpawnActor<AGunActor>(aSecondaryGunType);
-			if (mySecondaryGunActor) {
-				mySecondaryGunActor->InitializeRuntimeState();
-				if (ACharacter* const ownerCharacter = Cast<ACharacter>(GetOwner())) {
-					mySecondaryGunActor->AttachToCharacter(ownerCharacter);
+			if (mySecondaryGunType) {
+				mySecondaryGunActor = world->SpawnActor<AGunActor>(mySecondaryGunType, FTransform::Identity, spawnParams);
+				if (mySecondaryGunActor) {
+					ownerCharacter->AttachGun(mySecondaryGunActor);
 				}
 			}
 		}
@@ -249,7 +246,7 @@ void UWeaponComponent::UpdateGunVisibility() const
 void UWeaponComponent::CancelReload()
 {
 	if (myIsReloading) {
-		if (UWorld* const world = GetWorld()) {
+		if (const UWorld* const world = GetWorld()) {
 			world->GetTimerManager().ClearTimer(myReloadTimerHandle);
 		}
 		myIsReloading = false;
