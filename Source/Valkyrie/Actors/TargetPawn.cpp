@@ -10,17 +10,7 @@ ATargetPawn::ATargetPawn()
 	myHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("myHealthComponent"));
 }
 
-void ATargetPawn::BeginPlay()
-{
-	Super::BeginPlay();
-
-	myHealthComponent->OnDeath.AddUniqueDynamic(
-		this,
-		&ATargetPawn::HandleDeath
-	);
-}
-
-void ATargetPawn::HandleDeath()
+void ATargetPawn::OnDied()
 {
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);

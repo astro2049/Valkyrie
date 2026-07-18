@@ -16,13 +16,9 @@ class VALKYRIE_API ATargetPawn : public APawn
 
 public:
 	ATargetPawn();
-
-protected:
-	virtual void BeginPlay() override;
+	void OnDied();
 
 private:
-	UFUNCTION()
-	void HandleDeath();
 	void Respawn();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

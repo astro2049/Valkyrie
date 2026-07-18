@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "Valkyrie/Actors/Gun/GunActor.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
@@ -19,12 +20,19 @@ AValkPlayerCharacter::AValkPlayerCharacter()
 	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
 }
 
-void AValkPlayerCharacter::BeginPlay()
+void AValkPlayerCharacter::AttachGun(AGunActor* aGunActor)
 {
-	Super::BeginPlay();
+	if (!aGunActor) {
+		return;
+	}
 
-	if (myWeaponComponent) {
-		myWeaponComponent->InitializeGuns(myPrimaryGunType, mySecondaryGunType);
+	if (USkeletalMeshComponent* const characterMesh = GetMesh()) {
+		aGunActor->AttachToComponent(
+			characterMesh,
+			FAttachmentTransformRules::SnapToTargetIncludingScale,
+			myHandSocketName
+		);
+		aGunActor->SetOwner(this);
 	}
 }
 
@@ -92,13 +100,6 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 	}
 }
 
-void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
-{
-	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
-		playerController->OnDied(aDamageInstigator);
-	}
-}
-
 void AValkPlayerCharacter::HandleMove(const FInputActionValue& anInputValue)
 {
 	if (const FVector2D moveInput = anInputValue.Get<FVector2D>(); !moveInput.IsNearlyZero()) {
@@ -156,5 +157,12 @@ void AValkPlayerCharacter::Server_Interact_Implementation()
 {
 	if (myInteractionComponent) {
 		myInteractionComponent->Interact();
+	}
+}
+
+void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
+{
+	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
+		playerController->OnDied(aDamageInstigator);
 	}
 }
