@@ -24,9 +24,9 @@ public:
 	AGunActor();
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
-	bool CanFire(float aNow) const;
-	void ConsumeAmmo(float aNow);
+
+	bool CanFire() const;
+	void ConsumeAmmo();
 	bool CanReload() const;
 	void ApplyReloadAmmo();
 	void PlayFirePresentation() const;
@@ -43,7 +43,7 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UGunDataAsset> myGunDataAsset{nullptr};
-	
+
 	// Presentations
 	// fire
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -56,12 +56,13 @@ private:
 	TObjectPtr<UNiagaraSystem> myMuzzleFlashVFX{nullptr};
 
 	// States
+	float myFireInterval{0.f};
 	UPROPERTY(Replicated)
 	int32 myAmmoInMag{0};
 	UPROPERTY(Replicated)
 	int32 myReserveAmmo{0};
 	float myLastFiredTime{-1.f};
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<USceneComponent> myRootComponent{nullptr};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraSystem.h"
 #include "Components/ActorComponent.h"
 #include "TimerManager.h"
 #include "WeaponComponent.generated.h"
@@ -48,6 +49,8 @@ private:
 	void Multicast_PlayFirePresentation(AGunActor* aGunActor);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayReloadPresentation(AGunActor* aGunActor);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayHitPresentation(FVector aHitPoint, const FVector aHitNormal);
 	UFUNCTION()
 	void OnRep_GunState();
 
@@ -75,4 +78,8 @@ private:
 	TSubclassOf<AGunActor> myPrimaryGunType;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<AGunActor> mySecondaryGunType;
+	
+	// on hit
+	UPROPERTY(EditDefaultsOnly, Category="Apex")
+	TObjectPtr<UNiagaraSystem> myImpactVFX;
 };
