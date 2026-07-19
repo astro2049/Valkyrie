@@ -28,6 +28,7 @@ void AGunActor::BeginPlay()
 	if (HasAuthority() && myGunDataAsset) {
 		myAmmoInMag = FMath::Max(myGunDataAsset->myMagazineSize, 1);
 		myReserveAmmo = FMath::Max(myGunDataAsset->myInitialReserveAmmo, 0);
+		myFireInterval = myGunDataAsset->myRPM > 0.f ? 60.f / myGunDataAsset->myRPM : 0.f;
 		myLastFiredTime = -1.f;
 	}
 }
@@ -40,20 +41,20 @@ void AGunActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	DOREPLIFETIME(AGunActor, myReserveAmmo);
 }
 
-bool AGunActor::CanFire(const float aNow) const
+bool AGunActor::CanFire() const
 {
-	bool canFire = false;
-	if (myGunDataAsset) {
-		const float fireInterval = myGunDataAsset->myRPM > 0.f ? 60.f / myGunDataAsset->myRPM : 0.f;
-		canFire = myAmmoInMag > 0 && aNow - myLastFiredTime >= fireInterval;
+	if (const UWorld* const world = GetWorld()) {
+		return myAmmoInMag > 0 && world->GetTimeSeconds() - myLastFiredTime >= myFireInterval;
 	}
-	return canFire;
+	return false;
 }
 
-void AGunActor::ConsumeAmmo(const float aNow)
+void AGunActor::ConsumeAmmo()
 {
-	myLastFiredTime = aNow;
-	myAmmoInMag = FMath::Max(myAmmoInMag - 1, 0);
+	if (const UWorld* const world = GetWorld()) {
+		myLastFiredTime = world->GetTimeSeconds();
+		myAmmoInMag = FMath::Max(myAmmoInMag - 1, 0);
+	}
 }
 
 bool AGunActor::CanReload() const

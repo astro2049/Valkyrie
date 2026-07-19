@@ -8,6 +8,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/Player/ValkPlayerCharacter.h"
 
@@ -31,7 +32,7 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (const AActor* const owner = GetOwner()) {
 		if (owner->HasAuthority()) {
 			SpawnGunActors();
@@ -60,9 +61,8 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 	if (world && owner) {
 		if (const UHealthComponent* const healthComponent = owner->FindComponentByClass<UHealthComponent>()) {
 			if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
-				const float now = world->GetTimeSeconds();
-				if (!healthComponent->IsDead() && !myIsReloading && !aTraceDirection.IsNearlyZero() && currentGunActor->CanFire(now)) {
-					currentGunActor->ConsumeAmmo(now);
+				if (!healthComponent->IsDead() && !myIsReloading && !aTraceDirection.IsNearlyZero() && currentGunActor->CanFire()) {
+					currentGunActor->ConsumeAmmo();
 
 					// line trace
 					const FVector start = aTraceStart;
@@ -78,13 +78,14 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 						params
 					);
 					if (hasHit) {
-						if (AActor* const hitActor = hitResult.GetActor()) {
-							if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
+						if (const APawn* const hitPawn = Cast<APawn>(hitResult.GetActor())) {
+							if (UHealthComponent* health = hitPawn->FindComponentByClass<UHealthComponent>()) {
 								AController* damageInstigator = nullptr;
 								if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
 									damageInstigator = ownerPawn->GetController();
 								}
 								health->ApplyDamage(currentGunActor->GetDamage(), damageInstigator);
+								Multicast_PlayHitPresentation(hitResult.ImpactPoint, hitResult.ImpactNormal);
 							}
 						}
 					}
@@ -173,6 +174,18 @@ void UWeaponComponent::Multicast_PlayReloadPresentation_Implementation(AGunActor
 {
 	if (aGunActor) {
 		aGunActor->PlayReloadPresentation();
+	}
+}
+
+void UWeaponComponent::Multicast_PlayHitPresentation_Implementation(FVector aHitPoint, const FVector aHitNormal)
+{
+	if (myImpactVFX) {
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			myImpactVFX,
+			aHitPoint,
+			aHitNormal.Rotation()
+		);
 	}
 }
 
