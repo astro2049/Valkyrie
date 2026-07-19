@@ -7,6 +7,7 @@
 #include "TimerManager.h"
 #include "TargetPawn.generated.h"
 
+class AController;
 class UHealthComponent;
 
 UCLASS(Blueprintable)
@@ -16,9 +17,11 @@ class VALKYRIE_API ATargetPawn : public APawn
 
 public:
 	ATargetPawn();
-	void OnDied();
 
 private:
+	virtual void BeginPlay() override;
+
+	void OnHealthDied(AController* aDamageInstigator);
 	void Respawn();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

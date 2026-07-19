@@ -4,7 +4,6 @@
 
 #include "Engine/World.h"
 #include "Valkyrie/Components/HealthComponent.h"
-#include "Valkyrie/Player/ValkPlayerCharacter.h"
 
 void AZombieAIController::Attack(AActor* const aTarget)
 {
@@ -19,11 +18,7 @@ void AZombieAIController::Attack(AActor* const aTarget)
 		if (const float currentTime = world->GetTimeSeconds(); currentTime >= myLastAttackTime + myAttackCooldown) {
 			myLastAttackTime = currentTime;
 			if (UHealthComponent* const healthComponent = aTarget->FindComponentByClass<UHealthComponent>()) {
-				if (healthComponent->ApplyDamage(myDamagePerAttack)) {
-					if (AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(aTarget)) {
-						playerCharacter->OnDied(this);
-					}
-				}
+				healthComponent->ApplyDamage(myDamagePerAttack, this);
 			}
 		}
 	}

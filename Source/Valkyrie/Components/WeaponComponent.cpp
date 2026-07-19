@@ -9,7 +9,6 @@
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Valkyrie/Actors/TargetPawn.h"
 #include "Valkyrie/Player/ValkPlayerCharacter.h"
 
 UWeaponComponent::UWeaponComponent()
@@ -85,14 +84,7 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 								if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
 									damageInstigator = ownerPawn->GetController();
 								}
-								if (health->ApplyDamage(currentGunActor->GetDamage())) {
-									if (AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(hitActor)) {
-										playerCharacter->OnDied(damageInstigator);
-									}
-									if (ATargetPawn* const targetPawn = Cast<ATargetPawn>(hitActor)) {
-										targetPawn->OnDied();
-									}
-								}
+								health->ApplyDamage(currentGunActor->GetDamage(), damageInstigator);
 							}
 						}
 					}
