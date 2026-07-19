@@ -23,9 +23,10 @@ public:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
 	void AttachGun(AGunActor* aGunActor);
-	void OnDied(AController* aDamageInstigator) const;
 
 private:
+	virtual void BeginPlay() override;
+
 	void HandleMove(const FInputActionValue& anInputValue);
 	void HandleLook(const FInputActionValue& anInputValue);
 	void HandleFire();
@@ -33,6 +34,7 @@ private:
 	void HandleInteract();
 	void HandleEquipPrimaryGun();
 	void HandleEquipSecondaryGun();
+	void OnHealthDied(AController* aDamageInstigator);
 
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();

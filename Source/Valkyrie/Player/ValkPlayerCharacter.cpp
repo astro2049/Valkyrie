@@ -20,6 +20,15 @@ AValkPlayerCharacter::AValkPlayerCharacter()
 	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
 }
 
+void AValkPlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (myHealthComponent) {
+		myHealthComponent->OnDied().BindUObject(this, &AValkPlayerCharacter::OnHealthDied);
+	}
+}
+
 void AValkPlayerCharacter::AttachGun(AGunActor* aGunActor)
 {
 	if (!aGunActor) {
@@ -160,7 +169,7 @@ void AValkPlayerCharacter::Server_Interact_Implementation()
 	}
 }
 
-void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
+void AValkPlayerCharacter::OnHealthDied(AController* const aDamageInstigator)
 {
 	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
 		playerController->OnDied(aDamageInstigator);
