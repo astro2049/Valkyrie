@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "GunDataAsset.h"
+#include "NiagaraSystem.h"
 #include "Components/ArrowComponent.h"
+#include "GameFramework/Actor.h"
 #include "GunActor.generated.h"
 
 class UGunDataAsset;
@@ -52,7 +53,7 @@ private:
 	TObjectPtr<USoundBase> myReloadSound{nullptr};
 	// muzzle flash
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TObjectPtr<UParticleSystem> myMuzzleFlashParticle{nullptr};
+	TObjectPtr<UNiagaraSystem> myMuzzleFlashVFX{nullptr};
 
 	// States
 	UPROPERTY(Replicated)

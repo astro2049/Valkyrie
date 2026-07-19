@@ -3,6 +3,7 @@
 
 #include "GunActor.h"
 
+#include "NiagaraFunctionLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -78,8 +79,14 @@ void AGunActor::PlayFirePresentation() const
 		if (myFireSound) {
 			UGameplayStatics::PlaySoundAtLocation(this, myFireSound, muzzleTransform.GetLocation());
 		}
-		if (myMuzzleFlashParticle) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), myMuzzleFlashParticle, muzzleTransform);
+		if (myMuzzleFlashVFX) {
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				myMuzzleFlashVFX,
+				muzzleTransform.GetLocation(),
+				muzzleTransform.GetRotation().Rotator(),
+				muzzleTransform.GetScale3D()
+			);
 		}
 	}
 }
