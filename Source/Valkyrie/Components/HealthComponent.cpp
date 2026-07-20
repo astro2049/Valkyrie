@@ -30,6 +30,7 @@ void UHealthComponent::ApplyDamage(const float aDamage, AController* const aDama
 	if (const AActor* const owner = GetOwner()) {
 		if (owner->HasAuthority() && aDamage > 0.f && !myIsDead) {
 			myHealth = FMath::Clamp(myHealth - aDamage, 0.f, myMaxHealth);
+			myOnDamaged.ExecuteIfBound(aDamage, aDamageInstigator);
 			if (myHealth <= 0.f) {
 				myIsDead = true;
 				myOnDied.ExecuteIfBound(aDamageInstigator);
