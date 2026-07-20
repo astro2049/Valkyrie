@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "Valkyrie/GameModes/ValkGameMode.h"
+#include "Valkyrie/UI/DamageIndicatorInterface.h"
 #include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void AValkPlayerController::BeginPlay()
@@ -143,5 +144,14 @@ void AValkPlayerController::Client_PlayHitRepresentations_Implementation()
 {
 	if (UUIMessageSubsystem* const uiMessageSubsystem = VALK_UIMESSAGESUBSYS()) {
 		uiMessageSubsystem->BroadcastUIMessage(UIMessage::LocalPlayerHitConfirmed);
+	}
+}
+
+void AValkPlayerController::Client_PlayDamageRepresentations_Implementation(const FVector aDamageSourceLocation)
+{
+	if (myHUDWidget) {
+		if (myHUDWidget->Implements<UDamageIndicatorInterface>()) {
+			IDamageIndicatorInterface::Execute_PlayDamageIndicator(myHUDWidget, aDamageSourceLocation);
+		}
 	}
 }

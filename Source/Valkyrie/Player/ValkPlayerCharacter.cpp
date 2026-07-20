@@ -25,7 +25,8 @@ void AValkPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	if (myHealthComponent) {
-		myHealthComponent->OnDied().BindUObject(this, &AValkPlayerCharacter::OnHealthDied);
+		myHealthComponent->OnDamaged().BindUObject(this, &AValkPlayerCharacter::OnDamaged);
+		myHealthComponent->OnDied().BindUObject(this, &AValkPlayerCharacter::OnDied);
 	}
 }
 
@@ -169,9 +170,29 @@ void AValkPlayerCharacter::Server_Interact_Implementation()
 	}
 }
 
-void AValkPlayerCharacter::OnHealthDied(AController* const aDamageInstigator)
+void AValkPlayerCharacter::OnDamaged(const float, AController* const aDamageInstigator)
+{
+	Multicast_PlayHitReact();
+
+	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
+		if (aDamageInstigator) {
+			if (const APawn* const damageInstigatorPawn = aDamageInstigator->GetPawn()) {
+				playerController->Client_PlayDamageRepresentations(damageInstigatorPawn->GetActorLocation());
+			}
+		}
+	}
+}
+
+void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
 {
 	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
 		playerController->OnDied(aDamageInstigator);
+	}
+}
+
+void AValkPlayerCharacter::Multicast_PlayHitReact_Implementation()
+{
+	if (myHitReactMontage) {
+		PlayAnimMontage(myHitReactMontage);
 	}
 }

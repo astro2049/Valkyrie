@@ -12,6 +12,7 @@
 struct FInputActionValue;
 class UInputAction;
 class AGunActor;
+class UAnimMontage;
 
 UCLASS(Blueprintable)
 class VALKYRIE_API AValkPlayerCharacter : public ACharacter
@@ -34,14 +35,14 @@ private:
 	void HandleInteract();
 	void HandleEquipPrimaryGun();
 	void HandleEquipSecondaryGun();
-	void OnHealthDied(AController* aDamageInstigator);
+
+	void OnDamaged(float aDamage, AController* aDamageInstigator);
+	void OnDied(AController* aDamageInstigator) const;
 
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
-
-	// hand socket
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	FName myHandSocketName{"HandGrip_R"};
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayHitReact();
 
 	// input actions
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -66,4 +67,10 @@ private:
 	TObjectPtr<UWeaponComponent> myWeaponComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInteractionComponent> myInteractionComponent;
+
+	// hand socket
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	FName myHandSocketName{"HandGrip_R"};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UAnimMontage> myHitReactMontage{nullptr};
 };

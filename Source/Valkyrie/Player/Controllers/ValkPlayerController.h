@@ -24,6 +24,8 @@ public:
 	void Client_OnPlayerRespawned();
 	UFUNCTION(Client, Unreliable)
 	void Client_PlayHitRepresentations();
+	UFUNCTION(Client, Unreliable)
+	void Client_PlayDamageRepresentations(FVector aDamageSourceLocation);
 
 protected:
 	virtual void BeginPlay() override;
@@ -35,21 +37,23 @@ private:
 	void ShowScoreboard();
 	void HideScoreboard();
 
-	// input
+	// I. input
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputMappingContext> myInputMappingContext{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myInputActionOpenScoreboard{nullptr};
-	
+
+	// II. UI
 	// HUD
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myHUDWidget{nullptr};
-	// Scoreboard
+	// scoreboard
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myScoreboardWidget{nullptr};
+	// HUD class
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	// UI Classes
 	TSubclassOf<UUserWidget> myHUDWidgetClass;
+	// scoreboard class
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myScoreboardWidgetClass;
 };
