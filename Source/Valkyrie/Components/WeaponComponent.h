@@ -80,6 +80,8 @@ private:
 	TSubclassOf<AGunActor> mySecondaryGunType;
 	
 	// on hit
-	UPROPERTY(EditDefaultsOnly, Category="Apex")
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UNiagaraSystem> myImpactVFX;
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<USoundBase> myHitSoundCue;
 };
