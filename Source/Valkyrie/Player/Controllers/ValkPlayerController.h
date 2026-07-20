@@ -22,6 +22,8 @@ public:
 	void Client_OnPlayerDied();
 	UFUNCTION(Client, Reliable)
 	void Client_OnPlayerRespawned();
+	UFUNCTION(Client, Unreliable)
+	void Client_PlayHitRepresentations();
 
 protected:
 	virtual void BeginPlay() override;

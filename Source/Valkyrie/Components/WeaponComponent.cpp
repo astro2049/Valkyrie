@@ -11,6 +11,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/Player/ValkPlayerCharacter.h"
+#include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 
 UWeaponComponent::UWeaponComponent()
 {
@@ -57,7 +58,7 @@ void UWeaponComponent::Fire()
 void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart, const FVector aTraceDirection)
 {
 	const UWorld* const world = GetWorld();
-	const AActor* const owner = GetOwner();
+	const APawn* const owner = Cast<APawn>(GetOwner());
 	if (world && owner) {
 		if (const UHealthComponent* const healthComponent = owner->FindComponentByClass<UHealthComponent>()) {
 			if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
@@ -86,6 +87,9 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 								}
 								health->ApplyDamage(currentGunActor->GetDamage(), damageInstigator);
 								Multicast_PlayHitPresentation(hitResult.ImpactPoint, hitResult.ImpactNormal);
+								if (AValkPlayerController* const ownerController = Cast<AValkPlayerController>(owner->GetController())) {
+									ownerController->Client_PlayHitRepresentations();
+								}
 							}
 						}
 					}

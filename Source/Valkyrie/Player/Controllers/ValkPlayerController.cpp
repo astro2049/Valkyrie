@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "Valkyrie/GameModes/ValkGameMode.h"
+#include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void AValkPlayerController::BeginPlay()
 {
@@ -135,5 +136,12 @@ void AValkPlayerController::HideScoreboard()
 
 	if (myScoreboardWidget) {
 		myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void AValkPlayerController::Client_PlayHitRepresentations_Implementation()
+{
+	if (UUIMessageSubsystem* const uiMessageSubsystem = VALK_UIMESSAGESUBSYS()) {
+		uiMessageSubsystem->BroadcastUIMessage(UIMessage::LocalPlayerHitConfirmed);
 	}
 }
