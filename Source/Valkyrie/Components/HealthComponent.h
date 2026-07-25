@@ -25,8 +25,11 @@ public:
 
 	FHealthComponentDamaged& GetOnDamaged() { return myDamagedDelegate; }
 	FHealthComponentDied& GetOnDied() { return myDiedDelegate; }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	float GetMaxHealth() const { return myMaxHealth; }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	float GetHealth() const { return myHealth; }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool GetIsDead() const { return myIsDead; }
 
 private:
@@ -35,10 +38,10 @@ private:
 	FHealthComponentDamaged myDamagedDelegate;
 	FHealthComponentDied myDiedDelegate;
 
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myMaxHealth{100.f};
-	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	float myHealth{100.f};
-	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
 	bool myIsDead{false};
 };

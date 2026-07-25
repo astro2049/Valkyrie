@@ -38,9 +38,9 @@ private:
 	void SetCombatSliceState(ECombatSliceState aNewState) const;
 	void SetDefenseTimeRemaining(float aDefenseTimeRemaining) const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDefenseDuration{60.f};
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
 	float myDefenseTimeRemaining{60.f};
 
 	TWeakObjectPtr<AExtractionZone> myExtractionZone;

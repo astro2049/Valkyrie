@@ -63,8 +63,8 @@ private:
 	int32 myReserveAmmo{0};
 	float myLastFiredTime{-1.f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY()
 	TObjectPtr<USceneComponent> myRootComponent{nullptr};
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY()
 	TObjectPtr<UArrowComponent> myMuzzleArrowComponent{nullptr};
 };

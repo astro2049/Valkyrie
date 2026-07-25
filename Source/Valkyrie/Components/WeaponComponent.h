@@ -65,9 +65,9 @@ private:
 	EValkWeaponSlot myCurrentSlot{EValkWeaponSlot::Primary};
 	UPROPERTY(Replicated)
 	bool myIsReloading{false};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myTraceDistance{10000.f};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	bool myDrawDebugTrace{true};
 
 	// primary and secondary gun types
