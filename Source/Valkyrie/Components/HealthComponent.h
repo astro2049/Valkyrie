@@ -25,6 +25,7 @@ public:
 
 	FHealthComponentDamaged& GetOnDamaged() { return myDamagedDelegate; }
 	FHealthComponentDied& GetOnDied() { return myDiedDelegate; }
+
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	float GetMaxHealth() const { return myMaxHealth; }
 	UFUNCTION(BlueprintPure, Category="Valkyrie")

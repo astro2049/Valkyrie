@@ -6,22 +6,8 @@
 #include "Engine/DataAsset.h"
 #include "MapDataAsset.generated.h"
 
-class AGameModeBase;
 class UTexture2D;
-
-USTRUCT(BlueprintType)
-struct FMenuModeEntry
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
-	FText myDisplayName;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
-	TSubclassOf<AGameModeBase> myGameModeClass;
-
-	bool IsPlayable() const;
-};
+class UWorld;
 
 UCLASS(BlueprintType)
 class VALKYRIE_API UMapDataAsset : public UDataAsset
@@ -30,13 +16,13 @@ class VALKYRIE_API UMapDataAsset : public UDataAsset
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
-	FText myDisplayName;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(MultiLine=true))
-	FText myDescription;
+	TObjectPtr<UTexture2D> myMapImage{nullptr};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
-	TObjectPtr<UTexture2D> myPreviewImage{nullptr};
+	FText myMapName;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
-	FName myLevelName;
+	FText myMapMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(MultiLine="true"))
+	FText myMapDescription;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
-	TArray<FMenuModeEntry> mySupportedModes;
+	TSoftObjectPtr<UWorld> myLevel;
 };

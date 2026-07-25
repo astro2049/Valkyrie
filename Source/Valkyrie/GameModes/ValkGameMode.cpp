@@ -89,6 +89,6 @@ void AValkGameMode::ReturnToMainMenuAfterDelay()
 void AValkGameMode::ReturnPlayersToMainMenu() const
 {
 	if (UWorld* const world = GetWorld()) {
-		world->ServerTravel(TEXT("/Game/MainMenu/MainMenu"));
+		world->ServerTravel(TEXT("/Game/Maps/Level_MainMenu"));
 	}
 }
