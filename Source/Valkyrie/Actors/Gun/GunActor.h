@@ -29,12 +29,12 @@ public:
 	void ConsumeAmmo();
 	bool CanReload() const;
 	void ApplyReloadAmmo();
-	void PlayFirePresentation() const;
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayFirePresentation();
 	void PlayReloadPresentation() const;
 
 	// Getters
 	float GetDamage() const { return myGunDataAsset ? myGunDataAsset->myDamage : 0.f; }
-	float GetTraceDistance() const { return myGunDataAsset ? myGunDataAsset->myTraceDistance : 0.f; }
 	float GetReloadDuration() const { return myGunDataAsset ? myGunDataAsset->myReloadDuration : 0.f; }
 	int32 GetAmmoInMag() const { return myAmmoInMag; }
 	int32 GetReserveAmmo() const { return myReserveAmmo; }

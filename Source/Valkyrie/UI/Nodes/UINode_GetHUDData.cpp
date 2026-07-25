@@ -3,10 +3,10 @@
 #include "UINode_GetHUDData.h"
 
 #include "GameFramework/PlayerController.h"
-#include "Valkyrie/Player/ValkPlayerCharacter.h"
+#include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
 #include "Valkyrie/Actors/Gun/GunActor.h"
 #include "Valkyrie/Components/HealthComponent.h"
-#include "Valkyrie/Components/InteractionComponent.h"
+#include "Valkyrie/Components/Interaction/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
 
 FValkHUDData UUINode_GetHUDData::GetHUDData(APlayerController* const aPlayerController)

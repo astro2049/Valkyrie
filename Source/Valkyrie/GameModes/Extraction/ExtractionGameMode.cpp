@@ -65,15 +65,15 @@ void AExtractionGameMode::CompleteExtraction()
 	ensure(combatSliceGameState && combatSliceGameState->GetCombatSliceState() == ECombatSliceState::ToExtract);
 	SetCombatSliceState(ECombatSliceState::Completed);
 	SetDefenseTimeRemaining(0.f);
-	ScheduleReturnToMainMenu();
+	ReturnToMainMenuAfterDelay();
 }
 
-void AExtractionGameMode::OnPlayerDied(
+void AExtractionGameMode::PlayerDied(
 	AController* const aKillerController,
 	AController* const aVictimController
 )
 {
-	Super::OnPlayerDied(aKillerController, aVictimController);
+	Super::PlayerDied(aKillerController, aVictimController);
 
 	if (AreAllPlayersDead()) {
 		FailExtraction();
@@ -99,7 +99,7 @@ bool AExtractionGameMode::AreAllPlayersDead() const
 			if (const APawn* pawn = playerController->GetPawn()) {
 				if (const UHealthComponent* healthComponent = pawn->FindComponentByClass<UHealthComponent>()) {
 					hasPlayer = true;
-					if (!healthComponent->IsDead()) {
+					if (!healthComponent->GetIsDead()) {
 						areAllPlayersDead = false;
 						break;
 					}
@@ -123,7 +123,7 @@ void AExtractionGameMode::FailExtraction()
 		SetCombatSliceState(ECombatSliceState::Failed);
 		SetDefenseTimeRemaining(0.f);
 		GetWorldTimerManager().ClearTimer(myDefenseTimerHandle);
-		ScheduleReturnToMainMenu();
+		ReturnToMainMenuAfterDelay();
 	}
 }
 

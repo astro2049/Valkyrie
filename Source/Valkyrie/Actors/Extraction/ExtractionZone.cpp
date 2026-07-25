@@ -5,7 +5,7 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/GameModes/Extraction/ExtractionGameMode.h"
-#include "Valkyrie/Player/ValkPlayerCharacter.h"
+#include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
 
 AExtractionZone::AExtractionZone()
 {

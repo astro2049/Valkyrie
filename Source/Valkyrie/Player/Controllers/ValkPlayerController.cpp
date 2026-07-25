@@ -14,38 +14,37 @@ void AValkPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!IsLocalController()) {
-		return;
-	}
-
-	// I. input
-	// I.1. add input mapping context
-	if (myInputMappingContext) {
-		if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
-			if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
-				inputSubsystem->AddMappingContext(myInputMappingContext, 0);
+	// setup input and UI
+	if (IsLocalController()) {
+		// I. input
+		// I.1. add input mapping context
+		if (myInputMappingContext) {
+			if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
+				if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
+					inputSubsystem->AddMappingContext(myInputMappingContext, 0);
+				}
 			}
 		}
-	}
-	// I.2. set input mode to game only
-	bShowMouseCursor = false;
-	const FInputModeGameOnly inputMode;
-	SetInputMode(inputMode);
+		// I.2. set input mode to game only
+		bShowMouseCursor = false;
+		const FInputModeGameOnly inputMode;
+		SetInputMode(inputMode);
 
-	// II. UI
-	// II.1. add HUD to viewport
-	if (myHUDWidgetClass) {
-		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
-		if (myHUDWidget) {
-			myHUDWidget->AddToViewport();
+		// II. UI
+		// II.1. HUD
+		if (myHUDWidgetClass) {
+			myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
+			if (myHUDWidget) {
+				myHUDWidget->AddToViewport();
+			}
 		}
-	}
-	// II.2. add scoreboard to viewport
-	if (myScoreboardWidgetClass) {
-		myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
-		if (myScoreboardWidget) {
-			myScoreboardWidget->AddToViewport();
-			myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
+		// II.2. scoreboard
+		if (myScoreboardWidgetClass) {
+			myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
+			if (myScoreboardWidget) {
+				myScoreboardWidget->AddToViewport();
+				myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
+			}
 		}
 	}
 }
@@ -54,37 +53,31 @@ void AValkPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	if (!IsLocalController()) {
-		return;
-	}
-
-	if (UEnhancedInputComponent* const enhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)) {
-		if (myInputActionOpenScoreboard) {
-			enhancedInputComponent->BindAction(
-				myInputActionOpenScoreboard,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerController::ShowScoreboard
-			);
-			enhancedInputComponent->BindAction(
-				myInputActionOpenScoreboard,
-				ETriggerEvent::Completed,
-				this,
-				&AValkPlayerController::HideScoreboard
-			);
+	if (IsLocalController()) {
+		if (UEnhancedInputComponent* const enhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)) {
+			if (myInputActionOpenScoreboard) {
+				enhancedInputComponent->BindAction(
+					myInputActionOpenScoreboard,
+					ETriggerEvent::Started,
+					this,
+					&AValkPlayerController::ShowScoreboard
+				);
+				enhancedInputComponent->BindAction(
+					myInputActionOpenScoreboard,
+					ETriggerEvent::Completed,
+					this,
+					&AValkPlayerController::HideScoreboard
+				);
+			}
 		}
 	}
 }
 
-void AValkPlayerController::OnDied(AController* const aKillerController)
+void AValkPlayerController::OnControlledPawnDied(AController* const aKillerController)
 {
-	if (!HasAuthority()) {
-		return;
-	}
-
 	if (const UWorld* const world = GetWorld()) {
 		if (AValkGameMode* const gameMode = world->GetAuthGameMode<AValkGameMode>()) {
-			gameMode->OnPlayerDied(aKillerController, this);
+			gameMode->PlayerDied(aKillerController, this);
 		}
 	}
 }

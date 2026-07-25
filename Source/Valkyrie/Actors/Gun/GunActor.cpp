@@ -54,6 +54,7 @@ void AGunActor::ConsumeAmmo()
 	if (const UWorld* const world = GetWorld()) {
 		myLastFiredTime = world->GetTimeSeconds();
 		myAmmoInMag = FMath::Max(myAmmoInMag - 1, 0);
+		Multicast_PlayFirePresentation();
 	}
 }
 
@@ -73,7 +74,7 @@ void AGunActor::ApplyReloadAmmo()
 	myReserveAmmo -= ammoToLoad;
 }
 
-void AGunActor::PlayFirePresentation() const
+void AGunActor::Multicast_PlayFirePresentation_Implementation()
 {
 	if (myMuzzleArrowComponent) {
 		const FTransform muzzleTransform = myMuzzleArrowComponent->GetComponentTransform();

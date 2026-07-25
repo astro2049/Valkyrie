@@ -27,9 +27,10 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void Fire();
-	void Reload();
-	void EquipPrimaryGun();
-	void EquipSecondaryGun();
+	UFUNCTION(Server, Reliable)
+	void Server_Reload();
+	UFUNCTION(Server, Reliable)
+	void Server_EquipGun(EValkWeaponSlot aWeaponSlot);
 
 	AGunActor* GetCurrentGunActor() const;
 	bool IsReloading() const { return myIsReloading; }
@@ -38,38 +39,34 @@ public:
 
 private:
 	virtual void BeginPlay() override;
+	void SpawnGunActors();
+	void AttachGun(AGunActor* aGunActor) const;
+	void SetCurrentGun(EValkWeaponSlot aWeaponSlot);
+	UFUNCTION()
+	void OnRep_UpdateGunVisibility() const;
 
 	UFUNCTION(Server, Reliable)
 	void Server_TraceFire(FVector aTraceStart, FVector aTraceDirection);
-	UFUNCTION(Server, Reliable)
-	void Server_Reload();
-	UFUNCTION(Server, Reliable)
-	void Server_EquipGun(EValkWeaponSlot aWeaponSlot);
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayFirePresentation(AGunActor* aGunActor);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayReloadPresentation(AGunActor* aGunActor);
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitPresentation(FVector aHitPoint, const FVector aHitNormal);
-	UFUNCTION()
-	void OnRep_GunState();
 
-	void SpawnGunActors();
-	void SetCurrentGun(EValkWeaponSlot aWeaponSlot);
-	void UpdateGunVisibility() const;
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayReloadPresentation(AGunActor* aGunActor);
 	void CancelReload();
 	void FinishReload();
 
 	FTimerHandle myReloadTimerHandle;
 
-	UPROPERTY(ReplicatedUsing=OnRep_GunState)
+	UPROPERTY(Replicated)
 	TObjectPtr<AGunActor> myPrimaryGunActor{nullptr};
-	UPROPERTY(ReplicatedUsing=OnRep_GunState)
+	UPROPERTY(Replicated)
 	TObjectPtr<AGunActor> mySecondaryGunActor{nullptr};
-	UPROPERTY(ReplicatedUsing=OnRep_GunState)
+	UPROPERTY(ReplicatedUsing=OnRep_UpdateGunVisibility)
 	EValkWeaponSlot myCurrentSlot{EValkWeaponSlot::Primary};
 	UPROPERTY(Replicated)
 	bool myIsReloading{false};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	float myTraceDistance{10000.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	bool myDrawDebugTrace{true};
 
@@ -78,7 +75,9 @@ private:
 	TSubclassOf<AGunActor> myPrimaryGunType;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<AGunActor> mySecondaryGunType;
-	
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	FName myHandSocketName{"HandGrip_R"};
+
 	// on hit
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UNiagaraSystem> myImpactVFX;

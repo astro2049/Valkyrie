@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/Components/InteractableComponent.h"
+#include "Valkyrie/Components/Interaction/InteractableComponent.h"
 #include "GeneratorInteractableComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))

@@ -49,13 +49,13 @@ EValkTeamId ATDMGameMode::GetBalancedTeamId() const
 	return teamAPlayerCount <= teamBPlayerCount ? EValkTeamId::TeamA : EValkTeamId::TeamB;
 }
 
-void ATDMGameMode::OnPlayerDied(AController* const aKillerController, AController* const aVictimController)
+void ATDMGameMode::PlayerDied(AController* const aKillerController, AController* const aVictimController)
 {
 	if (!aVictimController) {
 		return;
 	}
 
-	Super::OnPlayerDied(aKillerController, aVictimController);
+	Super::PlayerDied(aKillerController, aVictimController);
 
 	bool canHandleDeath = true;
 	if (const AValkGameState* const gameState = GetGameState<AValkGameState>()) {
@@ -115,7 +115,7 @@ void ATDMGameMode::EndTDMMatch(const EValkTeamId aWinningTeamId)
 	if (AValkGameState* const gameState = GetGameState<AValkGameState>()) {
 		if (!gameState->HasMatchEnded()) {
 			gameState->SetWinningTeamId(aWinningTeamId);
-			ScheduleReturnToMainMenu();
+			ReturnToMainMenuAfterDelay();
 		}
 	}
 }

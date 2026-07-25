@@ -15,7 +15,7 @@ void ATargetPawn::BeginPlay()
 	Super::BeginPlay();
 
 	if (myHealthComponent) {
-		myHealthComponent->OnDied().BindUObject(this, &ATargetPawn::OnHealthDied);
+		myHealthComponent->GetOnDied().BindUObject(this, &ATargetPawn::OnHealthDied);
 	}
 }
 
@@ -37,5 +37,5 @@ void ATargetPawn::Respawn()
 {
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
-	myHealthComponent->ResetHealth();
+	myHealthComponent->Reset();
 }

@@ -30,7 +30,5 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myReloadDuration{2.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myTraceDistance{10000.f};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	EValkFireMode myFireMode{EValkFireMode::Auto};
 };

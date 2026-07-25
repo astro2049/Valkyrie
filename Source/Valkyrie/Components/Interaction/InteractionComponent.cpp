@@ -7,6 +7,7 @@
 UInteractionComponent::UInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
 }
 
 void UInteractionComponent::SetInteractable(AActor* const anInteractableActor)
@@ -16,7 +17,6 @@ void UInteractionComponent::SetInteractable(AActor* const anInteractableActor)
 	}
 
 	if (UInteractableComponent* const interactableComponent = anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
-		UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::SetInteractable"));
 		myInteractableComponent = interactableComponent;
 	}
 }
@@ -27,18 +27,14 @@ void UInteractionComponent::ClearInteractable(AActor* const anInteractableActor)
 		return;
 	}
 
-	if (myInteractableComponent.IsValid()) {
-		if (myInteractableComponent.Get() == anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
-			UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::ClearInteractable"));
-			myInteractableComponent.Reset();
-		}
+	if (myInteractableComponent.IsValid() && myInteractableComponent.Get() == anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
+		myInteractableComponent.Reset();
 	}
 }
 
-void UInteractionComponent::Interact() const
+void UInteractionComponent::Server_Interact_Implementation()
 {
 	if (UInteractableComponent* const interactableComponent = myInteractableComponent.Get()) {
-		UE_LOG(LogTemp, Log, TEXT("UInteractionComponent::Interact"));
 		interactableComponent->Interact();
 	}
 }

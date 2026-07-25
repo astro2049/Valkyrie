@@ -8,8 +8,8 @@
 
 class AController;
 
-DECLARE_DELEGATE_TwoParams(FOnHealthComponentDamaged, float, AController*);
-DECLARE_DELEGATE_OneParam(FOnHealthComponentDied, AController*);
+DECLARE_DELEGATE_TwoParams(FHealthComponentDamaged, float, AController*);
+DECLARE_DELEGATE_OneParam(FHealthComponentDied, AController*);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class VALKYRIE_API UHealthComponent : public UActorComponent
@@ -20,25 +20,25 @@ public:
 	UHealthComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void Reset();
 	void ApplyDamage(float aDamage, AController* aDamageInstigator);
-	void ResetHealth();
-	float GetHealth() const { return myHealth; }
+
+	FHealthComponentDamaged& GetOnDamaged() { return myDamagedDelegate; }
+	FHealthComponentDied& GetOnDied() { return myDiedDelegate; }
 	float GetMaxHealth() const { return myMaxHealth; }
-	UFUNCTION(BlueprintPure, Category="Valkyrie")
-	bool IsDead() const { return myIsDead; }
-	FOnHealthComponentDamaged& OnDamaged() { return myOnDamaged; }
-	FOnHealthComponentDied& OnDied() { return myOnDied; }
+	float GetHealth() const { return myHealth; }
+	bool GetIsDead() const { return myIsDead; }
 
 private:
 	virtual void BeginPlay() override;
 
-	FOnHealthComponentDamaged myOnDamaged;
-	FOnHealthComponentDied myOnDied;
+	FHealthComponentDamaged myDamagedDelegate;
+	FHealthComponentDied myDiedDelegate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myMaxHealth{100.f};
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	float myHealth{100.f};
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	bool myIsDead{false};
 };

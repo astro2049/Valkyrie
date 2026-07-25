@@ -17,7 +17,7 @@ public:
 	virtual void PostLogin(APlayerController* aNewPlayer) override;
 
 protected:
-	virtual void OnPlayerDied(AController* aKillerController, AController* aVictimController) override;
+	virtual void PlayerDied(AController* aKillerController, AController* aVictimController) override;
 
 private:
 	EValkTeamId GetBalancedTeamId() const;

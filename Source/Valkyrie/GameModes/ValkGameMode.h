@@ -14,18 +14,20 @@ class VALKYRIE_API AValkGameMode : public AGameModeBase
 
 public:
 	AValkGameMode();
-	virtual void PostLogin(APlayerController* aNewPlayer) override;
+	virtual void PostLogin(APlayerController* aNewPlayer) override; // assign team id
 	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
-
-	virtual void OnPlayerDied(AController* aKillerController, AController* aVictimController);
+	virtual void PlayerDied(AController* aKillerController, AController* aVictimController);
 
 protected:
-	void ScheduleReturnToMainMenu();
+	void ReturnToMainMenuAfterDelay(); 	// return to main menu after match ended
 
 private:
 	void ReturnPlayersToMainMenu() const;
+	FTimerHandle myReturnToMainMenuTimerHandle;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myPostMatchDelay{5.f};
-	FTimerHandle myReturnTimerHandle;
+	
+	int32 myTeamAPlayerCount{0};
+	int32 myTeamBPlayerCount{0};
 };

@@ -15,15 +15,26 @@ AValkGameMode::AValkGameMode()
 
 void AValkGameMode::PostLogin(APlayerController* const aNewPlayer)
 {
-	if (aNewPlayer) {
-		if (AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>()) {
-			if (playerState->GetTeamId() == EValkTeamId::None) {
-				playerState->SetTeamId(EValkTeamId::TeamA);
-			}
-		}
+	Super::PostLogin(aNewPlayer);
+
+	if (!aNewPlayer) {
+		return;
 	}
 
-	Super::PostLogin(aNewPlayer);
+	// assign team id
+	if (AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>()) {
+		if (playerState->GetTeamId() == EValkTeamId::None) {
+			playerState->SetTeamId(EValkTeamId::TeamA);
+		}
+
+		// assign index in team
+		const EValkTeamId teamId = playerState->GetTeamId();
+		if (teamId == EValkTeamId::TeamA) {
+			playerState->SetIndexInTeam(myTeamAPlayerCount++);
+		} else if (teamId == EValkTeamId::TeamB) {
+			playerState->SetIndexInTeam(myTeamBPlayerCount++);
+		}
+	}
 }
 
 AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlayer)
@@ -32,78 +43,46 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 		return Super::ChoosePlayerStart_Implementation(aPlayer);
 	}
 
-	AActor* selectedPlayerStart = nullptr;
-	if (const AValkPlayerState* const playerState = aPlayer->GetPlayerState<AValkPlayerState>()) {
-		FName playerStartTag;
-		switch (playerState->GetTeamId()) {
-		case EValkTeamId::TeamA:
-			playerStartTag = FName(TEXT("TeamA"));
-			break;
-		case EValkTeamId::TeamB:
-			playerStartTag = FName(TEXT("TeamB"));
-			break;
-		default:
-			break;
-		}
+	static const TMap<EValkTeamId, FString> teamNameMap = {
+		{EValkTeamId::None, "None"},
+		{EValkTeamId::TeamA, "TeamA"},
+		{EValkTeamId::TeamB, "TeamB"}
+	};
 
-		if (!playerStartTag.IsNone()) {
-			TArray<AActor*> playerStartActors;
-			UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStartActors);
-			TArray<APlayerStart*> teamPlayerStarts;
-			for (AActor* const playerStartActor : playerStartActors) {
-				if (APlayerStart* const playerStart = Cast<APlayerStart>(playerStartActor);
-					playerStart && playerStart->PlayerStartTag == playerStartTag) {
-					teamPlayerStarts.Add(playerStart);
-				}
-			}
-
-			if (!teamPlayerStarts.IsEmpty()) {
-				teamPlayerStarts.Sort([](const APlayerStart& aLeft, const APlayerStart& aRight) {
-					return aLeft.GetName() < aRight.GetName();
-				});
-				int32 playerIndex = 0;
-				if (const UWorld* const world = GetWorld()) {
-					for (FConstPlayerControllerIterator iterator = world->GetPlayerControllerIterator(); iterator; ++iterator) {
-						if (const APlayerController* const playerController = iterator->Get()) {
-							if (const AValkPlayerState* const currentPlayerState = playerController->GetPlayerState<AValkPlayerState>()) {
-								if (currentPlayerState->GetTeamId() == playerState->GetTeamId()) {
-									if (playerController == aPlayer) {
-										break;
-									}
-									++playerIndex;
-								}
-							}
-						}
-					}
-				}
-				selectedPlayerStart = teamPlayerStarts[playerIndex % teamPlayerStarts.Num()];
+	TArray<AActor*> playerStartActors;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStartActors);
+	for (AActor* const playerStartActor : playerStartActors) {
+		APlayerStart* const playerStart = Cast<APlayerStart>(playerStartActor);
+		const AValkPlayerState* const playerState = aPlayer->GetPlayerState<AValkPlayerState>();
+		if (playerStart && playerState) {
+			FString playerStartString = teamNameMap[playerState->GetTeamId()] + "_" + FString::FromInt(playerState->GetIndexInTeam());
+			// so PlayerStartTag should be like TeamA_0, TeamA_1...
+			if (playerStart->PlayerStartTag.IsEqual(FName(playerStartString))) {
+				return playerStart;
 			}
 		}
 	}
 
-	if (!selectedPlayerStart) {
-		selectedPlayerStart = Super::ChoosePlayerStart_Implementation(aPlayer);
-	}
-	return selectedPlayerStart;
+	return Super::ChoosePlayerStart_Implementation(aPlayer);
 }
 
-void AValkGameMode::ScheduleReturnToMainMenu()
+void AValkGameMode::PlayerDied(AController* const, AController* const aVictimController)
 {
-	if (!GetWorldTimerManager().IsTimerActive(myReturnTimerHandle)) {
+	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(aVictimController)) {
+		playerController->Client_OnPlayerDied();
+	}
+}
+
+void AValkGameMode::ReturnToMainMenuAfterDelay()
+{
+	if (!GetWorldTimerManager().IsTimerActive(myReturnToMainMenuTimerHandle)) {
 		GetWorldTimerManager().SetTimer(
-			myReturnTimerHandle,
+			myReturnToMainMenuTimerHandle,
 			this,
 			&AValkGameMode::ReturnPlayersToMainMenu,
 			myPostMatchDelay,
 			false
 		);
-	}
-}
-
-void AValkGameMode::OnPlayerDied(AController* const, AController* const aVictimController)
-{
-	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(aVictimController)) {
-		playerController->Client_OnPlayerDied();
 	}
 }
 

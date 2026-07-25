@@ -22,29 +22,27 @@ void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ResetHealth();
+	if (const AActor* const owner = GetOwner(); owner && owner->HasAuthority()) {
+		Reset();
+	}
+}
+
+void UHealthComponent::Reset()
+{
+	myHealth = myMaxHealth;
+	myIsDead = false;
 }
 
 void UHealthComponent::ApplyDamage(const float aDamage, AController* const aDamageInstigator)
 {
-	if (const AActor* const owner = GetOwner()) {
-		if (owner->HasAuthority() && aDamage > 0.f && !myIsDead) {
-			myHealth = FMath::Clamp(myHealth - aDamage, 0.f, myMaxHealth);
-			myOnDamaged.ExecuteIfBound(aDamage, aDamageInstigator);
-			if (myHealth <= 0.f) {
-				myIsDead = true;
-				myOnDied.ExecuteIfBound(aDamageInstigator);
-			}
-		}
+	if (aDamage <= 0.f || myIsDead) {
+		return;
 	}
-}
 
-void UHealthComponent::ResetHealth()
-{
-	if (const AActor* const owner = GetOwner()) {
-		if (owner->HasAuthority()) {
-			myHealth = myMaxHealth;
-			myIsDead = false;
-		}
+	myHealth = FMath::Clamp(myHealth - aDamage, 0.f, myMaxHealth);
+	myDamagedDelegate.ExecuteIfBound(aDamage, aDamageInstigator);
+	if (myHealth <= 0.f) {
+		myIsDead = true;
+		myDiedDelegate.ExecuteIfBound(aDamageInstigator);
 	}
 }

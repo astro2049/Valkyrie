@@ -15,12 +15,14 @@ class VALKYRIE_API UInteractionComponent : public UActorComponent
 public:
 	UInteractionComponent();
 
+	UFUNCTION(Server, Reliable)
+	void Server_Interact();
+
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void SetInteractable(AActor* anInteractableActor);
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ClearInteractable(AActor* anInteractableActor);
-	void Interact() const;
-	
+
 	bool HasInteractable() const { return myInteractableComponent.IsValid(); }
 
 private:

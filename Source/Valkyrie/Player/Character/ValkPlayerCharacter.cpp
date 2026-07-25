@@ -7,7 +7,6 @@
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
-#include "Valkyrie/Actors/Gun/GunActor.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
@@ -25,24 +24,8 @@ void AValkPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	if (myHealthComponent) {
-		myHealthComponent->OnDamaged().BindUObject(this, &AValkPlayerCharacter::OnDamaged);
-		myHealthComponent->OnDied().BindUObject(this, &AValkPlayerCharacter::OnDied);
-	}
-}
-
-void AValkPlayerCharacter::AttachGun(AGunActor* aGunActor)
-{
-	if (!aGunActor) {
-		return;
-	}
-
-	if (USkeletalMeshComponent* const characterMesh = GetMesh()) {
-		aGunActor->AttachToComponent(
-			characterMesh,
-			FAttachmentTransformRules::SnapToTargetIncludingScale,
-			myHandSocketName
-		);
-		aGunActor->SetOwner(this);
+		myHealthComponent->GetOnDamaged().BindUObject(this, &AValkPlayerCharacter::OnDamaged);
+		myHealthComponent->GetOnDied().BindUObject(this, &AValkPlayerCharacter::OnDied);
 	}
 }
 
@@ -140,53 +123,43 @@ void AValkPlayerCharacter::HandleFire()
 void AValkPlayerCharacter::HandleReload()
 {
 	if (myWeaponComponent) {
-		myWeaponComponent->Reload();
+		myWeaponComponent->Server_Reload();
 	}
 }
 
 void AValkPlayerCharacter::HandleInteract()
 {
-	Server_Interact();
+	if (myInteractionComponent) {
+		myInteractionComponent->Server_Interact();
+	}
 }
 
 void AValkPlayerCharacter::HandleEquipPrimaryGun()
 {
 	if (myWeaponComponent) {
-		myWeaponComponent->EquipPrimaryGun();
+		myWeaponComponent->Server_EquipGun(EValkWeaponSlot::Primary);
 	}
 }
 
 void AValkPlayerCharacter::HandleEquipSecondaryGun()
 {
 	if (myWeaponComponent) {
-		myWeaponComponent->EquipSecondaryGun();
-	}
-}
-
-void AValkPlayerCharacter::Server_Interact_Implementation()
-{
-	if (myInteractionComponent) {
-		myInteractionComponent->Interact();
+		myWeaponComponent->Server_EquipGun(EValkWeaponSlot::Secondary);
 	}
 }
 
 void AValkPlayerCharacter::OnDamaged(const float, AController* const aDamageInstigator)
 {
+	// play hit react montage
 	Multicast_PlayHitReact();
 
-	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
-		if (aDamageInstigator) {
-			if (const APawn* const damageInstigatorPawn = aDamageInstigator->GetPawn()) {
-				playerController->Client_PlayDamageRepresentations(damageInstigatorPawn->GetActorLocation());
-			}
+	// play damage indicator
+	if (aDamageInstigator) {
+		AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController());
+		const APawn* const damageInstigatorPawn = aDamageInstigator->GetPawn();
+		if (playerController && damageInstigatorPawn) {
+			playerController->Client_PlayDamageRepresentations(damageInstigatorPawn->GetActorLocation());
 		}
-	}
-}
-
-void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
-{
-	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
-		playerController->OnDied(aDamageInstigator);
 	}
 }
 
@@ -194,5 +167,12 @@ void AValkPlayerCharacter::Multicast_PlayHitReact_Implementation()
 {
 	if (myHitReactMontage) {
 		PlayAnimMontage(myHitReactMontage);
+	}
+}
+
+void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
+{
+	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
+		playerController->OnControlledPawnDied(aDamageInstigator);
 	}
 }

@@ -5,13 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Valkyrie/Components/HealthComponent.h"
-#include "Valkyrie/Components/InteractionComponent.h"
+#include "Valkyrie/Components/Interaction/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
 #include "ValkPlayerCharacter.generated.h"
 
 struct FInputActionValue;
 class UInputAction;
-class AGunActor;
 class UAnimMontage;
 
 UCLASS(Blueprintable)
@@ -23,7 +22,6 @@ public:
 	AValkPlayerCharacter();
 
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
-	void AttachGun(AGunActor* aGunActor);
 
 private:
 	virtual void BeginPlay() override;
@@ -39,8 +37,6 @@ private:
 	void OnDamaged(float aDamage, AController* aDamageInstigator);
 	void OnDied(AController* aDamageInstigator) const;
 
-	UFUNCTION(Server, Reliable)
-	void Server_Interact();
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitReact();
 
@@ -68,9 +64,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInteractionComponent> myInteractionComponent;
 
-	// hand socket
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	FName myHandSocketName{"HandGrip_R"};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UAnimMontage> myHitReactMontage{nullptr};
 };
