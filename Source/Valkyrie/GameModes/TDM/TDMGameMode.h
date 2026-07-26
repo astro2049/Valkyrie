@@ -14,13 +14,11 @@ class VALKYRIE_API ATDMGameMode : public AValkGameMode
 
 public:
 	ATDMGameMode();
-	virtual void PostLogin(APlayerController* aNewPlayer) override;
 
 protected:
 	virtual void PlayerDied(AController* aKillerController, AController* aVictimController) override;
 
 private:
-	EValkTeamId GetBalancedTeamId() const;
 	void HandlePlayerKilled(AController* aVictimController, AController* aKillerController);
 	void EndTDMMatch(EValkTeamId aWinningTeamId);
 	void RespawnPlayer(AController* aController);

@@ -1,0 +1,23 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "UINode_GetRoomPlayerData.generated.h"
+
+class APlayerController;
+
+UCLASS()
+class VALKYRIE_API UUINode_GetRoomPlayerData : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category="Valkyrie")
+	static void GetRoomPlayerData(
+		APlayerController* aPlayerController,
+		int32 aPlayerId,
+		FString& aPlayerName
+	);
+};

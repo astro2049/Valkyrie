@@ -21,6 +21,8 @@ public:
 	FText myMapName;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")
 	FText myMapMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(ClampMin="1", ClampMax="2"))
+	int32 myTeamCount{1};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(MultiLine="true"))
 	FText myMapDescription;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Valkyrie")

@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "TimerManager.h"
+#include "Valkyrie/Common/ValkTypes.h"
 #include "ValkGameMode.generated.h"
+
+class AValkPlayerState;
 
 UCLASS()
 class VALKYRIE_API AValkGameMode : public AGameModeBase
@@ -14,20 +17,21 @@ class VALKYRIE_API AValkGameMode : public AGameModeBase
 
 public:
 	AValkGameMode();
-	virtual void PostLogin(APlayerController* aNewPlayer) override; // assign team id
+	virtual void PostLogin(APlayerController* aNewPlayer) override;
 	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
 	virtual void PlayerDied(AController* aKillerController, AController* aVictimController);
 
 protected:
-	void ReturnToMainMenuAfterDelay(); 	// return to main menu after match ended
+	void ReturnToMainMenuAfterDelay();
+
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(ClampMin="1", ClampMax="2"))
+	int32 myTeamCount{1};
 
 private:
+	void AssignTeam(AValkPlayerState& aPlayerState) const;
 	void ReturnPlayersToMainMenu() const;
 	FTimerHandle myReturnToMainMenuTimerHandle;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myPostMatchDelay{5.f};
-	
-	int32 myTeamAPlayerCount{0};
-	int32 myTeamBPlayerCount{0};
 };

@@ -2,6 +2,7 @@
 
 #include "ValkGameMode.h"
 
+#include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
@@ -21,20 +22,38 @@ void AValkGameMode::PostLogin(APlayerController* const aNewPlayer)
 		return;
 	}
 
-	// assign team id
 	if (AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>()) {
 		if (playerState->GetTeamId() == EValkTeamId::None) {
-			playerState->SetTeamId(EValkTeamId::TeamA);
-		}
-
-		// assign index in team
-		const EValkTeamId teamId = playerState->GetTeamId();
-		if (teamId == EValkTeamId::TeamA) {
-			playerState->SetIndexInTeam(myTeamAPlayerCount++);
-		} else if (teamId == EValkTeamId::TeamB) {
-			playerState->SetIndexInTeam(myTeamBPlayerCount++);
+			AssignTeam(*playerState);
 		}
 	}
+}
+
+void AValkGameMode::AssignTeam(AValkPlayerState& aPlayerState) const
+{
+	if (aPlayerState.GetTeamId() != EValkTeamId::None) {
+		return;
+	}
+
+	if (myTeamCount == 1) {
+		aPlayerState.SetTeamId(EValkTeamId::TeamA);
+		return;
+	}
+
+	int32 teamAPlayerCount = 0;
+	int32 teamBPlayerCount = 0;
+	if (const AGameStateBase* const gameState = GetGameState<AGameStateBase>()) {
+		for (const APlayerState* const playerState : gameState->PlayerArray) {
+			if (const AValkPlayerState* const valkPlayerState = Cast<AValkPlayerState>(playerState)) {
+				if (valkPlayerState->GetTeamId() == EValkTeamId::TeamA) {
+					teamAPlayerCount++;
+				} else if (valkPlayerState->GetTeamId() == EValkTeamId::TeamB) {
+					teamBPlayerCount++;
+				}
+			}
+		}
+	}
+	aPlayerState.SetTeamId(teamAPlayerCount <= teamBPlayerCount ? EValkTeamId::TeamA : EValkTeamId::TeamB);
 }
 
 AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlayer)
@@ -49,16 +68,32 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 		{EValkTeamId::TeamB, "TeamB"}
 	};
 
-	TArray<AActor*> playerStartActors;
-	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStartActors);
-	for (AActor* const playerStartActor : playerStartActors) {
-		APlayerStart* const playerStart = Cast<APlayerStart>(playerStartActor);
-		const AValkPlayerState* const playerState = aPlayer->GetPlayerState<AValkPlayerState>();
-		if (playerStart && playerState) {
-			FString playerStartString = teamNameMap[playerState->GetTeamId()] + "_" + FString::FromInt(playerState->GetIndexInTeam());
-			// so PlayerStartTag should be like TeamA_0, TeamA_1...
-			if (playerStart->PlayerStartTag.IsEqual(FName(playerStartString))) {
-				return playerStart;
+	// calculate index in team
+	if (const AValkPlayerState* const playerState = aPlayer->GetPlayerState<AValkPlayerState>()) {
+		int32 indexInTeam = 0;
+		if (const AGameStateBase* const gameState = GetGameState<AGameStateBase>()) {
+			for (const APlayerState* const currentPlayerState : gameState->PlayerArray) {
+				if (currentPlayerState == playerState) {
+					break;
+				}
+
+				if (const AValkPlayerState* const currentValkPlayerState = Cast<AValkPlayerState>(currentPlayerState);
+					currentValkPlayerState && currentValkPlayerState->GetTeamId() == playerState->GetTeamId()) {
+					indexInTeam++;
+				}
+			}
+		}
+
+		TArray<AActor*> playerStartActors;
+		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStartActors);
+		for (AActor* const playerStartActor : playerStartActors) {
+			if (APlayerStart* const playerStart = Cast<APlayerStart>(playerStartActor)) {
+				if (playerStart->PlayerStartTag.IsEqual(
+					// so PlayerStartTag should be like TeamA_0, TeamA_1...
+					FName(teamNameMap[playerState->GetTeamId()] + "_" + FString::FromInt(indexInTeam))
+				)) {
+					return playerStart;
+				}
 			}
 		}
 	}

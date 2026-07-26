@@ -5,48 +5,17 @@
 #include "TDMGameState.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
-#include "GameFramework/PlayerController.h"
-#include "GameFramework/PlayerState.h"
 #include "TimerManager.h"
 #include "Valkyrie/GameModes/ValkGameState.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/States/TDM/TDMPlayerState.h"
-#include "Valkyrie/Player/States/ValkPlayerState.h"
 
 ATDMGameMode::ATDMGameMode()
 {
 	GameStateClass = ATDMGameState::StaticClass();
 	PlayerControllerClass = AValkPlayerController::StaticClass();
 	PlayerStateClass = ATDMPlayerState::StaticClass();
-}
-
-void ATDMGameMode::PostLogin(APlayerController* const aNewPlayer)
-{
-	if (aNewPlayer) {
-		if (AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>()) {
-			playerState->SetTeamId(GetBalancedTeamId());
-		}
-	}
-
-	Super::PostLogin(aNewPlayer);
-}
-
-EValkTeamId ATDMGameMode::GetBalancedTeamId() const
-{
-	int32 teamAPlayerCount = 0;
-	int32 teamBPlayerCount = 0;
-	if (const AValkGameState* const gameState = GetGameState<AValkGameState>()) {
-		for (const APlayerState* const playerState : gameState->PlayerArray) {
-			const AValkPlayerState* const valkPlayerState = Cast<AValkPlayerState>(playerState);
-			if (valkPlayerState && valkPlayerState->GetTeamId() == EValkTeamId::TeamA) {
-				++teamAPlayerCount;
-			} else if (valkPlayerState && valkPlayerState->GetTeamId() == EValkTeamId::TeamB) {
-				++teamBPlayerCount;
-			}
-		}
-	}
-
-	return teamAPlayerCount <= teamBPlayerCount ? EValkTeamId::TeamA : EValkTeamId::TeamB;
+	myTeamCount = 2;
 }
 
 void ATDMGameMode::PlayerDied(AController* const aKillerController, AController* const aVictimController)
