@@ -46,8 +46,8 @@ void UUINode_GetTDMScoreboardData::GetTDMScoreboardData(
 {
 	aTeamAScore = 0;
 	aTeamBScore = 0;
-	someTeamAPlayerIds.Reset();
-	someTeamBPlayerIds.Reset();
+	someTeamAPlayerIds.Init(-1, ValkGameRules::MaxPlayersPerTeam);
+	someTeamBPlayerIds.Init(-1, ValkGameRules::MaxPlayersPerTeam);
 
 	if (const ATDMGameState* const gameState = GetTDMGameState(aPlayerController)) {
 		aTeamAScore = gameState->GetTeamAKills();
@@ -67,14 +67,20 @@ void UUINode_GetTDMScoreboardData::GetTDMScoreboardData(
 
 		teamAPlayerStates.Sort(IsBeforeOnTDMScoreboard);
 		teamBPlayerStates.Sort(IsBeforeOnTDMScoreboard);
+		int32 teamAPlayerIndex = 0;
 		for (const ATDMPlayerState* const playerState : teamAPlayerStates) {
 			if (playerState) {
-				someTeamAPlayerIds.Add(playerState->GetPlayerId());
+				if (teamAPlayerIndex < ValkGameRules::MaxPlayersPerTeam) {
+					someTeamAPlayerIds[teamAPlayerIndex++] = playerState->GetPlayerId();
+				}
 			}
 		}
+		int32 teamBPlayerIndex = 0;
 		for (const ATDMPlayerState* const playerState : teamBPlayerStates) {
 			if (playerState) {
-				someTeamBPlayerIds.Add(playerState->GetPlayerId());
+				if (teamBPlayerIndex < ValkGameRules::MaxPlayersPerTeam) {
+					someTeamBPlayerIds[teamBPlayerIndex++] = playerState->GetPlayerId();
+				}
 			}
 		}
 	}

@@ -12,3 +12,8 @@ enum class EValkTeamId : uint8
 	TeamA = 1,
 	TeamB = 2
 };
+
+namespace ValkGameRules
+{
+	inline constexpr int32 MaxPlayersPerTeam{3};
+}
