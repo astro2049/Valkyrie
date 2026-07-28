@@ -34,20 +34,38 @@ namespace
 		}
 		return gameState;
 	}
+
+	void FillScoreboardRows(
+		const TArray<const ATDMPlayerState*>& somePlayerStates,
+		TArray<FValkTDMScoreboardRowData>& someRows
+	)
+	{
+		for (const ATDMPlayerState* const playerState : somePlayerStates) {
+			if (playerState && someRows.Num() < ValkGameRules::MaxPlayersPerTeam) {
+				FValkTDMScoreboardRowData row;
+				row.myPlayerName = playerState->GetPlayerName();
+				row.myKills = playerState->GetKills();
+				row.myDeaths = playerState->GetDeaths();
+				someRows.Add(row);
+			}
+		}
+	}
 }
 
 void UUINode_GetTDMScoreboardData::GetTDMScoreboardData(
 	APlayerController* const aPlayerController,
 	int32& aTeamAScore,
 	int32& aTeamBScore,
-	TArray<int32>& someTeamAPlayerIds,
-	TArray<int32>& someTeamBPlayerIds
+	TArray<FValkTDMScoreboardRowData>& someTeamARows,
+	TArray<FValkTDMScoreboardRowData>& someTeamBRows
 )
 {
 	aTeamAScore = 0;
 	aTeamBScore = 0;
-	someTeamAPlayerIds.Init(-1, ValkGameRules::MaxPlayersPerTeam);
-	someTeamBPlayerIds.Init(-1, ValkGameRules::MaxPlayersPerTeam);
+	someTeamARows.Reset();
+	someTeamBRows.Reset();
+	someTeamARows.Reserve(ValkGameRules::MaxPlayersPerTeam);
+	someTeamBRows.Reserve(ValkGameRules::MaxPlayersPerTeam);
 
 	if (const ATDMGameState* const gameState = GetTDMGameState(aPlayerController)) {
 		aTeamAScore = gameState->GetTeamAKills();
@@ -67,47 +85,7 @@ void UUINode_GetTDMScoreboardData::GetTDMScoreboardData(
 
 		teamAPlayerStates.Sort(IsBeforeOnTDMScoreboard);
 		teamBPlayerStates.Sort(IsBeforeOnTDMScoreboard);
-		int32 teamAPlayerIndex = 0;
-		for (const ATDMPlayerState* const playerState : teamAPlayerStates) {
-			if (playerState) {
-				if (teamAPlayerIndex < ValkGameRules::MaxPlayersPerTeam) {
-					someTeamAPlayerIds[teamAPlayerIndex++] = playerState->GetPlayerId();
-				}
-			}
-		}
-		int32 teamBPlayerIndex = 0;
-		for (const ATDMPlayerState* const playerState : teamBPlayerStates) {
-			if (playerState) {
-				if (teamBPlayerIndex < ValkGameRules::MaxPlayersPerTeam) {
-					someTeamBPlayerIds[teamBPlayerIndex++] = playerState->GetPlayerId();
-				}
-			}
-		}
-	}
-}
-
-void UUINode_GetTDMScoreboardData::GetTDMScoreboardRowData(
-	APlayerController* const aPlayerController,
-	const int32 aPlayerId,
-	FString& aPlayerName,
-	int32& aKills,
-	int32& aDeaths
-)
-{
-	aPlayerName = FString();
-	aKills = -1;
-	aDeaths = -1;
-
-	if (const ATDMGameState* const gameState = GetTDMGameState(aPlayerController)) {
-		for (const APlayerState* const playerState : gameState->PlayerArray) {
-			if (const ATDMPlayerState* const tdmPlayerState = Cast<ATDMPlayerState>(playerState)) {
-				if (tdmPlayerState->GetPlayerId() == aPlayerId) {
-					aPlayerName = tdmPlayerState->GetPlayerName();
-					aKills = tdmPlayerState->GetKills();
-					aDeaths = tdmPlayerState->GetDeaths();
-					break;
-				}
-			}
-		}
+		FillScoreboardRows(teamAPlayerStates, someTeamARows);
+		FillScoreboardRows(teamBPlayerStates, someTeamBRows);
 	}
 }

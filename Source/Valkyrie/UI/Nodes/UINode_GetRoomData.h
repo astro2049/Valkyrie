@@ -16,6 +16,6 @@ class VALKYRIE_API UUINode_GetRoomData : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	static void GetRoomData(APlayerController* aPlayerController,
-	                        TArray<int32>& outTeamAPlayerIds,
-	                        TArray<int32>& outTeamBPlayerIds);
+	                        TArray<FString>& someTeamAPlayerNames,
+	                        TArray<FString>& someTeamBPlayerNames);
 };

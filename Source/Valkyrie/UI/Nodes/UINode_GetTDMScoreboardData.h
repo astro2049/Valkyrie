@@ -8,6 +8,19 @@
 
 class APlayerController;
 
+USTRUCT(BlueprintType)
+struct FValkTDMScoreboardRowData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
+	FString myPlayerName;
+	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
+	int32 myKills{-1};
+	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
+	int32 myDeaths{-1};
+};
+
 UCLASS()
 class VALKYRIE_API UUINode_GetTDMScoreboardData : public UBlueprintFunctionLibrary
 {
@@ -19,15 +32,7 @@ public:
 		APlayerController* aPlayerController,
 		int32& aTeamAScore,
 		int32& aTeamBScore,
-		TArray<int32>& someTeamAPlayerIds,
-		TArray<int32>& someTeamBPlayerIds
-	);
-	UFUNCTION(BlueprintCallable, Category="Valkyrie")
-	static void GetTDMScoreboardRowData(
-		APlayerController* aPlayerController,
-		int32 aPlayerId,
-		FString& aPlayerName,
-		int32& aKills,
-		int32& aDeaths
+		TArray<FValkTDMScoreboardRowData>& someTeamARows,
+		TArray<FValkTDMScoreboardRowData>& someTeamBRows
 	);
 };
