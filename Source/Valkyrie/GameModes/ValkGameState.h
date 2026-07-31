@@ -15,6 +15,7 @@ class VALKYRIE_API AValkGameState : public AGameStateBase
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void SetMatchEnded();
 	void SetWinningTeamId(EValkTeamId aTeamId);
 	virtual bool HasMatchEnded() const override { return myMatchEnded; }
 	EValkTeamId GetWinningTeamId() const { return myWinningTeamId; }

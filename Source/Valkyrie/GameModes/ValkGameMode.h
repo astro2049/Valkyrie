@@ -22,13 +22,14 @@ public:
 	virtual void PlayerDied(AController* aKillerController, AController* aVictimController);
 
 protected:
-	void ReturnToMainMenuAfterDelay();
+	void FinishMatch();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(ClampMin="1", ClampMax="2"))
 	int32 myTeamCount{1};
 
 private:
 	void AssignTeam(AValkPlayerState& aPlayerState) const;
+	void ReturnToMainMenuAfterDelay();
 	void ReturnPlayersToMainMenu() const;
 	FTimerHandle myReturnToMainMenuTimerHandle;
 

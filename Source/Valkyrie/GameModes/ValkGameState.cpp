@@ -12,6 +12,15 @@ void AValkGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(AValkGameState, myWinningTeamId);
 }
 
+void AValkGameState::SetMatchEnded()
+{
+	if (!HasAuthority()) {
+		return;
+	}
+
+	myMatchEnded = true;
+}
+
 void AValkGameState::SetWinningTeamId(const EValkTeamId aTeamId)
 {
 	if (!HasAuthority()) {
@@ -20,6 +29,5 @@ void AValkGameState::SetWinningTeamId(const EValkTeamId aTeamId)
 
 	if (!myMatchEnded) {
 		myWinningTeamId = aTeamId;
-		myMatchEnded = true;
 	}
 }

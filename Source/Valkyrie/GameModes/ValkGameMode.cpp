@@ -5,6 +5,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
+#include "ValkGameState.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/States/ValkPlayerState.h"
 
@@ -105,6 +106,16 @@ void AValkGameMode::PlayerDied(AController* const, AController* const aVictimCon
 {
 	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(aVictimController)) {
 		playerController->Client_OnPlayerDied();
+	}
+}
+
+void AValkGameMode::FinishMatch()
+{
+	if (AValkGameState* const gameState = GetGameState<AValkGameState>()) {
+		if (!gameState->HasMatchEnded()) {
+			gameState->SetMatchEnded();
+			ReturnToMainMenuAfterDelay();
+		}
 	}
 }
 

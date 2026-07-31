@@ -82,10 +82,8 @@ void ATDMGameMode::HandlePlayerKilled(
 void ATDMGameMode::EndTDMMatch(const EValkTeamId aWinningTeamId)
 {
 	if (AValkGameState* const gameState = GetGameState<AValkGameState>()) {
-		if (!gameState->HasMatchEnded()) {
-			gameState->SetWinningTeamId(aWinningTeamId);
-			ReturnToMainMenuAfterDelay();
-		}
+		gameState->SetWinningTeamId(aWinningTeamId);
+		FinishMatch();
 	}
 }
 
