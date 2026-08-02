@@ -86,8 +86,7 @@ void AGunActor::Multicast_PlayFirePresentation_Implementation()
 				GetWorld(),
 				myMuzzleFlashVFX,
 				muzzleTransform.GetLocation(),
-				muzzleTransform.GetRotation().Rotator(),
-				muzzleTransform.GetScale3D()
+				muzzleTransform.GetRotation().Rotator()
 			);
 		}
 	}

@@ -1,25 +1,25 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "TargetPawn.h"
+#include "TargetActor.h"
 
 #include "TimerManager.h"
 #include "Valkyrie/Components/HealthComponent.h"
 
-ATargetPawn::ATargetPawn()
+ATargetActor::ATargetActor()
 {
 	myHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("myHealthComponent"));
 }
 
-void ATargetPawn::BeginPlay()
+void ATargetActor::BeginPlay()
 {
 	Super::BeginPlay();
 
 	if (myHealthComponent) {
-		myHealthComponent->GetOnDied().BindUObject(this, &ATargetPawn::OnHealthDied);
+		myHealthComponent->GetOnDied().BindUObject(this, &ATargetActor::OnHealthDied);
 	}
 }
 
-void ATargetPawn::OnHealthDied(AController* const)
+void ATargetActor::OnHealthDied(AController* const)
 {
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
@@ -27,13 +27,13 @@ void ATargetPawn::OnHealthDied(AController* const)
 	GetWorldTimerManager().SetTimer(
 		myRespawnTimerHandle,
 		this,
-		&ATargetPawn::Respawn,
+		&ATargetActor::Respawn,
 		myRespawnDelay,
 		false
 	);
 }
 
-void ATargetPawn::Respawn()
+void ATargetActor::Respawn()
 {
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);

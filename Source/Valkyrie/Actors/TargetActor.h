@@ -5,18 +5,18 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "TimerManager.h"
-#include "TargetPawn.generated.h"
+#include "TargetActor.generated.h"
 
 class AController;
 class UHealthComponent;
 
 UCLASS(Blueprintable)
-class VALKYRIE_API ATargetPawn : public APawn
+class VALKYRIE_API ATargetActor : public APawn
 {
 	GENERATED_BODY()
 
 public:
-	ATargetPawn();
+	ATargetActor();
 
 private:
 	virtual void BeginPlay() override;
@@ -26,7 +26,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myRespawnDelay{2.f};
-	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UHealthComponent> myHealthComponent{nullptr};
 	FTimerHandle myRespawnTimerHandle;
 };
