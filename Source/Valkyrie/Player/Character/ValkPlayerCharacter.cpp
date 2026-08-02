@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "Net/UnrealNetwork.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
@@ -17,6 +18,11 @@ AValkPlayerCharacter::AValkPlayerCharacter()
 	myHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	myWeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("myWeaponComponent"));
 	myInteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("myInteractionComponent"));
+	mySpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("mySpringArmComponent"));
+	mySpringArmComponent->SetupAttachment(GetRootComponent());
+	mySpringArmComponent->bUsePawnControlRotation = true;
+	myCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("myCameraComponent"));
+	myCameraComponent->SetupAttachment(mySpringArmComponent, USpringArmComponent::SocketName);
 }
 
 void AValkPlayerCharacter::BeginPlay()
@@ -27,6 +33,21 @@ void AValkPlayerCharacter::BeginPlay()
 		myHealthComponent->GetOnDamaged().BindUObject(this, &AValkPlayerCharacter::OnDamaged);
 		myHealthComponent->GetOnDied().BindUObject(this, &AValkPlayerCharacter::OnDied);
 	}
+	myAimTransitionSpeed = (myAimFov - myDefaultFov) / myAimTransitionDuration;
+}
+
+void AValkPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AValkPlayerCharacter, myIsAiming);
+}
+
+void AValkPlayerCharacter::Tick(const float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	UpdateFov(DeltaSeconds);
 }
 
 void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPlayerInputComponent)
@@ -88,6 +109,20 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 				ETriggerEvent::Started,
 				this,
 				&AValkPlayerCharacter::HandleEquipSecondaryGun
+			);
+		}
+		if (myAimAction) {
+			enhancedInputComponent->BindAction(
+				myAimAction,
+				ETriggerEvent::Started,
+				this,
+				&AValkPlayerCharacter::SetIsAiming
+			);
+			enhancedInputComponent->BindAction(
+				myAimAction,
+				ETriggerEvent::Completed,
+				this,
+				&AValkPlayerCharacter::SetIsNotAiming
 			);
 		}
 	}
@@ -175,4 +210,17 @@ void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
 	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
 		playerController->OnControlledPawnDied(aDamageInstigator);
 	}
+}
+
+void AValkPlayerCharacter::Server_SetAiming_Implementation(const bool aIsAiming)
+{
+	myIsAiming = aIsAiming;
+}
+
+void AValkPlayerCharacter::UpdateFov(const float aDeltaSecond)
+{
+	const float fovOffset = aDeltaSecond * (myIsAiming ? myAimTransitionSpeed : -myAimTransitionSpeed);
+	myCurrentFov = FMath::Clamp(myCurrentFov + fovOffset, myAimFov, myDefaultFov);
+
+	myCameraComponent->SetFieldOfView(myCurrentFov);
 }

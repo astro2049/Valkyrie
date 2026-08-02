@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/Interaction/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
@@ -25,6 +27,8 @@ public:
 
 private:
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	void HandleMove(const FInputActionValue& anInputValue);
 	void HandleLook(const FInputActionValue& anInputValue);
@@ -56,14 +60,41 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> mySecondaryWeaponAction{nullptr};
 
-	// components
+	// gameplay components: health, weapon, interaction
 	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
 	TObjectPtr<UHealthComponent> myHealthComponent;
 	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
 	TObjectPtr<UWeaponComponent> myWeaponComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInteractionComponent> myInteractionComponent;
-
+	// hit react montage
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UAnimMontage> myHitReactMontage{nullptr};
+
+	// ADS
+	UFUNCTION(Server, Reliable, Category="Valkyrie")
+	void Server_SetAiming(bool aIsAiming);
+	void SetIsAiming() { Server_SetAiming(true); }
+	void SetIsNotAiming() { Server_SetAiming(false); }
+	void UpdateFov(float aDeltaSecond);
+
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> myAimAction{nullptr};
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
+	bool myIsAiming{false};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myDefaultFov{90.f};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myAimFov{60.f};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myAimTransitionDuration{0.2f};
+	float myAimTransitionSpeed{-1.f}; // degrees/s
+	float myCurrentFov{myDefaultFov};
+
+	// camera components
+	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
+	TObjectPtr<USpringArmComponent> mySpringArmComponent;
+	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
+	TObjectPtr<UCameraComponent> myCameraComponent;
 };
