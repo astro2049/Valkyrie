@@ -81,7 +81,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myAimAction{nullptr};
 
-	UPROPERTY(Replicated, VisibleAnywhere, Category="Valkyrie")
+	UPROPERTY(ReplicatedUsing=OnRep_IsAiming, VisibleAnywhere, Category="Valkyrie")
 	bool myIsAiming{false};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDefaultFov{90.f};
@@ -91,6 +91,16 @@ private:
 	float myAimTransitionDuration{0.15f};
 	float myAimTransitionSpeed{-1.f}; // degrees/s
 	float myCurrentFov{myDefaultFov};
+
+	// move speed
+	UFUNCTION()
+	void OnRep_IsAiming() const;
+	void UpdateMaxMoveSpeed() const;
+
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myDefaultMaxWalkSpeed{600.f};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myAimMaxWalkSpeed{400.f};
 
 	// camera components
 	UPROPERTY(VisibleAnywhere, Category="Valkyrie")

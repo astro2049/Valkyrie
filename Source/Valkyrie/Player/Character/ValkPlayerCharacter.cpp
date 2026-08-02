@@ -34,6 +34,7 @@ void AValkPlayerCharacter::BeginPlay()
 		myHealthComponent->GetOnDied().BindUObject(this, &AValkPlayerCharacter::OnDied);
 	}
 	myAimTransitionSpeed = (myAimFov - myDefaultFov) / myAimTransitionDuration;
+	UpdateMaxMoveSpeed();
 }
 
 void AValkPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -215,6 +216,7 @@ void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
 void AValkPlayerCharacter::Server_SetAiming_Implementation(const bool aIsAiming)
 {
 	myIsAiming = aIsAiming;
+	UpdateMaxMoveSpeed();
 }
 
 void AValkPlayerCharacter::UpdateFov(const float aDeltaSecond)
@@ -223,4 +225,14 @@ void AValkPlayerCharacter::UpdateFov(const float aDeltaSecond)
 	myCurrentFov = FMath::Clamp(myCurrentFov + fovOffset, myAimFov, myDefaultFov);
 
 	myCameraComponent->SetFieldOfView(myCurrentFov);
+}
+
+void AValkPlayerCharacter::OnRep_IsAiming() const
+{
+	UpdateMaxMoveSpeed();
+}
+
+void AValkPlayerCharacter::UpdateMaxMoveSpeed() const
+{
+	GetCharacterMovement()->MaxWalkSpeed = myIsAiming ? myAimMaxWalkSpeed : myDefaultMaxWalkSpeed;
 }
