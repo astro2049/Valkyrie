@@ -99,3 +99,8 @@ void AGunActor::PlayReloadPresentation() const
 		UGameplayStatics::PlaySoundAtLocation(this, myReloadSound, GetActorLocation());
 	}
 }
+
+FVector AGunActor::GetMuzzleLocation() const
+{
+	return myMuzzleArrowComponent ? myMuzzleArrowComponent->GetComponentLocation() : GetActorLocation();
+}

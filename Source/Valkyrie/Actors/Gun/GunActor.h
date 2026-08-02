@@ -39,6 +39,7 @@ public:
 	int32 GetAmmoInMag() const { return myAmmoInMag; }
 	int32 GetReserveAmmo() const { return myReserveAmmo; }
 	int32 GetMagazineSize() const { return myGunDataAsset ? myGunDataAsset->myMagazineSize : 0; }
+	FVector GetMuzzleLocation() const;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -63,8 +64,8 @@ private:
 	int32 myReserveAmmo{0};
 	float myLastFiredTime{-1.f};
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<USceneComponent> myRootComponent{nullptr};
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UArrowComponent> myMuzzleArrowComponent{nullptr};
 };

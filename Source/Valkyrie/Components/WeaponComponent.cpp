@@ -8,6 +8,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
+#include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
@@ -141,6 +142,7 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 				ECC_Visibility,
 				params
 			);
+			Multicast_PlayBulletTrailPresentation(currentGunActor->GetMuzzleLocation(), hasHit ? hitResult.ImpactPoint : end);
 			// if hit
 			if (hasHit) {
 				if (const APawn* const hitPawn = Cast<APawn>(hitResult.GetActor())) {
@@ -260,4 +262,22 @@ AGunActor* UWeaponComponent::GetCurrentGunActor() const
 		return mySecondaryGunActor;
 	}
 	return nullptr;
+}
+
+void UWeaponComponent::Multicast_PlayBulletTrailPresentation_Implementation(const FVector aTrailStart, const FVector aTrailEnd)
+{
+	if (myBulletTrailVFX) {
+		if (UNiagaraComponent* const trailComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			myBulletTrailVFX,
+			aTrailStart,
+			FRotator::ZeroRotator,
+			FVector::OneVector,
+			true,
+			false
+		)) {
+			trailComponent->SetVariablePosition(TEXT("User.Beam End"), aTrailEnd);
+			trailComponent->Activate();
+		}
+	}
 }

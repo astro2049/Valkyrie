@@ -49,6 +49,8 @@ private:
 	void Server_TraceFire(FVector aTraceStart, FVector aTraceDirection);
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitPresentation(FVector aHitPoint, const FVector aHitNormal);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayBulletTrailPresentation(FVector aTrailStart, FVector aTrailEnd);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayReloadPresentation(AGunActor* aGunActor);
@@ -68,7 +70,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myTraceDistance{10000.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	bool myDrawDebugTrace{true};
+	bool myDrawDebugTrace{false};
 
 	// primary and secondary gun types
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -79,6 +81,8 @@ private:
 	FName myHandSocketName{"HandGrip_R"};
 
 	// on hit
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UNiagaraSystem> myBulletTrailVFX{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UNiagaraSystem> myImpactVFX;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
