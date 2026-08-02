@@ -86,9 +86,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDefaultFov{90.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myAimFov{60.f};
+	float myAimFov{80.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myAimTransitionDuration{0.2f};
+	float myAimTransitionDuration{0.15f};
 	float myAimTransitionSpeed{-1.f}; // degrees/s
 	float myCurrentFov{myDefaultFov};
 
