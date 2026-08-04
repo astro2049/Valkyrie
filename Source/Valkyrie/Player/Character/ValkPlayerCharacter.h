@@ -3,12 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemInterface.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/Interaction/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
+#include "Valkyrie/Player/GAS/AbilityInputId.h"
 #include "ValkPlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -16,20 +19,35 @@ class UInputAction;
 class UAnimMontage;
 
 UCLASS(Blueprintable)
-class VALKYRIE_API AValkPlayerCharacter : public ACharacter
+class VALKYRIE_API AValkPlayerCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
 	AValkPlayerCharacter();
 
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
+	{
+		return myAsc;
+	}
+
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
+	
+	// ADS
+	void SetAiming(bool aIsAiming);
 
 private:
+	// GAS
+	/** Ability System Component. Required to use Gameplay Attributes and Gameplay Abilities. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Valkyrie", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UAbilitySystemComponent> myAsc;
+
+	// Lifecycle functions
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	// user inputs
 	void HandleMove(const FInputActionValue& anInputValue);
 	void HandleLook(const FInputActionValue& anInputValue);
 	void HandleFire();
@@ -38,9 +56,11 @@ private:
 	void HandleEquipPrimaryGun();
 	void HandleEquipSecondaryGun();
 
+	// gameplay events
 	void OnDamaged(float aDamage, AController* aDamageInstigator);
 	void OnDied(AController* aDamageInstigator) const;
 
+	// hit react
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitReact();
 
@@ -72,10 +92,8 @@ private:
 	TObjectPtr<UAnimMontage> myHitReactMontage{nullptr};
 
 	// ADS
-	UFUNCTION(Server, Reliable, Category="Valkyrie")
-	void Server_SetAiming(bool aIsAiming);
-	void SetIsAiming() { Server_SetAiming(true); }
-	void SetIsNotAiming() { Server_SetAiming(false); }
+	void StartAiming() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Aim); }
+	void StopAiming() { myAsc->AbilityLocalInputReleased(EAbilityInputId::Aim); }
 	void UpdateFov(float aDeltaSecond);
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

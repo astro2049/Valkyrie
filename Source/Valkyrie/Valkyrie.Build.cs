@@ -15,7 +15,10 @@ public class Valkyrie : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"UMG",
-			"Niagara"
+			"Niagara",
+			"GameplayAbilities",
+			"GameplayTags",
+			"GameplayTasks"
 		]);
 
 		PrivateDependencyModuleNames.AddRange(["AIModule"]);

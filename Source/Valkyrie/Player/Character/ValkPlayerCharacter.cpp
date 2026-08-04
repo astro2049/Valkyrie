@@ -3,12 +3,15 @@
 #include "ValkPlayerCharacter.h"
 
 #include "EnhancedInputComponent.h"
+#include "AbilitySystemComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
+#include "Valkyrie/Player/GAS/AbilityInputId.h"
+#include "Valkyrie/Player/GAS/GameplayAbilities/AimAbility.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
 {
@@ -23,6 +26,9 @@ AValkPlayerCharacter::AValkPlayerCharacter()
 	mySpringArmComponent->bUsePawnControlRotation = true;
 	myCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("myCameraComponent"));
 	myCameraComponent->SetupAttachment(mySpringArmComponent, USpringArmComponent::SocketName);
+	
+	myAsc = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("myAbilitySystemComponent"));
+	myAsc->SetIsReplicated(true);
 }
 
 void AValkPlayerCharacter::BeginPlay()
@@ -35,6 +41,10 @@ void AValkPlayerCharacter::BeginPlay()
 	}
 	myAimTransitionSpeed = (myAimFov - myDefaultFov) / myAimTransitionDuration;
 	UpdateMaxMoveSpeed();
+
+	if (HasAuthority()) {
+		myAsc->GiveAbility(FGameplayAbilitySpec(UAimAbility::StaticClass(), 1, EAbilityInputId::Aim));
+	}
 }
 
 void AValkPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -117,13 +127,13 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 				myAimAction,
 				ETriggerEvent::Started,
 				this,
-				&AValkPlayerCharacter::SetIsAiming
+				&AValkPlayerCharacter::StartAiming
 			);
 			enhancedInputComponent->BindAction(
 				myAimAction,
 				ETriggerEvent::Completed,
 				this,
-				&AValkPlayerCharacter::SetIsNotAiming
+				&AValkPlayerCharacter::StopAiming
 			);
 		}
 	}
@@ -213,7 +223,7 @@ void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
 	}
 }
 
-void AValkPlayerCharacter::Server_SetAiming_Implementation(const bool aIsAiming)
+void AValkPlayerCharacter::SetAiming(const bool aIsAiming)
 {
 	myIsAiming = aIsAiming;
 	UpdateMaxMoveSpeed();
