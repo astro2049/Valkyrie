@@ -8,9 +8,9 @@
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
-#include "Net/UnrealNetwork.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/GAS/AbilityInputId.h"
+#include "Valkyrie/Player/GAS/AbilityTags.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/AimAbility.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
@@ -26,7 +26,7 @@ AValkPlayerCharacter::AValkPlayerCharacter()
 	mySpringArmComponent->bUsePawnControlRotation = true;
 	myCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("myCameraComponent"));
 	myCameraComponent->SetupAttachment(mySpringArmComponent, USpringArmComponent::SocketName);
-	
+
 	myAsc = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("myAbilitySystemComponent"));
 	myAsc->SetIsReplicated(true);
 }
@@ -45,13 +45,14 @@ void AValkPlayerCharacter::BeginPlay()
 	if (HasAuthority()) {
 		myAsc->GiveAbility(FGameplayAbilitySpec(UAimAbility::StaticClass(), 1, EAbilityInputId::Aim));
 	}
-}
 
-void AValkPlayerCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AValkPlayerCharacter, myIsAiming);
+	myAsc->RegisterGameplayTagEvent(
+		AbilityTags::State_Aiming,
+		EGameplayTagEventType::NewOrRemoved
+	).AddUObject(
+		this,
+		&AValkPlayerCharacter::OnAimingTagChanged
+	);
 }
 
 void AValkPlayerCharacter::Tick(const float DeltaSeconds)
@@ -222,27 +223,25 @@ void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
 		playerController->OnControlledPawnDied(aDamageInstigator);
 	}
 }
-
-void AValkPlayerCharacter::SetAiming(const bool aIsAiming)
+bool AValkPlayerCharacter::IsAiming() const
 {
-	myIsAiming = aIsAiming;
+	return myAsc->HasMatchingGameplayTag(AbilityTags::State_Aiming);
+}
+
+void AValkPlayerCharacter::OnAimingTagChanged(const FGameplayTag aTag, int32 aNewCount) const
+{
 	UpdateMaxMoveSpeed();
 }
 
 void AValkPlayerCharacter::UpdateFov(const float aDeltaSecond)
 {
-	const float fovOffset = aDeltaSecond * (myIsAiming ? myAimTransitionSpeed : -myAimTransitionSpeed);
+	const float fovOffset = aDeltaSecond * (IsAiming() ? myAimTransitionSpeed : -myAimTransitionSpeed);
 	myCurrentFov = FMath::Clamp(myCurrentFov + fovOffset, myAimFov, myDefaultFov);
 
 	myCameraComponent->SetFieldOfView(myCurrentFov);
 }
 
-void AValkPlayerCharacter::OnRep_IsAiming() const
-{
-	UpdateMaxMoveSpeed();
-}
-
 void AValkPlayerCharacter::UpdateMaxMoveSpeed() const
 {
-	GetCharacterMovement()->MaxWalkSpeed = myIsAiming ? myAimMaxWalkSpeed : myDefaultMaxWalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = IsAiming() ? myAimMaxWalkSpeed : myDefaultMaxWalkSpeed;
 }

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "AimAbility.generated.h"
 
 /**
@@ -32,4 +33,7 @@ public:
 
 	UFUNCTION()
 	void HandleInputReleased(float aTimeHeld);
+	
+private:
+	FActiveGameplayEffectHandle myAimingEffectHandle;
 };

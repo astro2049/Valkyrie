@@ -4,6 +4,7 @@
 
 #include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
+#include "Valkyrie/Player/GAS/GameplayEffects/AimingEffect.h"
 
 void UAimAbility::ActivateAbility(
 	const FGameplayAbilitySpecHandle Handle,
@@ -13,14 +14,19 @@ void UAimAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetAvatarActorFromActorInfo())) {
-		playerCharacter->SetAiming(true);
+	myAimingEffectHandle = ApplyGameplayEffectToOwner(
+		Handle,
+		ActorInfo,
+		ActivationInfo,
+		GetDefault<UAimingEffect>(),
+		1.f
+	);
 
-		if (UAbilityTask_WaitInputRelease* const waitTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this, true)) {
-			waitTask->OnRelease.AddDynamic(this, &UAimAbility::HandleInputReleased);
-			waitTask->ReadyForActivation();
-		}
+	if (UAbilityTask_WaitInputRelease* const waitTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this, true)) {
+		waitTask->OnRelease.AddDynamic(this, &UAimAbility::HandleInputReleased);
+		waitTask->ReadyForActivation();
 	}
+
 }
 void UAimAbility::EndAbility(
 	const FGameplayAbilitySpecHandle Handle,
@@ -29,9 +35,10 @@ void UAimAbility::EndAbility(
 	bool bReplicateEndAbility,
 	bool bWasCancelled)
 {
-	if (AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetAvatarActorFromActorInfo())) {
-		playerCharacter->SetAiming(false);
-	}
+	ActorInfo->AbilitySystemComponent->RemoveActiveGameplayEffect(
+		myAimingEffectHandle
+	);
+	myAimingEffectHandle.Invalidate();
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

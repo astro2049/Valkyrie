@@ -26,15 +26,11 @@ class VALKYRIE_API AValkPlayerCharacter : public ACharacter, public IAbilitySyst
 public:
 	AValkPlayerCharacter();
 
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
-	{
-		return myAsc;
-	}
-
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return myAsc; }
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
 	
-	// ADS
-	void SetAiming(bool aIsAiming);
+	UFUNCTION(BlueprintPure)
+	bool IsAiming() const;
 
 private:
 	// GAS
@@ -44,7 +40,6 @@ private:
 
 	// Lifecycle functions
 	virtual void BeginPlay() override;
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaSeconds) override;
 
 	// user inputs
@@ -63,6 +58,15 @@ private:
 	// hit react
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitReact();
+
+	// ADS
+	void OnAimingTagChanged(const FGameplayTag aTag, int32 aNewCount) const;
+	void StartAiming() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Aim); }
+	void StopAiming() { myAsc->AbilityLocalInputReleased(EAbilityInputId::Aim); }
+	void UpdateFov(float aDeltaSecond);
+
+	// move speed
+	void UpdateMaxMoveSpeed() const;
 
 	// input actions
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -92,15 +96,9 @@ private:
 	TObjectPtr<UAnimMontage> myHitReactMontage{nullptr};
 
 	// ADS
-	void StartAiming() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Aim); }
-	void StopAiming() { myAsc->AbilityLocalInputReleased(EAbilityInputId::Aim); }
-	void UpdateFov(float aDeltaSecond);
-
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myAimAction{nullptr};
 
-	UPROPERTY(ReplicatedUsing=OnRep_IsAiming, VisibleAnywhere, Category="Valkyrie")
-	bool myIsAiming{false};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDefaultFov{90.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -111,10 +109,6 @@ private:
 	float myCurrentFov{myDefaultFov};
 
 	// move speed
-	UFUNCTION()
-	void OnRep_IsAiming() const;
-	void UpdateMaxMoveSpeed() const;
-
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDefaultMaxWalkSpeed{600.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
