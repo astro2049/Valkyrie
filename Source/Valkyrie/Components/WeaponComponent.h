@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "NiagaraSystem.h"
 #include "Components/ActorComponent.h"
-#include "TimerManager.h"
 #include "WeaponComponent.generated.h"
 
 class AGunActor;
@@ -28,12 +27,13 @@ public:
 
 	void Fire();
 	UFUNCTION(Server, Reliable)
-	void Server_Reload();
-	UFUNCTION(Server, Reliable)
 	void Server_EquipGun(EValkWeaponSlot aWeaponSlot);
 
 	AGunActor* GetCurrentGunActor() const;
-	bool IsReloading() const { return myIsReloading; }
+	bool CanReload() const;
+	float GetReloadDuration() const;
+	void ApplyReloadAmmo();
+	bool IsReloading() const;
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	EValkWeaponSlot GetCurrentSlot() const { return myCurrentSlot; }
 
@@ -52,12 +52,7 @@ private:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayBulletTrailPresentation(FVector aTrailStart, FVector aTrailEnd);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayReloadPresentation(AGunActor* aGunActor);
 	void CancelReload();
-	void FinishReload();
-
-	FTimerHandle myReloadTimerHandle;
 
 	UPROPERTY(Replicated)
 	TObjectPtr<AGunActor> myPrimaryGunActor{nullptr};
@@ -65,8 +60,6 @@ private:
 	TObjectPtr<AGunActor> mySecondaryGunActor{nullptr};
 	UPROPERTY(ReplicatedUsing=OnRep_UpdateGunVisibility)
 	EValkWeaponSlot myCurrentSlot{EValkWeaponSlot::Primary};
-	UPROPERTY(Replicated)
-	bool myIsReloading{false};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myTraceDistance{10000.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

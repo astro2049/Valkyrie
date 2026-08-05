@@ -13,6 +13,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
+#include "Valkyrie/Player/GAS/AbilityTags.h"
 
 UWeaponComponent::UWeaponComponent()
 {
@@ -27,7 +28,6 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UWeaponComponent, myPrimaryGunActor);
 	DOREPLIFETIME(UWeaponComponent, mySecondaryGunActor);
 	DOREPLIFETIME(UWeaponComponent, myCurrentSlot);
-	DOREPLIFETIME(UWeaponComponent, myIsReloading);
 }
 
 // Called when the game starts
@@ -125,7 +125,7 @@ void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart
 	const APawn* const owner = Cast<APawn>(GetOwner());
 	AGunActor* const currentGunActor = GetCurrentGunActor();
 	if (world && owner && currentGunActor) {
-		if (!myIsReloading && currentGunActor->CanFire()) {
+		if (!IsReloading() && currentGunActor->CanFire()) {
 			// consume ammo
 			currentGunActor->ConsumeAmmo();
 
@@ -192,56 +192,12 @@ void UWeaponComponent::Multicast_PlayHitPresentation_Implementation(const FVecto
 	}
 }
 
-void UWeaponComponent::Server_Reload_Implementation()
-{
-	const UWorld* const world = GetWorld();
-	const AActor* const owner = GetOwner();
-	if (world && owner) {
-		if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
-			if (!myIsReloading && currentGunActor->CanReload()) {
-				myIsReloading = true;
-				Multicast_PlayReloadPresentation(currentGunActor);
-				const float reloadDuration = currentGunActor->GetReloadDuration();
-				if (reloadDuration > 0.f) {
-					world->GetTimerManager().SetTimer(
-						myReloadTimerHandle,
-						this,
-						&UWeaponComponent::FinishReload,
-						reloadDuration,
-						false
-					);
-				} else {
-					FinishReload();
-				}
-			}
-		}
-	}
-}
-
-void UWeaponComponent::Multicast_PlayReloadPresentation_Implementation(AGunActor* aGunActor)
-{
-	if (aGunActor) {
-		aGunActor->PlayReloadPresentation();
-	}
-}
-
 void UWeaponComponent::CancelReload()
 {
-	if (myIsReloading) {
-		if (const UWorld* const world = GetWorld()) {
-			world->GetTimerManager().ClearTimer(myReloadTimerHandle);
-		}
-		myIsReloading = false;
-	}
-}
-
-void UWeaponComponent::FinishReload()
-{
-	if (myIsReloading) {
-		if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
-			currentGunActor->ApplyReloadAmmo();
-		}
-		myIsReloading = false;
+	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
+		FGameplayTagContainer abilityTags;
+		abilityTags.AddTag(AbilityTags::Ability_Reload);
+		playerCharacter->GetAbilitySystemComponent()->CancelAbilities(&abilityTags);
 	}
 }
 
@@ -262,6 +218,33 @@ AGunActor* UWeaponComponent::GetCurrentGunActor() const
 		return mySecondaryGunActor;
 	}
 	return nullptr;
+}
+
+bool UWeaponComponent::CanReload() const
+{
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	return currentGunActor && currentGunActor->CanReload();
+}
+
+float UWeaponComponent::GetReloadDuration() const
+{
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	return currentGunActor ? currentGunActor->GetReloadDuration() : 0.f;
+}
+
+void UWeaponComponent::ApplyReloadAmmo()
+{
+	if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
+		currentGunActor->ApplyReloadAmmo();
+	}
+}
+
+bool UWeaponComponent::IsReloading() const
+{
+	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
+		return playerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::State_Reloading);
+	}
+	return false;
 }
 
 void UWeaponComponent::Multicast_PlayBulletTrailPresentation_Implementation(const FVector aTrailStart, const FVector aTrailEnd)

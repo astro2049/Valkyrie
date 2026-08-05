@@ -12,6 +12,7 @@
 #include "Valkyrie/Player/GAS/AbilityInputId.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/AimAbility.h"
+#include "Valkyrie/Player/GAS/GameplayAbilities/ReloadAbility.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
 {
@@ -44,6 +45,7 @@ void AValkPlayerCharacter::BeginPlay()
 
 	if (HasAuthority()) {
 		myAsc->GiveAbility(FGameplayAbilitySpec(UAimAbility::StaticClass(), 1, EAbilityInputId::Aim));
+		myAsc->GiveAbility(FGameplayAbilitySpec(UReloadAbility::StaticClass(), 1, EAbilityInputId::Reload));
 	}
 
 	myAsc->RegisterGameplayTagEvent(
@@ -94,7 +96,7 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 		if (myReloadAction) {
 			enhancedInputComponent->BindAction(
 				myReloadAction,
-				ETriggerEvent::Triggered,
+				ETriggerEvent::Started,
 				this,
 				&AValkPlayerCharacter::HandleReload
 			);
@@ -169,9 +171,7 @@ void AValkPlayerCharacter::HandleFire()
 
 void AValkPlayerCharacter::HandleReload()
 {
-	if (myWeaponComponent) {
-		myWeaponComponent->Server_Reload();
-	}
+	myAsc->AbilityLocalInputPressed(EAbilityInputId::Reload);
 }
 
 void AValkPlayerCharacter::HandleInteract()
