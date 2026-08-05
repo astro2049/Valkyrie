@@ -31,6 +31,8 @@ public:
 private:
 	UFUNCTION()
 	void HandleReloadFinished();
+	UFUNCTION()
+	void HandleReloadCancelled();
 
 	FActiveGameplayEffectHandle myReloadingEffectHandle;
 };

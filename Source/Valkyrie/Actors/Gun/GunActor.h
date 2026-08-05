@@ -14,6 +14,7 @@ class UParticleSystem;
 class USceneComponent;
 class USoundBase;
 class ACharacter;
+class UAnimMontage;
 
 UCLASS()
 class VALKYRIE_API AGunActor : public AActor
@@ -36,6 +37,7 @@ public:
 	// Getters
 	float GetDamage() const { return myGunDataAsset ? myGunDataAsset->myDamage : 0.f; }
 	float GetReloadDuration() const { return myGunDataAsset ? myGunDataAsset->myReloadDuration : 0.f; }
+	UAnimMontage* GetReloadMontage() const { return myReloadMontage; }
 	int32 GetAmmoInMag() const { return myAmmoInMag; }
 	int32 GetReserveAmmo() const { return myReserveAmmo; }
 	int32 GetMagazineSize() const { return myGunDataAsset ? myGunDataAsset->myMagazineSize : 0; }
@@ -52,6 +54,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	// reload
 	TObjectPtr<USoundBase> myReloadSound{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UAnimMontage> myReloadMontage{nullptr};
 	// muzzle flash
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UNiagaraSystem> myMuzzleFlashVFX{nullptr};

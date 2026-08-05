@@ -2,7 +2,9 @@
 
 #include "ReloadAbility.h"
 
-#include "Abilities/Tasks/AbilityTask_WaitDelay.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Animation/AnimMontage.h"
+#include "Valkyrie/Actors/Gun/GunActor.h"
 #include "Valkyrie/Components/WeaponComponent.h"
 #include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
@@ -33,6 +35,14 @@ void UReloadAbility::ActivateAbility(
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
+	AGunActor* const currentGunActor = weaponComponent->GetCurrentGunActor();
+	UAnimMontage* const reloadMontage = currentGunActor
+		? currentGunActor->GetReloadMontage()
+		: nullptr;
+	if (!reloadMontage) {
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+		return;
+	}
 
 	myReloadingEffectHandle = ApplyGameplayEffectToOwner(
 		Handle,
@@ -42,10 +52,22 @@ void UReloadAbility::ActivateAbility(
 		1.f
 	);
 
+	float montagePlayRate = 1.f;
 	const float reloadDuration = weaponComponent->GetReloadDuration();
-	UAbilityTask_WaitDelay* const waitTask = UAbilityTask_WaitDelay::WaitDelay(this, reloadDuration);
-	waitTask->OnFinish.AddDynamic(this, &UReloadAbility::HandleReloadFinished);
-	waitTask->ReadyForActivation();
+	if (reloadDuration > 0.f) {
+		montagePlayRate = reloadMontage->GetPlayLength() / reloadDuration;
+	}
+	UAbilityTask_PlayMontageAndWait* const montageTask =
+		UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+			this,
+			NAME_None,
+			reloadMontage,
+			montagePlayRate
+		);
+	montageTask->OnCompleted.AddDynamic(this, &UReloadAbility::HandleReloadFinished);
+	montageTask->OnInterrupted.AddDynamic(this, &UReloadAbility::HandleReloadCancelled);
+	montageTask->OnCancelled.AddDynamic(this, &UReloadAbility::HandleReloadCancelled);
+	montageTask->ReadyForActivation();
 }
 
 void UReloadAbility::EndAbility(
@@ -76,5 +98,21 @@ void UReloadAbility::HandleReloadFinished()
 		GetCurrentActivationInfo(),
 		playerCharacter && playerCharacter->HasAuthority(),
 		false
+	);
+}
+
+void UReloadAbility::HandleReloadCancelled()
+{
+	if (!IsActive()) {
+		return;
+	}
+
+	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetAvatarActorFromActorInfo());
+	EndAbility(
+		GetCurrentAbilitySpecHandle(),
+		GetCurrentActorInfo(),
+		GetCurrentActivationInfo(),
+		playerCharacter && playerCharacter->HasAuthority(),
+		true
 	);
 }
