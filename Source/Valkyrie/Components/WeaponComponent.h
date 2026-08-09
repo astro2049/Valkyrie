@@ -26,6 +26,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void Fire();
+	bool CanFire() const;
+	float GetFireInterval() const;
 	UFUNCTION(Server, Reliable)
 	void Server_EquipGun(EValkWeaponSlot aWeaponSlot);
 

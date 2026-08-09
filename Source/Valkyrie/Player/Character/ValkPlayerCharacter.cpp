@@ -12,6 +12,7 @@
 #include "Valkyrie/Player/GAS/AbilityInputId.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/AimAbility.h"
+#include "Valkyrie/Player/GAS/GameplayAbilities/FireAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/ReloadAbility.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
@@ -44,8 +45,15 @@ void AValkPlayerCharacter::BeginPlay()
 	UpdateMaxMoveSpeed();
 
 	if (HasAuthority()) {
-		myAsc->GiveAbility(FGameplayAbilitySpec(UAimAbility::StaticClass(), 1, EAbilityInputId::Aim));
-		myAsc->GiveAbility(FGameplayAbilitySpec(UReloadAbility::StaticClass(), 1, EAbilityInputId::Reload));
+		if (ensureMsgf(myAimAbilityType != nullptr, TEXT("%s has no Aim ability type assigned."), *GetNameSafe(this))) {
+			myAsc->GiveAbility(FGameplayAbilitySpec(myAimAbilityType, 1, EAbilityInputId::Aim));
+		}
+		if (ensureMsgf(myReloadAbilityType != nullptr, TEXT("%s has no Reload ability type assigned."), *GetNameSafe(this))) {
+			myAsc->GiveAbility(FGameplayAbilitySpec(myReloadAbilityType, 1, EAbilityInputId::Reload));
+		}
+		if (ensureMsgf(myFireAbilityType != nullptr, TEXT("%s has no Fire ability type assigned."), *GetNameSafe(this))) {
+			myAsc->GiveAbility(FGameplayAbilitySpec(myFireAbilityType, 1, EAbilityInputId::Fire));
+		}
 	}
 
 	myAsc->RegisterGameplayTagEvent(
@@ -88,9 +96,15 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 		if (myFireAction) {
 			enhancedInputComponent->BindAction(
 				myFireAction,
-				ETriggerEvent::Triggered,
+				ETriggerEvent::Started,
 				this,
-				&AValkPlayerCharacter::HandleFire
+				&AValkPlayerCharacter::StartFiring
+			);
+			enhancedInputComponent->BindAction(
+				myFireAction,
+				ETriggerEvent::Completed,
+				this,
+				&AValkPlayerCharacter::StopFiring
 			);
 		}
 		if (myReloadAction) {
@@ -159,13 +173,6 @@ void AValkPlayerCharacter::HandleLook(const FInputActionValue& anInputValue)
 	if (const FVector2D lookInput = anInputValue.Get<FVector2D>(); !lookInput.IsNearlyZero()) {
 		AddControllerYawInput(lookInput.X);
 		AddControllerPitchInput(lookInput.Y);
-	}
-}
-
-void AValkPlayerCharacter::HandleFire()
-{
-	if (myWeaponComponent) {
-		myWeaponComponent->Fire();
 	}
 }
 

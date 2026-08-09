@@ -25,10 +25,12 @@ void AGunActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (myGunDataAsset) {
+		myFireInterval = myGunDataAsset->myRPM > 0.f ? 60.f / myGunDataAsset->myRPM : 0.f;
+	}
 	if (HasAuthority() && myGunDataAsset) {
 		myAmmoInMag = FMath::Max(myGunDataAsset->myMagazineSize, 1);
 		myReserveAmmo = FMath::Max(myGunDataAsset->myInitialReserveAmmo, 0);
-		myFireInterval = myGunDataAsset->myRPM > 0.f ? 60.f / myGunDataAsset->myRPM : 0.f;
 		myLastFiredTime = -1.f;
 	}
 }
@@ -89,13 +91,6 @@ void AGunActor::Multicast_PlayFirePresentation_Implementation()
 				muzzleTransform.GetRotation().Rotator()
 			);
 		}
-	}
-}
-
-void AGunActor::PlayReloadPresentation() const
-{
-	if (myReloadSound) {
-		UGameplayStatics::PlaySoundAtLocation(this, myReloadSound, GetActorLocation());
 	}
 }
 

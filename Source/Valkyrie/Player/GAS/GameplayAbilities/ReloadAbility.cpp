@@ -8,14 +8,16 @@
 #include "Valkyrie/Components/WeaponComponent.h"
 #include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
-#include "Valkyrie/Player/GAS/GameplayEffects/ReloadingEffect.h"
 
 UReloadAbility::UReloadAbility()
 {
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+
 	FGameplayTagContainer assetTags;
 	assetTags.AddTag(AbilityTags::Ability_Reload);
 	SetAssetTags(assetTags);
-
+	ActivationOwnedTags.AddTag(AbilityTags::State_Reloading);
 	ActivationBlockedTags.AddTag(AbilityTags::State_Reloading);
 }
 
@@ -44,14 +46,6 @@ void UReloadAbility::ActivateAbility(
 		return;
 	}
 
-	myReloadingEffectHandle = ApplyGameplayEffectToOwner(
-		Handle,
-		ActorInfo,
-		ActivationInfo,
-		GetDefault<UReloadingEffect>(),
-		1.f
-	);
-
 	float montagePlayRate = 1.f;
 	const float reloadDuration = weaponComponent->GetReloadDuration();
 	if (reloadDuration > 0.f) {
@@ -68,19 +62,6 @@ void UReloadAbility::ActivateAbility(
 	montageTask->OnInterrupted.AddDynamic(this, &UReloadAbility::HandleReloadCancelled);
 	montageTask->OnCancelled.AddDynamic(this, &UReloadAbility::HandleReloadCancelled);
 	montageTask->ReadyForActivation();
-}
-
-void UReloadAbility::EndAbility(
-	const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo,
-	const FGameplayAbilityActivationInfo ActivationInfo,
-	bool bReplicateEndAbility,
-	bool bWasCancelled)
-{
-	ActorInfo->AbilitySystemComponent->RemoveActiveGameplayEffect(myReloadingEffectHandle);
-	myReloadingEffectHandle.Invalidate();
-
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UReloadAbility::HandleReloadFinished()

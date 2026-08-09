@@ -17,6 +17,9 @@
 struct FInputActionValue;
 class UInputAction;
 class UAnimMontage;
+class UAimAbility;
+class UFireAbility;
+class UReloadAbility;
 
 UCLASS(Blueprintable)
 class VALKYRIE_API AValkPlayerCharacter : public ACharacter, public IAbilitySystemInterface
@@ -37,6 +40,12 @@ private:
 	/** Ability System Component. Required to use Gameplay Attributes and Gameplay Abilities. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Valkyrie", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UAbilitySystemComponent> myAsc;
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UAimAbility> myAimAbilityType{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UReloadAbility> myReloadAbilityType{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UFireAbility> myFireAbilityType{nullptr};
 
 	// Lifecycle functions
 	virtual void BeginPlay() override;
@@ -45,7 +54,6 @@ private:
 	// user inputs
 	void HandleMove(const FInputActionValue& anInputValue);
 	void HandleLook(const FInputActionValue& anInputValue);
-	void HandleFire();
 	void HandleReload();
 	void HandleInteract();
 	void HandleEquipPrimaryGun();
@@ -64,6 +72,8 @@ private:
 	void StartAiming() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Aim); }
 	void StopAiming() { myAsc->AbilityLocalInputReleased(EAbilityInputId::Aim); }
 	void UpdateFov(float aDeltaSecond);
+	void StartFiring() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Fire); }
+	void StopFiring() { myAsc->AbilityLocalInputReleased(EAbilityInputId::Fire); }
 
 	// move speed
 	void UpdateMaxMoveSpeed() const;

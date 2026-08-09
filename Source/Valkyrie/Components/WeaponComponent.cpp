@@ -115,6 +115,18 @@ void UWeaponComponent::Fire()
 	}
 }
 
+bool UWeaponComponent::CanFire() const
+{
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	return currentGunActor && currentGunActor->CanFire();
+}
+
+float UWeaponComponent::GetFireInterval() const
+{
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	return currentGunActor ? currentGunActor->GetFireInterval() : 0.f;
+}
+
 void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart, const FVector aTraceDirection)
 {
 	if (aTraceDirection.IsNearlyZero()) {

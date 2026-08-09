@@ -32,10 +32,10 @@ public:
 	void ApplyReloadAmmo();
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayFirePresentation();
-	void PlayReloadPresentation() const;
 
 	// Getters
 	float GetDamage() const { return myGunDataAsset ? myGunDataAsset->myDamage : 0.f; }
+	float GetFireInterval() const { return myFireInterval; }
 	float GetReloadDuration() const { return myGunDataAsset ? myGunDataAsset->myReloadDuration : 0.f; }
 	UAnimMontage* GetReloadMontage() const { return myReloadMontage; }
 	int32 GetAmmoInMag() const { return myAmmoInMag; }
@@ -51,9 +51,6 @@ private:
 	// fire
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<USoundBase> myFireSound{nullptr};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	// reload
-	TObjectPtr<USoundBase> myReloadSound{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UAnimMontage> myReloadMontage{nullptr};
 	// muzzle flash
