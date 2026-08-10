@@ -25,9 +25,6 @@ public:
 	UWeaponComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void Fire();
-	bool CanFire() const;
-	float GetFireInterval() const;
 	UFUNCTION(Server, Reliable)
 	void Server_EquipGun(EValkWeaponSlot aWeaponSlot);
 
@@ -41,14 +38,14 @@ public:
 
 private:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void SpawnGunActors();
 	void AttachGun(AGunActor* aGunActor) const;
 	void SetCurrentGun(EValkWeaponSlot aWeaponSlot);
 	UFUNCTION()
 	void OnRep_UpdateGunVisibility() const;
 
-	UFUNCTION(Server, Reliable)
-	void Server_TraceFire(FVector aTraceStart, FVector aTraceDirection);
+	void TryFireOnce();
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitPresentation(FVector aHitPoint, const FVector aHitNormal);
 	UFUNCTION(NetMulticast, Unreliable)

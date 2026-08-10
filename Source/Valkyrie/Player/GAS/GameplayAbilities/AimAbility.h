@@ -13,6 +13,7 @@ class VALKYRIE_API UAimAbility : public UGameplayAbility
 
 public:
 	UAimAbility();
+
 	virtual void ActivateAbility(
 		const FGameplayAbilitySpecHandle Handle,
 		const FGameplayAbilityActorInfo* ActorInfo,

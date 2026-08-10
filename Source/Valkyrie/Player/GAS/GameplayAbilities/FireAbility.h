@@ -13,13 +13,7 @@ class VALKYRIE_API UFireAbility : public UGameplayAbility
 
 public:
 	UFireAbility();
-	virtual bool CanActivateAbility(
-		const FGameplayAbilitySpecHandle Handle,
-		const FGameplayAbilityActorInfo* ActorInfo,
-		const FGameplayTagContainer* SourceTags = nullptr,
-		const FGameplayTagContainer* TargetTags = nullptr,
-		FGameplayTagContainer* OptionalRelevantTags = nullptr
-	) const override;
+
 	virtual void ActivateAbility(
 		const FGameplayAbilitySpecHandle Handle,
 		const FGameplayAbilityActorInfo* ActorInfo,
@@ -30,9 +24,4 @@ public:
 private:
 	UFUNCTION()
 	void HandleInputReleased(float aTimeHeld);
-	UFUNCTION()
-	void HandleFireIntervalFinished();
-	UFUNCTION()
-	void HandleReloadFinished();
-	void FireAndWait();
 };

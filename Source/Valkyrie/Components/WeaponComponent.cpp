@@ -17,7 +17,8 @@
 
 UWeaponComponent::UWeaponComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 	SetIsReplicatedByDefault(true);
 }
 
@@ -37,8 +38,23 @@ void UWeaponComponent::BeginPlay()
 
 	if (const AActor* const owner = GetOwner()) {
 		if (owner->HasAuthority()) {
+			SetComponentTickEnabled(true);
 			SpawnGunActors();
 			SetCurrentGun(EValkWeaponSlot::Primary);
+		}
+	}
+}
+
+void UWeaponComponent::TickComponent(
+	const float DeltaTime,
+	const ELevelTick TickType,
+	FActorComponentTickFunction* const ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
+		if (playerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::Ability_Fire)) {
+			TryFireOnce();
 		}
 	}
 }
@@ -102,48 +118,25 @@ void UWeaponComponent::OnRep_UpdateGunVisibility() const
 	}
 }
 
-void UWeaponComponent::Fire()
+void UWeaponComponent::TryFireOnce()
 {
-	if (const APawn* const ownerPawn = Cast<APawn>(GetOwner())) {
-		if (const APlayerController* const playerController = Cast<APlayerController>(ownerPawn->GetController())) {
-			if (const APlayerCameraManager* const playerCameraManager = playerController->PlayerCameraManager) {
-				const FVector traceStart = playerCameraManager->GetCameraLocation();
-				const FVector traceDirection = playerCameraManager->GetCameraRotation().Vector();
-				Server_TraceFire(traceStart, traceDirection);
-			}
-		}
-	}
-}
-
-bool UWeaponComponent::CanFire() const
-{
-	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	return currentGunActor && currentGunActor->CanFire();
-}
-
-float UWeaponComponent::GetFireInterval() const
-{
-	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	return currentGunActor ? currentGunActor->GetFireInterval() : 0.f;
-}
-
-void UWeaponComponent::Server_TraceFire_Implementation(const FVector aTraceStart, const FVector aTraceDirection)
-{
-	if (aTraceDirection.IsNearlyZero()) {
-		return;
-	}
-
 	const UWorld* const world = GetWorld();
 	const APawn* const owner = Cast<APawn>(GetOwner());
 	AGunActor* const currentGunActor = GetCurrentGunActor();
 	if (world && owner && currentGunActor) {
-		if (!IsReloading() && currentGunActor->CanFire()) {
+		const APlayerController* const playerController = Cast<APlayerController>(owner->GetController());
+		if (playerController && !IsReloading() && currentGunActor->CanFire()) {
+			FVector traceStart;
+			FRotator traceRotation;
+			playerController->GetPlayerViewPoint(traceStart, traceRotation);
+			const FVector traceDirection = traceRotation.Vector();
+
 			// consume ammo
 			currentGunActor->ConsumeAmmo();
 
 			// line trace
-			const FVector start = aTraceStart;
-			const FVector end = start + aTraceDirection.GetSafeNormal() * myTraceDistance;
+			const FVector start = traceStart;
+			const FVector end = start + traceDirection * myTraceDistance;
 			FHitResult hitResult;
 			FCollisionQueryParams params;
 			params.AddIgnoredActor(owner);

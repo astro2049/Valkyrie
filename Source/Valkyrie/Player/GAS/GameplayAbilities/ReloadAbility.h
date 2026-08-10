@@ -13,6 +13,7 @@ class VALKYRIE_API UReloadAbility : public UGameplayAbility
 
 public:
 	UReloadAbility();
+
 	virtual void ActivateAbility(
 		const FGameplayAbilitySpecHandle Handle,
 		const FGameplayAbilityActorInfo* ActorInfo,
