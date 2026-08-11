@@ -20,6 +20,7 @@ class UAnimMontage;
 class UAimAbility;
 class UFireAbility;
 class UReloadAbility;
+class USwitchWeaponAbility;
 
 UCLASS(Blueprintable)
 class VALKYRIE_API AValkPlayerCharacter : public ACharacter, public IAbilitySystemInterface
@@ -46,6 +47,8 @@ private:
 	TSubclassOf<UReloadAbility> myReloadAbilityType{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UFireAbility> myFireAbilityType{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<USwitchWeaponAbility> mySwitchWeaponAbilityType{nullptr};
 
 	// Lifecycle functions
 	virtual void BeginPlay() override;

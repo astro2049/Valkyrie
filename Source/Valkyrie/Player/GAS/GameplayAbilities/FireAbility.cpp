@@ -9,7 +9,12 @@ UFireAbility::UFireAbility()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+
+	FGameplayTagContainer assetTags;
+	assetTags.AddTag(AbilityTags::Ability_Fire);
+	SetAssetTags(assetTags);
 	ActivationOwnedTags.AddTag(AbilityTags::Ability_Fire);
+	ActivationBlockedTags.AddTag(AbilityTags::Ability_SwitchWeapon);
 }
 
 void UFireAbility::ActivateAbility(

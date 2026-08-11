@@ -14,6 +14,7 @@
 #include "Valkyrie/Player/GAS/GameplayAbilities/AimAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/FireAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/ReloadAbility.h"
+#include "Valkyrie/Player/GAS/GameplayAbilities/SwitchWeaponAbility.h"
 
 AValkPlayerCharacter::AValkPlayerCharacter()
 {
@@ -54,10 +55,14 @@ void AValkPlayerCharacter::BeginPlay()
 		if (ensureMsgf(myFireAbilityType != nullptr, TEXT("%s has no Fire ability type assigned."), *GetNameSafe(this))) {
 			myAsc->GiveAbility(FGameplayAbilitySpec(myFireAbilityType, 1, EAbilityInputId::Fire));
 		}
+		if (ensureMsgf(mySwitchWeaponAbilityType != nullptr, TEXT("%s has no Switch Weapon ability type assigned."), *GetNameSafe(this))) {
+			myAsc->GiveAbility(FGameplayAbilitySpec(mySwitchWeaponAbilityType, 1, EAbilityInputId::PrimaryWeapon));
+			myAsc->GiveAbility(FGameplayAbilitySpec(mySwitchWeaponAbilityType, 1, EAbilityInputId::SecondaryWeapon));
+		}
 	}
 
 	myAsc->RegisterGameplayTagEvent(
-		AbilityTags::State_Aiming,
+		AbilityTags::Ability_Aim,
 		EGameplayTagEventType::NewOrRemoved
 	).AddUObject(
 		this,
@@ -190,15 +195,15 @@ void AValkPlayerCharacter::HandleInteract()
 
 void AValkPlayerCharacter::HandleEquipPrimaryGun()
 {
-	if (myWeaponComponent) {
-		myWeaponComponent->Server_EquipGun(EValkWeaponSlot::Primary);
+	if (myWeaponComponent && myWeaponComponent->GetCurrentSlot() != EValkWeaponSlot::Primary) {
+		myAsc->AbilityLocalInputPressed(EAbilityInputId::PrimaryWeapon);
 	}
 }
 
 void AValkPlayerCharacter::HandleEquipSecondaryGun()
 {
-	if (myWeaponComponent) {
-		myWeaponComponent->Server_EquipGun(EValkWeaponSlot::Secondary);
+	if (myWeaponComponent && myWeaponComponent->GetCurrentSlot() != EValkWeaponSlot::Secondary) {
+		myAsc->AbilityLocalInputPressed(EAbilityInputId::SecondaryWeapon);
 	}
 }
 
@@ -232,7 +237,7 @@ void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
 }
 bool AValkPlayerCharacter::IsAiming() const
 {
-	return myAsc->HasMatchingGameplayTag(AbilityTags::State_Aiming);
+	return myAsc->HasMatchingGameplayTag(AbilityTags::Ability_Aim);
 }
 
 void AValkPlayerCharacter::OnAimingTagChanged(const FGameplayTag aTag, int32 aNewCount) const

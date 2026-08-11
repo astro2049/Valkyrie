@@ -4,5 +4,7 @@ enum EAbilityInputId : uint8
 {
 	Aim,
 	Reload,
-	Fire
+	Fire,
+	PrimaryWeapon,
+	SecondaryWeapon
 };

@@ -25,10 +25,8 @@ public:
 	UWeaponComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UFUNCTION(Server, Reliable)
-	void Server_EquipGun(EValkWeaponSlot aWeaponSlot);
-
 	AGunActor* GetCurrentGunActor() const;
+	void EquipGun(EValkWeaponSlot aWeaponSlot);
 	bool CanReload() const;
 	float GetReloadDuration() const;
 	void ApplyReloadAmmo();
@@ -50,8 +48,6 @@ private:
 	void Multicast_PlayHitPresentation(FVector aHitPoint, const FVector aHitNormal);
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayBulletTrailPresentation(FVector aTrailStart, FVector aTrailEnd);
-
-	void CancelReload();
 
 	UPROPERTY(Replicated)
 	TObjectPtr<AGunActor> myPrimaryGunActor{nullptr};

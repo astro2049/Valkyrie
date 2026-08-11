@@ -10,7 +10,11 @@ UAimAbility::UAimAbility()
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 
-	ActivationOwnedTags.AddTag(AbilityTags::State_Aiming);
+	FGameplayTagContainer assetTags;
+	assetTags.AddTag(AbilityTags::Ability_Aim);
+	SetAssetTags(assetTags);
+	ActivationOwnedTags.AddTag(AbilityTags::Ability_Aim);
+	ActivationBlockedTags.AddTag(AbilityTags::Ability_SwitchWeapon);
 }
 
 void UAimAbility::ActivateAbility(

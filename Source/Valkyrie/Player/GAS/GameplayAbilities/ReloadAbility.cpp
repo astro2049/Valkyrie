@@ -17,8 +17,9 @@ UReloadAbility::UReloadAbility()
 	FGameplayTagContainer assetTags;
 	assetTags.AddTag(AbilityTags::Ability_Reload);
 	SetAssetTags(assetTags);
-	ActivationOwnedTags.AddTag(AbilityTags::State_Reloading);
-	ActivationBlockedTags.AddTag(AbilityTags::State_Reloading);
+	ActivationOwnedTags.AddTag(AbilityTags::Ability_Reload);
+	ActivationBlockedTags.AddTag(AbilityTags::Ability_Reload);
+	ActivationBlockedTags.AddTag(AbilityTags::Ability_SwitchWeapon);
 }
 
 void UReloadAbility::ActivateAbility(

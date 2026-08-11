@@ -197,21 +197,9 @@ void UWeaponComponent::Multicast_PlayHitPresentation_Implementation(const FVecto
 	}
 }
 
-void UWeaponComponent::CancelReload()
+void UWeaponComponent::EquipGun(const EValkWeaponSlot aWeaponSlot)
 {
-	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
-		FGameplayTagContainer abilityTags;
-		abilityTags.AddTag(AbilityTags::Ability_Reload);
-		playerCharacter->GetAbilitySystemComponent()->CancelAbilities(&abilityTags);
-	}
-}
-
-void UWeaponComponent::Server_EquipGun_Implementation(const EValkWeaponSlot aWeaponSlot)
-{
-	if (aWeaponSlot != myCurrentSlot) {
-		CancelReload();
-		SetCurrentGun(aWeaponSlot);
-	}
+	SetCurrentGun(aWeaponSlot);
 }
 
 AGunActor* UWeaponComponent::GetCurrentGunActor() const
@@ -247,7 +235,7 @@ void UWeaponComponent::ApplyReloadAmmo()
 bool UWeaponComponent::IsReloading() const
 {
 	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
-		return playerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::State_Reloading);
+		return playerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::Ability_Reload);
 	}
 	return false;
 }
