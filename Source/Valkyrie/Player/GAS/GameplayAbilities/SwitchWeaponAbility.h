@@ -25,20 +25,17 @@ public:
 	) override;
 
 private:
-	void PlayUnholsterMontage();
 	void EndSwitch(bool aWasCancelled);
 
 	UFUNCTION()
-	void HandleHolsterFinished();
-	UFUNCTION()
-	void HandleUnholsterFinished();
+	void HandleSwitchFinished();
 	UFUNCTION()
 	void HandleSwitchCancelled();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TObjectPtr<UAnimMontage> myHolsterMontage{nullptr};
+	TObjectPtr<UAnimMontage> mySwitchWeaponMontage{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TObjectPtr<UAnimMontage> myUnholsterMontage{nullptr};
+	float mySwitchDuration{0.3f};
 
 	EValkWeaponSlot myTargetWeaponSlot{EValkWeaponSlot::Primary};
 };

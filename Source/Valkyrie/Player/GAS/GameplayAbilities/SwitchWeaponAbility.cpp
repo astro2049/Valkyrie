@@ -18,7 +18,7 @@ USwitchWeaponAbility::USwitchWeaponAbility()
 	assetTags.AddTag(AbilityTags::Ability_SwitchWeapon);
 	SetAssetTags(assetTags);
 	ActivationOwnedTags.AddTag(AbilityTags::Ability_SwitchWeapon);
-	ActivationBlockedTags.AddTag(AbilityTags::Ability_SwitchWeapon);
+	CancelAbilitiesWithTag.AddTag(AbilityTags::Ability_SwitchWeapon);
 	CancelAbilitiesWithTag.AddTag(AbilityTags::Ability_Aim);
 	CancelAbilitiesWithTag.AddTag(AbilityTags::Ability_Fire);
 	CancelAbilitiesWithTag.AddTag(AbilityTags::Ability_Reload);
@@ -43,21 +43,26 @@ void USwitchWeaponAbility::ActivateAbility(
 		}
 
 		if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(ActorInfo->AvatarActor.Get())) {
-			if (const UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>()) {
+			if (UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>()) {
 				if (weaponComponent->GetCurrentSlot() != myTargetWeaponSlot) {
-					if (myHolsterMontage) {
+					weaponComponent->EquipGun(myTargetWeaponSlot);
+					if (mySwitchWeaponMontage) {
+						const float switchDuration = FMath::Max(mySwitchDuration, UE_KINDA_SMALL_NUMBER);
+						const float montagePlayRate = mySwitchWeaponMontage->GetPlayLength() / switchDuration;
+
 						UAbilityTask_PlayMontageAndWait* const montageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
 							this,
 							NAME_None,
-							myHolsterMontage
+							mySwitchWeaponMontage,
+							montagePlayRate
 						);
-						montageTask->OnCompleted.AddDynamic(this, &USwitchWeaponAbility::HandleHolsterFinished);
+						montageTask->OnCompleted.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchFinished);
 						montageTask->OnInterrupted.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchCancelled);
 						montageTask->OnCancelled.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchCancelled);
 						montageTask->ReadyForActivation();
 						return;
 					} else {
-						HandleHolsterFinished();
+						HandleSwitchFinished();
 						return;
 					}
 				}
@@ -68,38 +73,7 @@ void USwitchWeaponAbility::ActivateAbility(
 	EndSwitch(true);
 }
 
-void USwitchWeaponAbility::HandleHolsterFinished()
-{
-	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetAvatarActorFromActorInfo())) {
-		if (UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>()) {
-			weaponComponent->EquipGun(myTargetWeaponSlot);
-			PlayUnholsterMontage();
-			return;
-		}
-	}
-
-	EndSwitch(true);
-}
-
-void USwitchWeaponAbility::PlayUnholsterMontage()
-{
-	if (myUnholsterMontage) {
-		UAbilityTask_PlayMontageAndWait* const montageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-			this,
-			NAME_None,
-			myUnholsterMontage
-		);
-		montageTask->OnCompleted.AddDynamic(this, &USwitchWeaponAbility::HandleUnholsterFinished);
-		montageTask->OnInterrupted.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchCancelled);
-		montageTask->OnCancelled.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchCancelled);
-		montageTask->ReadyForActivation();
-		return;
-	}
-
-	HandleUnholsterFinished();
-}
-
-void USwitchWeaponAbility::HandleUnholsterFinished()
+void USwitchWeaponAbility::HandleSwitchFinished()
 {
 	EndSwitch(false);
 }

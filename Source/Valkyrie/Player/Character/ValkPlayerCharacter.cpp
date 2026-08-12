@@ -195,16 +195,12 @@ void AValkPlayerCharacter::HandleInteract()
 
 void AValkPlayerCharacter::HandleEquipPrimaryGun()
 {
-	if (myWeaponComponent && myWeaponComponent->GetCurrentSlot() != EValkWeaponSlot::Primary) {
-		myAsc->AbilityLocalInputPressed(EAbilityInputId::PrimaryWeapon);
-	}
+	myAsc->AbilityLocalInputPressed(EAbilityInputId::PrimaryWeapon);
 }
 
 void AValkPlayerCharacter::HandleEquipSecondaryGun()
 {
-	if (myWeaponComponent && myWeaponComponent->GetCurrentSlot() != EValkWeaponSlot::Secondary) {
-		myAsc->AbilityLocalInputPressed(EAbilityInputId::SecondaryWeapon);
-	}
+	myAsc->AbilityLocalInputPressed(EAbilityInputId::SecondaryWeapon);
 }
 
 void AValkPlayerCharacter::OnDamaged(const float, AController* const aDamageInstigator)
