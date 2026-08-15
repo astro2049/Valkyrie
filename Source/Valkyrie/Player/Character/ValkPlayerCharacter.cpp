@@ -12,6 +12,7 @@
 #include "Valkyrie/Player/GAS/AbilityInputId.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/AimAbility.h"
+#include "Valkyrie/Player/GAS/GameplayAbilities/DashAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/FireAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/ReloadAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/SwitchWeaponAbility.h"
@@ -58,6 +59,9 @@ void AValkPlayerCharacter::BeginPlay()
 		if (ensureMsgf(mySwitchWeaponAbilityType != nullptr, TEXT("%s has no Switch Weapon ability type assigned."), *GetNameSafe(this))) {
 			myAsc->GiveAbility(FGameplayAbilitySpec(mySwitchWeaponAbilityType, 1, EAbilityInputId::PrimaryWeapon));
 			myAsc->GiveAbility(FGameplayAbilitySpec(mySwitchWeaponAbilityType, 1, EAbilityInputId::SecondaryWeapon));
+		}
+		if (ensureMsgf(myDashAbilityType != nullptr, TEXT("%s has no Dash ability type assigned."), *GetNameSafe(this))) {
+			myAsc->GiveAbility(FGameplayAbilitySpec(myDashAbilityType, 1, EAbilityInputId::Dash));
 		}
 	}
 
@@ -170,6 +174,14 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 				ETriggerEvent::Completed,
 				this,
 				&AValkPlayerCharacter::StopAiming
+			);
+		}
+		if (myDashAction) {
+			enhancedInputComponent->BindAction(
+				myDashAction,
+				ETriggerEvent::Started,
+				this,
+				&AValkPlayerCharacter::StartDashing
 			);
 		}
 	}

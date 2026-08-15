@@ -18,6 +18,7 @@ struct FInputActionValue;
 class UInputAction;
 class UAnimMontage;
 class UAimAbility;
+class UDashAbility;
 class UFireAbility;
 class UReloadAbility;
 class USwitchWeaponAbility;
@@ -49,6 +50,8 @@ private:
 	TSubclassOf<UFireAbility> myFireAbilityType{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<USwitchWeaponAbility> mySwitchWeaponAbilityType{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UDashAbility> myDashAbilityType{nullptr};
 
 	// Lifecycle functions
 	virtual void BeginPlay() override;
@@ -77,6 +80,7 @@ private:
 	void UpdateFov(float aDeltaSecond);
 	void StartFiring() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Fire); }
 	void StopFiring() { myAsc->AbilityLocalInputReleased(EAbilityInputId::Fire); }
+	void StartDashing() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Dash); }
 
 	// move speed
 	void UpdateMaxMoveSpeed() const;
@@ -98,6 +102,8 @@ private:
 	TObjectPtr<UInputAction> myPrimaryWeaponAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> mySecondaryWeaponAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> myDashAction{nullptr};
 
 	// gameplay components: health, weapon, interaction
 	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
