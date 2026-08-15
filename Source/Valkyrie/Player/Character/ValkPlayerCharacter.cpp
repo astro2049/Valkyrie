@@ -14,6 +14,7 @@
 #include "Valkyrie/Player/GAS/GameplayAbilities/AimAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/DashAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/FireAbility.h"
+#include "Valkyrie/Player/GAS/GameplayAbilities/GrenadeAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/ReloadAbility.h"
 #include "Valkyrie/Player/GAS/GameplayAbilities/SwitchWeaponAbility.h"
 
@@ -62,6 +63,9 @@ void AValkPlayerCharacter::BeginPlay()
 		}
 		if (ensureMsgf(myDashAbilityType != nullptr, TEXT("%s has no Dash ability type assigned."), *GetNameSafe(this))) {
 			myAsc->GiveAbility(FGameplayAbilitySpec(myDashAbilityType, 1, EAbilityInputId::Dash));
+		}
+		if (ensureMsgf(myGrenadeAbilityType != nullptr, TEXT("%s has no Grenade ability type assigned."), *GetNameSafe(this))) {
+			myAsc->GiveAbility(FGameplayAbilitySpec(myGrenadeAbilityType, 1, EAbilityInputId::Grenade));
 		}
 	}
 
@@ -182,6 +186,14 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 				ETriggerEvent::Started,
 				this,
 				&AValkPlayerCharacter::StartDashing
+			);
+		}
+		if (myGrenadeAction) {
+			enhancedInputComponent->BindAction(
+				myGrenadeAction,
+				ETriggerEvent::Started,
+				this,
+				&AValkPlayerCharacter::ThrowGrenade
 			);
 		}
 	}

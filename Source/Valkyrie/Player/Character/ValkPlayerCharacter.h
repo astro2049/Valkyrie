@@ -20,6 +20,7 @@ class UAnimMontage;
 class UAimAbility;
 class UDashAbility;
 class UFireAbility;
+class UGrenadeAbility;
 class UReloadAbility;
 class USwitchWeaponAbility;
 
@@ -52,6 +53,8 @@ private:
 	TSubclassOf<USwitchWeaponAbility> mySwitchWeaponAbilityType{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UDashAbility> myDashAbilityType{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TSubclassOf<UGrenadeAbility> myGrenadeAbilityType{nullptr};
 
 	// Lifecycle functions
 	virtual void BeginPlay() override;
@@ -81,6 +84,7 @@ private:
 	void StartFiring() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Fire); }
 	void StopFiring() { myAsc->AbilityLocalInputReleased(EAbilityInputId::Fire); }
 	void StartDashing() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Dash); }
+	void ThrowGrenade() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Grenade); }
 
 	// move speed
 	void UpdateMaxMoveSpeed() const;
@@ -104,6 +108,8 @@ private:
 	TObjectPtr<UInputAction> mySecondaryWeaponAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myDashAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> myGrenadeAction{nullptr};
 
 	// gameplay components: health, weapon, interaction
 	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
