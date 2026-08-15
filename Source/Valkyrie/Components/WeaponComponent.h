@@ -31,6 +31,11 @@ public:
 	float GetReloadDuration() const;
 	void ApplyReloadAmmo();
 	bool IsReloading() const;
+	float GetCurrentSpreadHalfAngleDegrees() const
+	{
+		return FMath::Max(myCurrentBaseSpreadHalfAngleDegrees, 0.f) + myFireSpreadOffsetDegrees;
+	}
+	float GetBaseSpreadHalfAngleDegrees() const;
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	EValkWeaponSlot GetCurrentSlot() const { return myCurrentSlot; }
 
@@ -40,10 +45,14 @@ private:
 	void SpawnGunActors();
 	void AttachGun(AGunActor* aGunActor) const;
 	void SetCurrentGun(EValkWeaponSlot aWeaponSlot);
+	void UpdateSpread(float aDeltaTime);
+	void AddFireSpread();
 	UFUNCTION()
-	void OnRep_UpdateGunVisibility() const;
+	void OnRep_UpdateGunVisibility();
 
 	void TryFireOnce();
+	UFUNCTION(Client, Unreliable)
+	void Client_AddFireSpread(EValkWeaponSlot aWeaponSlot);
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitPresentation(FVector aHitPoint, const FVector aHitNormal);
 	UFUNCTION(NetMulticast, Unreliable)
@@ -59,6 +68,8 @@ private:
 	float myTraceDistance{10000.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	bool myDrawDebugTrace{false};
+	float myCurrentBaseSpreadHalfAngleDegrees{-1.f};
+	float myFireSpreadOffsetDegrees{0.f};
 
 	// primary and secondary gun types
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

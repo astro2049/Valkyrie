@@ -5,6 +5,7 @@
 #include "Valkyrie/Actors/Gun/GunActor.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
@@ -36,9 +37,9 @@ void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetComponentTickEnabled(true);
 	if (const AActor* const owner = GetOwner()) {
 		if (owner->HasAuthority()) {
-			SetComponentTickEnabled(true);
 			SpawnGunActors();
 			SetCurrentGun(EValkWeaponSlot::Primary);
 		}
@@ -53,9 +54,58 @@ void UWeaponComponent::TickComponent(
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
-		if (playerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::Ability_Fire)) {
+		UpdateSpread(DeltaTime);
+		if (playerCharacter->HasAuthority()
+			&& playerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::Ability_Fire)) {
 			TryFireOnce();
 		}
+	}
+}
+
+void UWeaponComponent::UpdateSpread(const float aDeltaTime)
+{
+	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner());
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	if (playerCharacter && currentGunActor) {
+		float desiredSpreadHalfAngleDegrees = currentGunActor->GetAimSpreadHalfAngleDegrees();
+		if (!playerCharacter->IsAiming()) {
+			const float maxWalkSpeed = playerCharacter->GetCharacterMovement()->MaxWalkSpeed;
+			const float speedRatio = maxWalkSpeed > 0.f
+				? FMath::Clamp(playerCharacter->GetVelocity().Size2D() / maxWalkSpeed, 0.f, 1.f)
+				: 0.f;
+			desiredSpreadHalfAngleDegrees = FMath::Lerp(
+				currentGunActor->GetBaseSpreadHalfAngleDegrees(),
+				currentGunActor->GetMaxMoveSpreadHalfAngleDegrees(),
+				speedRatio
+			);
+		}
+		if (myCurrentBaseSpreadHalfAngleDegrees < 0.f) {
+			myCurrentBaseSpreadHalfAngleDegrees = desiredSpreadHalfAngleDegrees;
+		} else {
+			myCurrentBaseSpreadHalfAngleDegrees = FMath::FInterpTo(
+				myCurrentBaseSpreadHalfAngleDegrees,
+				desiredSpreadHalfAngleDegrees,
+				aDeltaTime,
+				currentGunActor->GetSpreadInterpSpeed()
+			);
+		}
+		myFireSpreadOffsetDegrees = FMath::FInterpConstantTo(
+			myFireSpreadOffsetDegrees,
+			0.f,
+			aDeltaTime,
+			currentGunActor->GetFireSpreadRecoverySpeedDegreesPerSecond()
+		);
+	}
+}
+
+void UWeaponComponent::AddFireSpread()
+{
+	if (const AGunActor* const currentGunActor = GetCurrentGunActor()) {
+		myFireSpreadOffsetDegrees = FMath::Clamp(
+			myFireSpreadOffsetDegrees + FMath::Max(currentGunActor->GetFireSpreadPerShotDegrees(), 0.f),
+			0.f,
+			FMath::Max(currentGunActor->GetMaxFireSpreadOffsetDegrees(), 0.f)
+		);
 	}
 }
 
@@ -104,7 +154,7 @@ void UWeaponComponent::SetCurrentGun(const EValkWeaponSlot aWeaponSlot)
 	OnRep_UpdateGunVisibility();
 }
 
-void UWeaponComponent::OnRep_UpdateGunVisibility() const
+void UWeaponComponent::OnRep_UpdateGunVisibility()
 {
 	const bool shouldShowPrimaryGun = myCurrentSlot == EValkWeaponSlot::Primary;
 	const bool shouldShowSecondaryGun = !shouldShowPrimaryGun;
@@ -116,6 +166,9 @@ void UWeaponComponent::OnRep_UpdateGunVisibility() const
 		mySecondaryGunActor->SetActorHiddenInGame(!shouldShowSecondaryGun);
 		mySecondaryGunActor->SetActorEnableCollision(!shouldShowSecondaryGun);
 	}
+
+	myCurrentBaseSpreadHalfAngleDegrees = GetCurrentGunActor() ? GetBaseSpreadHalfAngleDegrees() : -1.f;
+	myFireSpreadOffsetDegrees = 0.f;
 }
 
 void UWeaponComponent::TryFireOnce()
@@ -129,10 +182,15 @@ void UWeaponComponent::TryFireOnce()
 			FVector traceStart;
 			FRotator traceRotation;
 			playerController->GetPlayerViewPoint(traceStart, traceRotation);
-			const FVector traceDirection = traceRotation.Vector();
+			const FVector traceDirection = FMath::VRandCone(
+				traceRotation.Vector(),
+				FMath::DegreesToRadians(GetCurrentSpreadHalfAngleDegrees())
+			);
 
 			// consume ammo
 			currentGunActor->ConsumeAmmo();
+			AddFireSpread();
+			Client_AddFireSpread(myCurrentSlot);
 
 			// line trace
 			const FVector start = traceStart;
@@ -185,6 +243,13 @@ void UWeaponComponent::TryFireOnce()
 	}
 }
 
+void UWeaponComponent::Client_AddFireSpread_Implementation(const EValkWeaponSlot aWeaponSlot)
+{
+	if (const AActor* const owner = GetOwner(); owner && !owner->HasAuthority() && myCurrentSlot == aWeaponSlot) {
+		AddFireSpread();
+	}
+}
+
 void UWeaponComponent::Multicast_PlayHitPresentation_Implementation(const FVector aHitPoint, const FVector aHitNormal)
 {
 	if (myImpactVFX) {
@@ -211,6 +276,12 @@ AGunActor* UWeaponComponent::GetCurrentGunActor() const
 		return mySecondaryGunActor;
 	}
 	return nullptr;
+}
+
+float UWeaponComponent::GetBaseSpreadHalfAngleDegrees() const
+{
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	return currentGunActor ? currentGunActor->GetBaseSpreadHalfAngleDegrees() : 0.f;
 }
 
 bool UWeaponComponent::CanReload() const

@@ -37,6 +37,13 @@ public:
 	float GetDamage() const { return myGunDataAsset ? myGunDataAsset->myDamage : 0.f; }
 	float GetFireInterval() const { return myFireInterval; }
 	float GetReloadDuration() const { return myGunDataAsset ? myGunDataAsset->myReloadDuration : 0.f; }
+	float GetBaseSpreadHalfAngleDegrees() const { return myGunDataAsset ? myGunDataAsset->myBaseSpreadHalfAngleDegrees : 0.f; }
+	float GetAimSpreadHalfAngleDegrees() const { return myGunDataAsset ? myGunDataAsset->myAimSpreadHalfAngleDegrees : 0.f; }
+	float GetMaxMoveSpreadHalfAngleDegrees() const { return myGunDataAsset ? myGunDataAsset->myMaxMoveSpreadHalfAngleDegrees : 0.f; }
+	float GetSpreadInterpSpeed() const { return myGunDataAsset ? myGunDataAsset->mySpreadInterpSpeed : 0.f; }
+	float GetFireSpreadPerShotDegrees() const { return myGunDataAsset ? myGunDataAsset->myFireSpreadPerShotDegrees : 0.f; }
+	float GetMaxFireSpreadOffsetDegrees() const { return myGunDataAsset ? myGunDataAsset->myMaxFireSpreadOffsetDegrees : 0.f; }
+	float GetFireSpreadRecoverySpeedDegreesPerSecond() const { return myGunDataAsset ? myGunDataAsset->myFireSpreadRecoverySpeedDegreesPerSecond : 0.f; }
 	UAnimMontage* GetReloadMontage() const { return myReloadMontage; }
 	int32 GetAmmoInMag() const { return myAmmoInMag; }
 	int32 GetReserveAmmo() const { return myReserveAmmo; }

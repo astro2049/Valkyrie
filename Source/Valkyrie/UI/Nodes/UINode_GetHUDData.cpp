@@ -27,6 +27,8 @@ FValkHUDData UUINode_GetHUDData::GetHUDData(APlayerController* const aPlayerCont
 				data.myReserveAmmo = currentGunActor->GetReserveAmmo();
 			}
 			data.myIsReloading = weaponComponent->IsReloading();
+			data.myCrosshairSpreadHalfAngleDegrees = weaponComponent->GetCurrentSpreadHalfAngleDegrees();
+			data.myCrosshairBaseSpreadHalfAngleDegrees = weaponComponent->GetBaseSpreadHalfAngleDegrees();
 		}
 		if (const UInteractionComponent* const interactionComponent = playerCharacter->FindComponentByClass<UInteractionComponent>()) {
 			data.myHasInteractable = interactionComponent->HasInteractable();

@@ -25,6 +25,10 @@ struct FValkHUDData
 	bool myIsReloading{false};
 	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
 	bool myHasInteractable{false};
+	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
+	float myCrosshairSpreadHalfAngleDegrees{0.f};
+	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
+	float myCrosshairBaseSpreadHalfAngleDegrees{0.f};
 };
 
 UCLASS()
