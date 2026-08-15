@@ -55,10 +55,6 @@ void UWeaponComponent::TickComponent(
 
 	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
 		UpdateSpread(DeltaTime);
-		if (playerCharacter->HasAuthority()
-			&& playerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::Ability_Fire)) {
-			TryFireOnce();
-		}
 	}
 }
 
@@ -171,7 +167,16 @@ void UWeaponComponent::OnRep_UpdateGunVisibility()
 	myFireSpreadOffsetDegrees = 0.f;
 }
 
-void UWeaponComponent::TryFireOnce()
+void UWeaponComponent::PlayPredictedFire()
+{
+	if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
+		if (!IsReloading() && currentGunActor->GetAmmoInMag() > 0) {
+			currentGunActor->PlayFirePresentation();
+		}
+	}
+}
+
+void UWeaponComponent::TryCommitFire()
 {
 	const UWorld* const world = GetWorld();
 	const APawn* const owner = Cast<APawn>(GetOwner());
@@ -189,6 +194,7 @@ void UWeaponComponent::TryFireOnce()
 
 			// consume ammo
 			currentGunActor->ConsumeAmmo();
+			currentGunActor->Multicast_PlayFirePresentation();
 			AddFireSpread();
 			Client_AddFireSpread(myCurrentSlot);
 
@@ -241,6 +247,12 @@ void UWeaponComponent::TryFireOnce()
 			}
 		}
 	}
+}
+
+float UWeaponComponent::GetFireInterval() const
+{
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	return currentGunActor ? currentGunActor->GetFireInterval() : 0.f;
 }
 
 void UWeaponComponent::Client_AddFireSpread_Implementation(const EValkWeaponSlot aWeaponSlot)

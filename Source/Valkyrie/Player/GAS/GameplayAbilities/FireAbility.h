@@ -6,6 +6,8 @@
 #include "Abilities/GameplayAbility.h"
 #include "FireAbility.generated.h"
 
+class UWeaponComponent;
+
 UCLASS(Abstract, Blueprintable)
 class VALKYRIE_API UFireAbility : public UGameplayAbility
 {
@@ -20,8 +22,20 @@ public:
 		const FGameplayAbilityActivationInfo ActivationInfo,
 		const FGameplayEventData* TriggerEventData
 	) override;
+	virtual void EndAbility(
+		const FGameplayAbilitySpecHandle Handle,
+		const FGameplayAbilityActorInfo* ActorInfo,
+		const FGameplayAbilityActivationInfo ActivationInfo,
+		bool bReplicateEndAbility,
+		bool bWasCancelled
+	) override;
 
 private:
+	void FireStep();
 	UFUNCTION()
 	void HandleInputReleased(float aTimeHeld);
+
+	UPROPERTY()
+	TObjectPtr<UWeaponComponent> myWeaponComponent{nullptr};
+	FTimerHandle myFireTimerHandle;
 };

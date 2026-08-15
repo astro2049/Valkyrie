@@ -27,6 +27,9 @@ public:
 
 	AGunActor* GetCurrentGunActor() const;
 	void EquipGun(EValkWeaponSlot aWeaponSlot);
+	void PlayPredictedFire();
+	void TryCommitFire();
+	float GetFireInterval() const;
 	bool CanReload() const;
 	float GetReloadDuration() const;
 	void ApplyReloadAmmo();
@@ -50,7 +53,6 @@ private:
 	UFUNCTION()
 	void OnRep_UpdateGunVisibility();
 
-	void TryFireOnce();
 	UFUNCTION(Client, Unreliable)
 	void Client_AddFireSpread(EValkWeaponSlot aWeaponSlot);
 	UFUNCTION(NetMulticast, Unreliable)

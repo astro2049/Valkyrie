@@ -28,6 +28,7 @@ public:
 
 	bool CanFire() const;
 	void ConsumeAmmo();
+	void PlayFirePresentation();
 	bool CanReload() const;
 	void ApplyReloadAmmo();
 	UFUNCTION(NetMulticast, Unreliable)

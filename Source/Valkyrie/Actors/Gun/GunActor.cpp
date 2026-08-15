@@ -6,6 +6,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -56,7 +57,6 @@ void AGunActor::ConsumeAmmo()
 	if (const UWorld* const world = GetWorld()) {
 		myLastFiredTime = world->GetTimeSeconds();
 		myAmmoInMag = FMath::Max(myAmmoInMag - 1, 0);
-		Multicast_PlayFirePresentation();
 	}
 }
 
@@ -77,6 +77,14 @@ void AGunActor::ApplyReloadAmmo()
 }
 
 void AGunActor::Multicast_PlayFirePresentation_Implementation()
+{
+	const APawn* const ownerPawn = Cast<APawn>(GetOwner());
+	if (!ownerPawn || !ownerPawn->IsLocallyControlled()) {
+		PlayFirePresentation();
+	}
+}
+
+void AGunActor::PlayFirePresentation()
 {
 	if (myMuzzleArrowComponent) {
 		const FTransform muzzleTransform = myMuzzleArrowComponent->GetComponentTransform();
