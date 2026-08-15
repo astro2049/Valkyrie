@@ -98,6 +98,20 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 				&AValkPlayerCharacter::HandleLook
 			);
 		}
+		if (myJumpAction) {
+			enhancedInputComponent->BindAction(
+				myJumpAction,
+				ETriggerEvent::Started,
+				this,
+				&ACharacter::Jump
+			);
+			enhancedInputComponent->BindAction(
+				myJumpAction,
+				ETriggerEvent::Completed,
+				this,
+				&ACharacter::StopJumping
+			);
+		}
 		if (myFireAction) {
 			enhancedInputComponent->BindAction(
 				myFireAction,

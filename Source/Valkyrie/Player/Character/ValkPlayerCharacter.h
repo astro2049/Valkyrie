@@ -87,6 +87,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myLookAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> myJumpAction{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myFireAction{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputAction> myReloadAction{nullptr};
