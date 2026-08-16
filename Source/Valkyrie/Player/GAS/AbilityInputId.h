@@ -8,5 +8,5 @@ enum EAbilityInputId : uint8
 	PrimaryWeapon,
 	SecondaryWeapon,
 	Dash,
-	Grenade
+	ThrowGrenade
 };

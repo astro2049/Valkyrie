@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "GrenadeAbility.generated.h"
+#include "ThrowGrenadeAbility.generated.h"
 
 class AGrenadeActor;
 class UAnimMontage;
 
 UCLASS(Abstract, Blueprintable)
-class VALKYRIE_API UGrenadeAbility : public UGameplayAbility
+class VALKYRIE_API UThrowGrenadeAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
 public:
-	UGrenadeAbility();
+	UThrowGrenadeAbility();
 
 	virtual void ActivateAbility(
 		FGameplayAbilitySpecHandle Handle,

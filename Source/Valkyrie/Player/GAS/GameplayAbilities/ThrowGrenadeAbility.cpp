@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "GrenadeAbility.h"
+#include "ThrowGrenadeAbility.h"
 
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
@@ -12,19 +12,19 @@
 #include "Valkyrie/Actors/Grenade/GrenadeActor.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
 
-UGrenadeAbility::UGrenadeAbility()
+UThrowGrenadeAbility::UThrowGrenadeAbility()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 
 	FGameplayTagContainer assetTags;
-	assetTags.AddTag(AbilityTags::Ability_Grenade);
+	assetTags.AddTag(AbilityTags::Ability_ThrowGrenade);
 	SetAssetTags(assetTags);
-	ActivationOwnedTags.AddTag(AbilityTags::Ability_Grenade);
-	ActivationBlockedTags.AddTag(AbilityTags::Ability_Grenade);
+	ActivationOwnedTags.AddTag(AbilityTags::Ability_ThrowGrenade);
+	ActivationBlockedTags.AddTag(AbilityTags::Ability_ThrowGrenade);
 }
 
-void UGrenadeAbility::ActivateAbility(
+void UThrowGrenadeAbility::ActivateAbility(
 	const FGameplayAbilitySpecHandle Handle,
 	const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo,
@@ -41,13 +41,13 @@ void UGrenadeAbility::ActivateAbility(
 			NAME_None,
 			myThrowMontage
 		);
-		montageTask->OnCompleted.AddDynamic(this, &UGrenadeAbility::HandleThrowFinished);
-		montageTask->OnInterrupted.AddDynamic(this, &UGrenadeAbility::HandleThrowCancelled);
-		montageTask->OnCancelled.AddDynamic(this, &UGrenadeAbility::HandleThrowCancelled);
+		montageTask->OnCompleted.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowFinished);
+		montageTask->OnInterrupted.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowCancelled);
+		montageTask->OnCancelled.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowCancelled);
 		montageTask->ReadyForActivation();
 
 		UAbilityTask_WaitDelay* const releaseTask = UAbilityTask_WaitDelay::WaitDelay(this, myThrowReleaseTime);
-		releaseTask->OnFinish.AddDynamic(this, &UGrenadeAbility::HandleGrenadeReleased);
+		releaseTask->OnFinish.AddDynamic(this, &UThrowGrenadeAbility::HandleGrenadeReleased);
 		releaseTask->ReadyForActivation();
 		return;
 	}
@@ -55,7 +55,7 @@ void UGrenadeAbility::ActivateAbility(
 	EndThrow(true);
 }
 
-void UGrenadeAbility::HandleGrenadeReleased()
+void UThrowGrenadeAbility::HandleGrenadeReleased()
 {
 	ACharacter* const character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
 	UWorld* const world = GetWorld();
@@ -90,17 +90,17 @@ void UGrenadeAbility::HandleGrenadeReleased()
 	}
 }
 
-void UGrenadeAbility::HandleThrowFinished()
+void UThrowGrenadeAbility::HandleThrowFinished()
 {
 	EndThrow(false);
 }
 
-void UGrenadeAbility::HandleThrowCancelled()
+void UThrowGrenadeAbility::HandleThrowCancelled()
 {
 	EndThrow(true);
 }
 
-void UGrenadeAbility::EndThrow(const bool aWasCancelled)
+void UThrowGrenadeAbility::EndThrow(const bool aWasCancelled)
 {
 	const ACharacter* const character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
 	EndAbility(
