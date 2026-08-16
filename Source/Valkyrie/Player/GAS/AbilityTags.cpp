@@ -9,4 +9,5 @@ namespace AbilityTags
 	UE_DEFINE_GAMEPLAY_TAG(Ability_Dash, "Ability.Dash");
 	UE_DEFINE_GAMEPLAY_TAG(Ability_Grenade, "Ability.Grenade");
 	UE_DEFINE_GAMEPLAY_TAG(Cooldown_Dash, "Cooldown.Dash");
+	UE_DEFINE_GAMEPLAY_TAG(GameplayCue_Dash_Start, "GameplayCue.Dash.Start");
 }

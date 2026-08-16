@@ -6,6 +6,8 @@
 #include "Abilities/GameplayAbility.h"
 #include "DashAbility.generated.h"
 
+class UCurveFloat;
+
 UCLASS(Abstract, Blueprintable)
 class VALKYRIE_API UDashAbility : public UGameplayAbility
 {
@@ -28,7 +30,9 @@ private:
 	void EndDash(bool aWasCancelled);
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myDashDistance{600.f};
+	float myDashInitialSpeed{6000.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDashDuration{0.2f};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UCurveFloat> myDashStrengthCurve{nullptr};
 };

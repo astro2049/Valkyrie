@@ -11,4 +11,5 @@ namespace AbilityTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Dash);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Grenade);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cooldown_Dash);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameplayCue_Dash_Start);
 }

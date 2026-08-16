@@ -146,4 +146,8 @@ private:
 	TObjectPtr<USpringArmComponent> mySpringArmComponent;
 	UPROPERTY(VisibleAnywhere, Category="Valkyrie")
 	TObjectPtr<UCameraComponent> myCameraComponent;
+	
+	 // Dash
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
+	bool IsDashing() const;
 };

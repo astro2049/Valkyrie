@@ -291,3 +291,8 @@ void AValkPlayerCharacter::UpdateMaxMoveSpeed() const
 {
 	GetCharacterMovement()->MaxWalkSpeed = IsAiming() ? myAimMaxWalkSpeed : myDefaultMaxWalkSpeed;
 }
+
+bool AValkPlayerCharacter::IsDashing() const
+{
+	return myAsc->HasMatchingGameplayTag(AbilityTags::Ability_Dash);
+}

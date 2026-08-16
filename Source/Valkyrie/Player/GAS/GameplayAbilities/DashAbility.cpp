@@ -3,6 +3,7 @@
 #include "DashAbility.h"
 
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
+#include "AbilitySystemComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/RootMotionSource.h"
@@ -16,6 +17,7 @@ UDashAbility::UDashAbility()
 	FGameplayTagContainer assetTags;
 	assetTags.AddTag(AbilityTags::Ability_Dash);
 	SetAssetTags(assetTags);
+	ActivationOwnedTags.AddTag(AbilityTags::Ability_Dash);
 }
 
 void UDashAbility::ActivateAbility(
@@ -27,18 +29,25 @@ void UDashAbility::ActivateAbility(
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 	if (ACharacter* const character = Cast<ACharacter>(ActorInfo->AvatarActor.Get())) {
-		const FVector dashDirection = character->GetActorForwardVector().GetSafeNormal2D();
-		if (!dashDirection.IsNearlyZero() && myDashDistance > 0.f && myDashDuration > 0.f) {
+		const FVector movementInputDirection = character->GetLastMovementInputVector().GetSafeNormal2D();
+		const FVector dashDirection = movementInputDirection.IsNearlyZero()
+			? character->GetActorForwardVector().GetSafeNormal2D()
+			: movementInputDirection;
+		if (!dashDirection.IsNearlyZero() && myDashInitialSpeed > 0.f && myDashDuration > 0.f) {
 			if (CommitAbility(Handle, ActorInfo, ActivationInfo)) {
+				GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(
+					AbilityTags::GameplayCue_Dash_Start,
+					FGameplayEffectContextHandle()
+				);
 				UAbilityTask_ApplyRootMotionConstantForce* const dashTask =
 					UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(
 						this,
 						NAME_None,
 						dashDirection,
-						myDashDistance / myDashDuration,
+						myDashInitialSpeed,
 						myDashDuration,
 						false,
-						nullptr,
+						myDashStrengthCurve,
 						ERootMotionFinishVelocityMode::ClampVelocity,
 						FVector::ZeroVector,
 						character->GetCharacterMovement()->MaxWalkSpeed,
