@@ -74,8 +74,7 @@ void AGrenadeActor::Explode()
 {
 	if (UWorld* const world = GetWorld()) {
 		TArray<FOverlapResult> overlapResults;
-		FCollisionObjectQueryParams objectQueryParams;
-		objectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+		const FCollisionObjectQueryParams objectQueryParams(FCollisionObjectQueryParams::AllObjects);
 		FCollisionQueryParams queryParams;
 		queryParams.AddIgnoredActor(this);
 
