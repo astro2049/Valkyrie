@@ -4,6 +4,7 @@
 
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
@@ -109,6 +110,17 @@ void AGrenadeActor::Multicast_PlayExplosionPresentation_Implementation()
 	myProjectileMovementComponent->Deactivate();
 	myCollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	myMeshComponent->SetVisibility(false, true);
+	if (myDrawExplosionDebug) {
+		DrawDebugSphere(
+			GetWorld(),
+			GetActorLocation(),
+			myExplosionRadius,
+			32,
+			FColor::Red,
+			false,
+			1.f
+		);
+	}
 
 	if (myExplosionVfx) {
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, myExplosionVfx, GetActorLocation());

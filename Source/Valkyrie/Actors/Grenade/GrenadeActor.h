@@ -44,6 +44,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDamage{75.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	bool myDrawExplosionDebug{false};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UNiagaraSystem> myExplosionVfx{nullptr};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<USoundBase> myExplosionSound{nullptr};
