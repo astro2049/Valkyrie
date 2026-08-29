@@ -73,16 +73,6 @@ void USwitchWeaponAbility::ActivateAbility(
 	EndSwitch(true);
 }
 
-void USwitchWeaponAbility::HandleSwitchFinished()
-{
-	EndSwitch(false);
-}
-
-void USwitchWeaponAbility::HandleSwitchCancelled()
-{
-	EndSwitch(true);
-}
-
 void USwitchWeaponAbility::EndSwitch(const bool aWasCancelled)
 {
 	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetAvatarActorFromActorInfo());

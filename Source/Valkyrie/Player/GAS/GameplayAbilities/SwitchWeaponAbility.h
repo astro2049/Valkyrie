@@ -28,9 +28,9 @@ private:
 	void EndSwitch(bool aWasCancelled);
 
 	UFUNCTION()
-	void HandleSwitchFinished();
+	void HandleSwitchFinished() { EndSwitch(false); }
 	UFUNCTION()
-	void HandleSwitchCancelled();
+	void HandleSwitchCancelled() { EndSwitch(true); }
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UAnimMontage> mySwitchWeaponMontage{nullptr};

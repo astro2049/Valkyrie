@@ -7,11 +7,13 @@
 #include "AbilitySystemInterface.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/Interaction/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
 #include "Valkyrie/Player/GAS/AbilityInputId.h"
+#include "Valkyrie/Player/GAS/AbilityTags.h"
 #include "ValkPlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -36,7 +38,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* aPlayerInputComponent) override;
 	
 	UFUNCTION(BlueprintPure)
-	bool IsAiming() const;
+	bool IsAiming() const { return myAsc->HasMatchingGameplayTag(AbilityTags::Ability_Aim); }
 
 private:
 	// GAS
@@ -63,10 +65,10 @@ private:
 	// user inputs
 	void HandleMove(const FInputActionValue& anInputValue);
 	void HandleLook(const FInputActionValue& anInputValue);
-	void HandleReload();
+	void HandleReload() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Reload); }
 	void HandleInteract();
-	void HandleEquipPrimaryGun();
-	void HandleEquipSecondaryGun();
+	void HandleEquipPrimaryGun() { myAsc->AbilityLocalInputPressed(EAbilityInputId::PrimaryWeapon); }
+	void HandleEquipSecondaryGun() { myAsc->AbilityLocalInputPressed(EAbilityInputId::SecondaryWeapon); }
 
 	// gameplay events
 	void OnDamaged(float aDamage, AController* aDamageInstigator);
@@ -77,7 +79,7 @@ private:
 	void Multicast_PlayHitReact();
 
 	// ADS
-	void OnAimingTagChanged(const FGameplayTag aTag, int32 aNewCount) const;
+	void OnAimingTagChanged(FGameplayTag, int32) const { UpdateMaxMoveSpeed(); }
 	void StartAiming() { myAsc->AbilityLocalInputPressed(EAbilityInputId::Aim); }
 	void StopAiming() { myAsc->AbilityLocalInputReleased(EAbilityInputId::Aim); }
 	void UpdateFov(float aDeltaSecond);
@@ -87,7 +89,7 @@ private:
 	void ThrowGrenade() { myAsc->AbilityLocalInputPressed(EAbilityInputId::ThrowGrenade); }
 
 	// move speed
-	void UpdateMaxMoveSpeed() const;
+	void UpdateMaxMoveSpeed() const { GetCharacterMovement()->MaxWalkSpeed = IsAiming() ? myAimMaxWalkSpeed : myDefaultMaxWalkSpeed; }
 
 	// input actions
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -149,5 +151,5 @@ private:
 	
 	 // Dash
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
-	bool IsDashing() const;
+	bool IsDashing() const { return myAsc->HasMatchingGameplayTag(AbilityTags::Ability_Dash); }
 };

@@ -27,9 +27,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	AGunActor* GetCurrentGunActor() const;
-	void EquipGun(EValkWeaponSlot aWeaponSlot);
+	void EquipGun(const EValkWeaponSlot aWeaponSlot) { SetCurrentGun(aWeaponSlot); }
 	void StartFiring();
-	void StopFiring();
+	void StopFiring() { myIsFiring = false; }
 	bool CanReload() const;
 	float GetReloadDuration() const;
 	void ApplyReloadAmmo();

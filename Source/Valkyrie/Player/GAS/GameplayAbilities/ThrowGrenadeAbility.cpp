@@ -90,16 +90,6 @@ void UThrowGrenadeAbility::HandleGrenadeReleased()
 	}
 }
 
-void UThrowGrenadeAbility::HandleThrowFinished()
-{
-	EndThrow(false);
-}
-
-void UThrowGrenadeAbility::HandleThrowCancelled()
-{
-	EndThrow(true);
-}
-
 void UThrowGrenadeAbility::EndThrow(const bool aWasCancelled)
 {
 	const ACharacter* const character = Cast<ACharacter>(GetAvatarActorFromActorInfo());

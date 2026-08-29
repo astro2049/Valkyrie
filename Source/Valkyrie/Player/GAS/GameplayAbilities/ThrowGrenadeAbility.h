@@ -28,9 +28,9 @@ private:
 	UFUNCTION()
 	void HandleGrenadeReleased();
 	UFUNCTION()
-	void HandleThrowFinished();
+	void HandleThrowFinished() { EndThrow(false); }
 	UFUNCTION()
-	void HandleThrowCancelled();
+	void HandleThrowCancelled() { EndThrow(true); }
 
 	void EndThrow(bool aWasCancelled);
 

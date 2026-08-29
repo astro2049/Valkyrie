@@ -63,11 +63,6 @@ void UDashAbility::ActivateAbility(
 	EndDash(true);
 }
 
-void UDashAbility::HandleDashFinished()
-{
-	EndDash(false);
-}
-
 void UDashAbility::EndDash(const bool aWasCancelled)
 {
 	const ACharacter* const character = Cast<ACharacter>(GetAvatarActorFromActorInfo());

@@ -219,26 +219,11 @@ void AValkPlayerCharacter::HandleLook(const FInputActionValue& anInputValue)
 	}
 }
 
-void AValkPlayerCharacter::HandleReload()
-{
-	myAsc->AbilityLocalInputPressed(EAbilityInputId::Reload);
-}
-
 void AValkPlayerCharacter::HandleInteract()
 {
 	if (myInteractionComponent) {
 		myInteractionComponent->Server_Interact();
 	}
-}
-
-void AValkPlayerCharacter::HandleEquipPrimaryGun()
-{
-	myAsc->AbilityLocalInputPressed(EAbilityInputId::PrimaryWeapon);
-}
-
-void AValkPlayerCharacter::HandleEquipSecondaryGun()
-{
-	myAsc->AbilityLocalInputPressed(EAbilityInputId::SecondaryWeapon);
 }
 
 void AValkPlayerCharacter::OnDamaged(const float, AController* const aDamageInstigator)
@@ -269,15 +254,6 @@ void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
 		playerController->OnControlledPawnDied(aDamageInstigator);
 	}
 }
-bool AValkPlayerCharacter::IsAiming() const
-{
-	return myAsc->HasMatchingGameplayTag(AbilityTags::Ability_Aim);
-}
-
-void AValkPlayerCharacter::OnAimingTagChanged(const FGameplayTag aTag, int32 aNewCount) const
-{
-	UpdateMaxMoveSpeed();
-}
 
 void AValkPlayerCharacter::UpdateFov(const float aDeltaSecond)
 {
@@ -285,14 +261,4 @@ void AValkPlayerCharacter::UpdateFov(const float aDeltaSecond)
 	myCurrentFov = FMath::Clamp(myCurrentFov + fovOffset, myAimFov, myDefaultFov);
 
 	myCameraComponent->SetFieldOfView(myCurrentFov);
-}
-
-void AValkPlayerCharacter::UpdateMaxMoveSpeed() const
-{
-	GetCharacterMovement()->MaxWalkSpeed = IsAiming() ? myAimMaxWalkSpeed : myDefaultMaxWalkSpeed;
-}
-
-bool AValkPlayerCharacter::IsDashing() const
-{
-	return myAsc->HasMatchingGameplayTag(AbilityTags::Ability_Dash);
 }

@@ -24,11 +24,10 @@ AGunActor::AGunActor()
 void AGunActor::BeginPlay()
 {
 	Super::BeginPlay();
+	check(myGunDataAsset);
 
-	if (myGunDataAsset) {
-		myFireInterval = myGunDataAsset->myRPM > 0.f ? 60.f / myGunDataAsset->myRPM : 0.f;
-	}
-	if (HasAuthority() && myGunDataAsset) {
+	myFireInterval = myGunDataAsset->myRPM > 0.f ? 60.f / myGunDataAsset->myRPM : 0.f;
+	if (HasAuthority()) {
 		myAmmoInMag = FMath::Max(myGunDataAsset->myMagazineSize, 1);
 		myReserveAmmo = FMath::Max(myGunDataAsset->myInitialReserveAmmo, 0);
 		myLastFiredTime = -1.f;
@@ -59,15 +58,6 @@ void AGunActor::ConsumeAmmo()
 	}
 }
 
-bool AGunActor::CanReload() const
-{
-	bool canReload = false;
-	if (myGunDataAsset) {
-		canReload = myAmmoInMag < GetMagazineSize() && myReserveAmmo > 0;
-	}
-	return canReload;
-}
-
 void AGunActor::ApplyReloadAmmo()
 {
 	const int32 ammoToLoad = FMath::Min(GetMagazineSize() - myAmmoInMag, myReserveAmmo);
@@ -96,9 +86,4 @@ void AGunActor::PlayFirePresentation()
 			);
 		}
 	}
-}
-
-FVector AGunActor::GetMuzzleLocation() const
-{
-	return myMuzzleArrowComponent ? myMuzzleArrowComponent->GetComponentLocation() : GetActorLocation();
 }

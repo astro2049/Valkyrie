@@ -25,7 +25,7 @@ public:
 
 private:
 	UFUNCTION()
-	void HandleDashFinished();
+	void HandleDashFinished() { EndDash(false); }
 
 	void EndDash(bool aWasCancelled);
 

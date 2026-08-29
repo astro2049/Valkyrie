@@ -186,11 +186,6 @@ void UWeaponComponent::StartFiring()
 	TryFireOnce();
 }
 
-void UWeaponComponent::StopFiring()
-{
-	myIsFiring = false;
-}
-
 void UWeaponComponent::TryFireOnce()
 {
 	const APawn* const ownerPawn = CastChecked<APawn>(GetOwner());
@@ -287,11 +282,6 @@ void UWeaponComponent::Multicast_PlayHitPresentation_Implementation(const FVecto
 			aHitNormal.Rotation()
 		);
 	}
-}
-
-void UWeaponComponent::EquipGun(const EValkWeaponSlot aWeaponSlot)
-{
-	SetCurrentGun(aWeaponSlot);
 }
 
 AGunActor* UWeaponComponent::GetCurrentGunActor() const
