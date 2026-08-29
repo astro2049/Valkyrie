@@ -9,6 +9,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "HealthComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -56,6 +57,9 @@ void UWeaponComponent::TickComponent(
 	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
 		UpdateSpread(DeltaTime);
 	}
+	if (myIsFiring) {
+		TryFireOnce();
+	}
 }
 
 void UWeaponComponent::UpdateSpread(const float aDeltaTime)
@@ -67,8 +71,8 @@ void UWeaponComponent::UpdateSpread(const float aDeltaTime)
 		if (!playerCharacter->IsAiming()) {
 			const float maxWalkSpeed = playerCharacter->GetCharacterMovement()->MaxWalkSpeed;
 			const float speedRatio = maxWalkSpeed > 0.f
-				? FMath::Clamp(playerCharacter->GetVelocity().Size2D() / maxWalkSpeed, 0.f, 1.f)
-				: 0.f;
+				                         ? FMath::Clamp(playerCharacter->GetVelocity().Size2D() / maxWalkSpeed, 0.f, 1.f)
+				                         : 0.f;
 			desiredSpreadHalfAngleDegrees = FMath::Lerp(
 				currentGunActor->GetBaseSpreadHalfAngleDegrees(),
 				currentGunActor->GetMaxMoveSpreadHalfAngleDegrees(),
@@ -167,92 +171,103 @@ void UWeaponComponent::OnRep_UpdateGunVisibility()
 	myFireSpreadOffsetDegrees = 0.f;
 }
 
-void UWeaponComponent::PlayPredictedFire()
+void UWeaponComponent::StartFiring()
 {
-	if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
-		if (!IsReloading() && currentGunActor->GetAmmoInMag() > 0) {
-			currentGunActor->PlayFirePresentation();
+	const APawn* const ownerPawn = CastChecked<APawn>(GetOwner());
+	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	if (!IsReloading() && currentGunActor->GetAmmoInMag() == 0) {
+		if (ownerPawn->IsLocallyControlled()) {
+			UGameplayStatics::PlaySoundAtLocation(this, myEmptyFireSound, currentGunActor->GetMuzzleLocation());
 		}
+		return;
+	}
+
+	myIsFiring = true;
+	TryFireOnce();
+}
+
+void UWeaponComponent::StopFiring()
+{
+	myIsFiring = false;
+}
+
+void UWeaponComponent::TryFireOnce()
+{
+	const APawn* const ownerPawn = CastChecked<APawn>(GetOwner());
+	if (ownerPawn->HasAuthority()) {
+		FireOnce();
 	}
 }
 
-void UWeaponComponent::TryCommitFire()
+void UWeaponComponent::FireOnce()
 {
 	const UWorld* const world = GetWorld();
 	const APawn* const owner = Cast<APawn>(GetOwner());
 	AGunActor* const currentGunActor = GetCurrentGunActor();
-	if (world && owner && currentGunActor) {
-		const APlayerController* const playerController = Cast<APlayerController>(owner->GetController());
-		if (playerController && !IsReloading() && currentGunActor->CanFire()) {
-			FVector traceStart;
-			FRotator traceRotation;
-			playerController->GetPlayerViewPoint(traceStart, traceRotation);
-			const FVector traceDirection = FMath::VRandCone(
-				traceRotation.Vector(),
-				FMath::DegreesToRadians(GetCurrentSpreadHalfAngleDegrees())
-			);
+	const APlayerController* const playerController = Cast<APlayerController>(owner->GetController());
+	if (!IsReloading() && currentGunActor->CanFire()) {
+		FVector traceStart;
+		FRotator traceRotation;
+		playerController->GetPlayerViewPoint(traceStart, traceRotation);
+		const FVector traceDirection = FMath::VRandCone(
+			traceRotation.Vector(),
+			FMath::DegreesToRadians(GetCurrentSpreadHalfAngleDegrees())
+		);
 
-			// consume ammo
-			currentGunActor->ConsumeAmmo();
-			currentGunActor->Multicast_PlayFirePresentation();
-			AddFireSpread();
-			Client_AddFireSpread(myCurrentSlot);
+		// consume ammo
+		currentGunActor->ConsumeAmmo();
+		currentGunActor->Multicast_PlayFirePresentation();
+		AddFireSpread();
+		Client_AddFireSpread(myCurrentSlot);
 
-			// line trace
-			const FVector start = traceStart;
-			const FVector end = start + traceDirection * myTraceDistance;
-			FHitResult hitResult;
-			FCollisionQueryParams params;
-			params.AddIgnoredActor(owner);
-			const bool hasHit = world->LineTraceSingleByChannel(
-				hitResult,
-				start,
-				end,
-				ECC_Visibility,
-				params
-			);
-			Multicast_PlayBulletTrailPresentation(currentGunActor->GetMuzzleLocation(), hasHit ? hitResult.ImpactPoint : end);
-			// if hit
-			if (hasHit) {
-				if (const APawn* const hitPawn = Cast<APawn>(hitResult.GetActor())) {
-					if (UHealthComponent* health = hitPawn->FindComponentByClass<UHealthComponent>()) {
-						AController* damageInstigator = nullptr;
-						if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
-							damageInstigator = ownerPawn->GetController();
-							if (AValkPlayerController* const ownerController = Cast<AValkPlayerController>(owner->GetController())) {
-								// HUD: hit marker and sound (on shooter's side)
-								ownerController->Client_PlayHitRepresentations();
-							}
+		// line trace
+		const FVector start = traceStart;
+		const FVector end = start + traceDirection * myTraceDistance;
+		FHitResult hitResult;
+		FCollisionQueryParams params;
+		params.AddIgnoredActor(owner);
+		const bool hasHit = world->LineTraceSingleByChannel(
+			hitResult,
+			start,
+			end,
+			ECC_Visibility,
+			params
+		);
+		Multicast_PlayBulletTrailPresentation(currentGunActor->GetMuzzleLocation(), hasHit ? hitResult.ImpactPoint : end);
+		// if hit
+		if (hasHit) {
+			if (const APawn* const hitPawn = Cast<APawn>(hitResult.GetActor())) {
+				if (UHealthComponent* health = hitPawn->FindComponentByClass<UHealthComponent>()) {
+					AController* damageInstigator = nullptr;
+					if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
+						damageInstigator = ownerPawn->GetController();
+						if (AValkPlayerController* const ownerController = Cast<AValkPlayerController>(owner->GetController())) {
+							// HUD: hit marker and sound (on shooter's side)
+							ownerController->Client_PlayHitRepresentations();
 						}
-						// apply damage
-						health->ApplyDamage(currentGunActor->GetDamage(), damageInstigator);
-						// blood mist VFX at impact point
-						Multicast_PlayHitPresentation(hitResult.ImpactPoint, hitResult.ImpactNormal);
 					}
+					// apply damage
+					health->ApplyDamage(currentGunActor->GetDamage(), damageInstigator);
+					// blood mist VFX at impact point
+					Multicast_PlayHitPresentation(hitResult.ImpactPoint, hitResult.ImpactNormal);
 				}
 			}
+		}
 
-			// debug trace
-			if (myDrawDebugTrace) {
-				DrawDebugLine(
-					world,
-					start,
-					hasHit ? hitResult.ImpactPoint : end,
-					hasHit ? FColor::Green : FColor::Red,
-					false,
-					1.0f,
-					0,
-					1.5f
-				);
-			}
+		// debug trace
+		if (myDrawDebugTrace) {
+			DrawDebugLine(
+				world,
+				start,
+				hasHit ? hitResult.ImpactPoint : end,
+				hasHit ? FColor::Green : FColor::Red,
+				false,
+				1.0f,
+				0,
+				1.5f
+			);
 		}
 	}
-}
-
-float UWeaponComponent::GetFireInterval() const
-{
-	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	return currentGunActor ? currentGunActor->GetFireInterval() : 0.f;
 }
 
 void UWeaponComponent::Client_AddFireSpread_Implementation(const EValkWeaponSlot aWeaponSlot)

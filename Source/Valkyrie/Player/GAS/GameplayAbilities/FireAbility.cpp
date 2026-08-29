@@ -3,8 +3,6 @@
 #include "FireAbility.h"
 
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
-#include "Engine/World.h"
-#include "TimerManager.h"
 #include "Valkyrie/Components/WeaponComponent.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
 
@@ -28,28 +26,10 @@ void UFireAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	myWeaponComponent = ActorInfo && ActorInfo->AvatarActor.IsValid()
-		? ActorInfo->AvatarActor->FindComponentByClass<UWeaponComponent>()
-		: nullptr;
-	UWorld* const world = GetWorld();
-	const float fireInterval = myWeaponComponent ? myWeaponComponent->GetFireInterval() : 0.f;
-	if (myWeaponComponent && world && fireInterval > 0.f) {
-		if (UAbilityTask_WaitInputRelease* const inputTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this, true)) {
-			inputTask->OnRelease.AddDynamic(this, &UFireAbility::HandleInputReleased);
-			inputTask->ReadyForActivation();
-		}
-
-		FireStep();
-		world->GetTimerManager().SetTimer(
-			myFireTimerHandle,
-			this,
-			&UFireAbility::FireStep,
-			fireInterval,
-			true
-		);
-	} else {
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
-	}
+	ActorInfo->AvatarActor->FindComponentByClass<UWeaponComponent>()->StartFiring();
+	UAbilityTask_WaitInputRelease* const waitTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this, true);
+	waitTask->OnRelease.AddDynamic(this, &UFireAbility::HandleInputReleased);
+	waitTask->ReadyForActivation();
 }
 
 void UFireAbility::EndAbility(
@@ -59,24 +39,9 @@ void UFireAbility::EndAbility(
 	const bool bReplicateEndAbility,
 	const bool bWasCancelled)
 {
-	if (UWorld* const world = GetWorld()) {
-		world->GetTimerManager().ClearTimer(myFireTimerHandle);
-	}
-	myWeaponComponent = nullptr;
+	ActorInfo->AvatarActor->FindComponentByClass<UWeaponComponent>()->StopFiring();
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-}
-
-void UFireAbility::FireStep()
-{
-	if (const FGameplayAbilityActorInfo* const actorInfo = GetCurrentActorInfo(); actorInfo && myWeaponComponent) {
-		if (actorInfo->IsLocallyControlled()) {
-			myWeaponComponent->PlayPredictedFire();
-		}
-		if (actorInfo->IsNetAuthority()) {
-			myWeaponComponent->TryCommitFire();
-		}
-	}
 }
 
 void UFireAbility::HandleInputReleased(const float aTimeHeld)

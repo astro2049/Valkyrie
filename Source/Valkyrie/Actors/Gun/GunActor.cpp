@@ -6,7 +6,6 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -78,10 +77,7 @@ void AGunActor::ApplyReloadAmmo()
 
 void AGunActor::Multicast_PlayFirePresentation_Implementation()
 {
-	const APawn* const ownerPawn = Cast<APawn>(GetOwner());
-	if (!ownerPawn || !ownerPawn->IsLocallyControlled()) {
-		PlayFirePresentation();
-	}
+	PlayFirePresentation();
 }
 
 void AGunActor::PlayFirePresentation()

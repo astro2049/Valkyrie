@@ -31,11 +31,6 @@ public:
 	) override;
 
 private:
-	void FireStep();
 	UFUNCTION()
 	void HandleInputReleased(float aTimeHeld);
-
-	UPROPERTY()
-	TObjectPtr<UWeaponComponent> myWeaponComponent{nullptr};
-	FTimerHandle myFireTimerHandle;
 };

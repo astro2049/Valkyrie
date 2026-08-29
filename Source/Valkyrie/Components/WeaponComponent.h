@@ -8,6 +8,7 @@
 #include "WeaponComponent.generated.h"
 
 class AGunActor;
+class USoundBase;
 
 UENUM(BlueprintType)
 enum class EValkWeaponSlot : uint8
@@ -27,9 +28,8 @@ public:
 
 	AGunActor* GetCurrentGunActor() const;
 	void EquipGun(EValkWeaponSlot aWeaponSlot);
-	void PlayPredictedFire();
-	void TryCommitFire();
-	float GetFireInterval() const;
+	void StartFiring();
+	void StopFiring();
 	bool CanReload() const;
 	float GetReloadDuration() const;
 	void ApplyReloadAmmo();
@@ -48,6 +48,8 @@ private:
 	void SpawnGunActors();
 	void AttachGun(AGunActor* aGunActor) const;
 	void SetCurrentGun(EValkWeaponSlot aWeaponSlot);
+	void TryFireOnce();
+	void FireOnce();
 	void UpdateSpread(float aDeltaTime);
 	void AddFireSpread();
 	UFUNCTION()
@@ -72,6 +74,7 @@ private:
 	bool myDrawDebugTrace{false};
 	float myCurrentBaseSpreadHalfAngleDegrees{-1.f};
 	float myFireSpreadOffsetDegrees{0.f};
+	bool myIsFiring{false};
 
 	// primary and secondary gun types
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
@@ -80,6 +83,8 @@ private:
 	TSubclassOf<AGunActor> mySecondaryGunType;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	FName myHandSocketName{"HandGrip_R"};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<USoundBase> myEmptyFireSound{nullptr};
 
 	// on hit
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
