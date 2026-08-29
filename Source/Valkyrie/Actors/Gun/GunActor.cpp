@@ -60,7 +60,7 @@ void AGunActor::ConsumeAmmo()
 
 void AGunActor::ApplyReloadAmmo()
 {
-	const int32 ammoToLoad = FMath::Min(GetMagazineSize() - myAmmoInMag, myReserveAmmo);
+	const int32 ammoToLoad = FMath::Min(myGunDataAsset->myMagazineSize - myAmmoInMag, myReserveAmmo);
 	myAmmoInMag += ammoToLoad;
 	myReserveAmmo -= ammoToLoad;
 }

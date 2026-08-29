@@ -18,10 +18,6 @@ struct FValkHUDData
 	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
 	float myMaxHealth{0.f};
 	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
-	int32 myAmmo{0};
-	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
-	int32 myReserveAmmo{0};
-	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
 	bool myIsReloading{false};
 	UPROPERTY(BlueprintReadOnly, Category="Valkyrie")
 	bool myHasInteractable{false};

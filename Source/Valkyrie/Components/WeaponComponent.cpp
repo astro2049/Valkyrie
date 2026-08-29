@@ -67,15 +67,16 @@ void UWeaponComponent::UpdateSpread(const float aDeltaTime)
 	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner());
 	const AGunActor* const currentGunActor = GetCurrentGunActor();
 	if (playerCharacter && currentGunActor) {
-		float desiredSpreadHalfAngleDegrees = currentGunActor->GetAimSpreadHalfAngleDegrees();
+		const UGunDataAsset* const gunDataAsset = currentGunActor->GetGunDataAsset();
+		float desiredSpreadHalfAngleDegrees = gunDataAsset->myAimSpreadHalfAngleDegrees;
 		if (!playerCharacter->IsAiming()) {
 			const float maxWalkSpeed = playerCharacter->GetCharacterMovement()->MaxWalkSpeed;
 			const float speedRatio = maxWalkSpeed > 0.f
 				                         ? FMath::Clamp(playerCharacter->GetVelocity().Size2D() / maxWalkSpeed, 0.f, 1.f)
 				                         : 0.f;
 			desiredSpreadHalfAngleDegrees = FMath::Lerp(
-				currentGunActor->GetBaseSpreadHalfAngleDegrees(),
-				currentGunActor->GetMaxMoveSpreadHalfAngleDegrees(),
+				gunDataAsset->myBaseSpreadHalfAngleDegrees,
+				gunDataAsset->myMaxMoveSpreadHalfAngleDegrees,
 				speedRatio
 			);
 		}
@@ -86,14 +87,14 @@ void UWeaponComponent::UpdateSpread(const float aDeltaTime)
 				myCurrentBaseSpreadHalfAngleDegrees,
 				desiredSpreadHalfAngleDegrees,
 				aDeltaTime,
-				currentGunActor->GetSpreadInterpSpeed()
+				gunDataAsset->mySpreadInterpSpeed
 			);
 		}
 		myFireSpreadOffsetDegrees = FMath::FInterpConstantTo(
 			myFireSpreadOffsetDegrees,
 			0.f,
 			aDeltaTime,
-			currentGunActor->GetFireSpreadRecoverySpeedDegreesPerSecond()
+			gunDataAsset->myFireSpreadRecoverySpeedDegreesPerSecond
 		);
 	}
 }
@@ -101,10 +102,11 @@ void UWeaponComponent::UpdateSpread(const float aDeltaTime)
 void UWeaponComponent::AddFireSpread()
 {
 	if (const AGunActor* const currentGunActor = GetCurrentGunActor()) {
+		const UGunDataAsset* const gunDataAsset = currentGunActor->GetGunDataAsset();
 		myFireSpreadOffsetDegrees = FMath::Clamp(
-			myFireSpreadOffsetDegrees + FMath::Max(currentGunActor->GetFireSpreadPerShotDegrees(), 0.f),
+			myFireSpreadOffsetDegrees + FMath::Max(gunDataAsset->myFireSpreadPerShotDegrees, 0.f),
 			0.f,
-			FMath::Max(currentGunActor->GetMaxFireSpreadOffsetDegrees(), 0.f)
+			FMath::Max(gunDataAsset->myMaxFireSpreadOffsetDegrees, 0.f)
 		);
 	}
 }
@@ -242,7 +244,7 @@ void UWeaponComponent::FireOnce()
 						}
 					}
 					// apply damage
-					health->ApplyDamage(currentGunActor->GetDamage(), damageInstigator);
+					health->ApplyDamage(currentGunActor->GetGunDataAsset()->myDamage, damageInstigator);
 					// blood mist VFX at impact point
 					Multicast_PlayHitPresentation(hitResult.ImpactPoint, hitResult.ImpactNormal);
 				}
@@ -298,7 +300,7 @@ AGunActor* UWeaponComponent::GetCurrentGunActor() const
 float UWeaponComponent::GetBaseSpreadHalfAngleDegrees() const
 {
 	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	return currentGunActor ? currentGunActor->GetBaseSpreadHalfAngleDegrees() : 0.f;
+	return currentGunActor ? currentGunActor->GetGunDataAsset()->myBaseSpreadHalfAngleDegrees : 0.f;
 }
 
 bool UWeaponComponent::CanReload() const
@@ -310,7 +312,7 @@ bool UWeaponComponent::CanReload() const
 float UWeaponComponent::GetReloadDuration() const
 {
 	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	return currentGunActor ? currentGunActor->GetReloadDuration() : 0.f;
+	return currentGunActor ? currentGunActor->GetGunDataAsset()->myReloadDuration : 0.f;
 }
 
 void UWeaponComponent::ApplyReloadAmmo()

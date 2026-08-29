@@ -4,7 +4,6 @@
 
 #include "GameFramework/PlayerController.h"
 #include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
-#include "Valkyrie/Actors/Gun/GunActor.h"
 #include "Valkyrie/Components/HealthComponent.h"
 #include "Valkyrie/Components/Interaction/InteractionComponent.h"
 #include "Valkyrie/Components/WeaponComponent.h"
@@ -22,10 +21,6 @@ FValkHUDData UUINode_GetHUDData::GetHUDData(APlayerController* const aPlayerCont
 			data.myMaxHealth = healthComponent->GetMaxHealth();
 		}
 		if (const UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>()) {
-			if (const AGunActor* const currentGunActor = weaponComponent->GetCurrentGunActor()) {
-				data.myAmmo = currentGunActor->GetAmmoInMag();
-				data.myReserveAmmo = currentGunActor->GetReserveAmmo();
-			}
 			data.myIsReloading = weaponComponent->IsReloading();
 			data.myCrosshairSpreadHalfAngleDegrees = weaponComponent->GetCurrentSpreadHalfAngleDegrees();
 			data.myCrosshairBaseSpreadHalfAngleDegrees = weaponComponent->GetBaseSpreadHalfAngleDegrees();

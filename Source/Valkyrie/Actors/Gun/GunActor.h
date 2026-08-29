@@ -29,26 +29,20 @@ public:
 	bool CanFire() const;
 	void ConsumeAmmo();
 	void PlayFirePresentation();
-	bool CanReload() const { return myAmmoInMag < GetMagazineSize() && myReserveAmmo > 0; }
+	bool CanReload() const { return myAmmoInMag < myGunDataAsset->myMagazineSize && myReserveAmmo > 0; }
 	void ApplyReloadAmmo();
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayFirePresentation();
 
 	// Getters
-	float GetDamage() const { return myGunDataAsset->myDamage; }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
+	UGunDataAsset* GetGunDataAsset() const { return myGunDataAsset; }
 	float GetFireInterval() const { return myFireInterval; }
-	float GetReloadDuration() const { return myGunDataAsset->myReloadDuration; }
-	float GetBaseSpreadHalfAngleDegrees() const { return myGunDataAsset->myBaseSpreadHalfAngleDegrees; }
-	float GetAimSpreadHalfAngleDegrees() const { return myGunDataAsset->myAimSpreadHalfAngleDegrees; }
-	float GetMaxMoveSpreadHalfAngleDegrees() const { return myGunDataAsset->myMaxMoveSpreadHalfAngleDegrees; }
-	float GetSpreadInterpSpeed() const { return myGunDataAsset->mySpreadInterpSpeed; }
-	float GetFireSpreadPerShotDegrees() const { return myGunDataAsset->myFireSpreadPerShotDegrees; }
-	float GetMaxFireSpreadOffsetDegrees() const { return myGunDataAsset->myMaxFireSpreadOffsetDegrees; }
-	float GetFireSpreadRecoverySpeedDegreesPerSecond() const { return myGunDataAsset->myFireSpreadRecoverySpeedDegreesPerSecond; }
 	UAnimMontage* GetReloadMontage() const { return myReloadMontage; }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	int32 GetAmmoInMag() const { return myAmmoInMag; }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	int32 GetReserveAmmo() const { return myReserveAmmo; }
-	int32 GetMagazineSize() const { return myGunDataAsset->myMagazineSize; }
 	FVector GetMuzzleLocation() const { return myMuzzleArrowComponent ? myMuzzleArrowComponent->GetComponentLocation() : GetActorLocation(); }
 
 private:

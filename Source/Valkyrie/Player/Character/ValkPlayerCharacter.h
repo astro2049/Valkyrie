@@ -39,6 +39,8 @@ public:
 	
 	UFUNCTION(BlueprintPure)
 	bool IsAiming() const { return myAsc->HasMatchingGameplayTag(AbilityTags::Ability_Aim); }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
+	UWeaponComponent* GetWeaponComponent() const { return myWeaponComponent; }
 
 private:
 	// GAS

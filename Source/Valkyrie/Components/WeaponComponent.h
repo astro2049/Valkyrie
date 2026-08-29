@@ -26,6 +26,7 @@ public:
 	UWeaponComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	AGunActor* GetCurrentGunActor() const;
 	void EquipGun(const EValkWeaponSlot aWeaponSlot) { SetCurrentGun(aWeaponSlot); }
 	void StartFiring();

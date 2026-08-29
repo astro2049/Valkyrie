@@ -19,6 +19,8 @@ class VALKYRIE_API UGunDataAsset : public UDataAsset
 	GENERATED_BODY()
 	
 public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Valkyrie")
+	FText myName;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDamage{25.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
