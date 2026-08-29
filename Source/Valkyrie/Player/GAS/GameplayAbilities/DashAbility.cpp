@@ -28,42 +28,36 @@ void UDashAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (ACharacter* const character = Cast<ACharacter>(ActorInfo->AvatarActor.Get())) {
-		const FVector movementInputDirection = character->GetLastMovementInputVector().GetSafeNormal2D();
-		const FVector dashDirection = movementInputDirection.IsNearlyZero()
-			? character->GetActorForwardVector().GetSafeNormal2D()
-			: movementInputDirection;
-		if (!dashDirection.IsNearlyZero() && myDashInitialSpeed > 0.f && myDashDuration > 0.f) {
-			if (CommitAbility(Handle, ActorInfo, ActivationInfo)) {
-				GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(
-					AbilityTags::GameplayCue_Dash_Start,
-					FGameplayEffectContextHandle()
+	ACharacter* const character = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
+	const FVector movementInputDirection = character->GetLastMovementInputVector().GetSafeNormal2D();
+	const FVector dashDirection = !movementInputDirection.IsNearlyZero() ? movementInputDirection : character->GetActorForwardVector().GetSafeNormal2D();
+	if (!dashDirection.IsNearlyZero() && myDashInitialSpeed > 0.f && myDashDuration > 0.f) {
+		if (CommitAbility(Handle, ActorInfo, ActivationInfo)) {
+			GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(
+				AbilityTags::GameplayCue_Dash_Start,
+				FGameplayEffectContextHandle()
+			);
+			character->LaunchCharacter(FVector::UpVector * myDashUpwardSpeed, false, true);
+			UAbilityTask_ApplyRootMotionConstantForce* const dashTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(
+					this,
+					NAME_None,
+					dashDirection,
+					myDashInitialSpeed,
+					myDashDuration,
+					false,
+					myDashStrengthCurve,
+					ERootMotionFinishVelocityMode::ClampVelocity,
+					FVector::ZeroVector,
+					character->GetCharacterMovement()->MaxWalkSpeed,
+					true
 				);
-				UAbilityTask_ApplyRootMotionConstantForce* const dashTask =
-					UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(
-						this,
-						NAME_None,
-						dashDirection,
-						myDashInitialSpeed,
-						myDashDuration,
-						false,
-						myDashStrengthCurve,
-						ERootMotionFinishVelocityMode::ClampVelocity,
-						FVector::ZeroVector,
-						character->GetCharacterMovement()->MaxWalkSpeed,
-						true
-					);
-				dashTask->OnFinish.AddDynamic(this, &UDashAbility::HandleDashFinished);
-				dashTask->ReadyForActivation();
-				return;
-			}
+			dashTask->OnFinish.AddDynamic(this, &UDashAbility::EndDash);
+			dashTask->ReadyForActivation();
 		}
 	}
-
-	EndDash(true);
 }
 
-void UDashAbility::EndDash(const bool aWasCancelled)
+void UDashAbility::EndDash()
 {
 	const ACharacter* const character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
 	EndAbility(
@@ -71,6 +65,6 @@ void UDashAbility::EndDash(const bool aWasCancelled)
 		GetCurrentActorInfo(),
 		GetCurrentActivationInfo(),
 		character && character->HasAuthority(),
-		aWasCancelled
+		false
 	);
 }

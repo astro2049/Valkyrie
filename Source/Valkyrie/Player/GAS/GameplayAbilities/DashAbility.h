@@ -25,12 +25,12 @@ public:
 
 private:
 	UFUNCTION()
-	void HandleDashFinished() { EndDash(false); }
-
-	void EndDash(bool aWasCancelled);
+	void EndDash();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myDashInitialSpeed{6000.f};
+	float myDashInitialSpeed{3000.f};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myDashUpwardSpeed{600.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myDashDuration{0.2f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
