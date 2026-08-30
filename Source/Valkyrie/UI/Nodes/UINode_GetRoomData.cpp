@@ -20,14 +20,13 @@ void UUINode_GetRoomData::GetRoomData(APlayerController* aPlayerController,
 		if (const UWorld* const world = aPlayerController->GetWorld()) {
 			if (const AGameStateBase* const gameState = world->GetGameState<AGameStateBase>()) {
 				for (const APlayerState* const playerState : gameState->PlayerArray) {
-					if (const AValkPlayerState* const valkPlayerState = Cast<AValkPlayerState>(playerState)) {
-						if (valkPlayerState->GetTeamId() == EValkTeamId::TeamA
-							&& someTeamAPlayerNames.Num() < ValkGameRules::MaxPlayersPerTeam) {
-							someTeamAPlayerNames.Add(valkPlayerState->GetPlayerName());
-						} else if (valkPlayerState->GetTeamId() == EValkTeamId::TeamB
-							&& someTeamBPlayerNames.Num() < ValkGameRules::MaxPlayersPerTeam) {
-							someTeamBPlayerNames.Add(valkPlayerState->GetPlayerName());
-						}
+					const AValkPlayerState* const valkPlayerState = CastChecked<AValkPlayerState>(playerState);
+					if (valkPlayerState->GetTeamId() == EValkTeamId::TeamA
+						&& someTeamAPlayerNames.Num() < ValkGameRules::MaxPlayersPerTeam) {
+						someTeamAPlayerNames.Add(valkPlayerState->GetPlayerName());
+					} else if (valkPlayerState->GetTeamId() == EValkTeamId::TeamB
+						&& someTeamBPlayerNames.Num() < ValkGameRules::MaxPlayersPerTeam) {
+						someTeamBPlayerNames.Add(valkPlayerState->GetPlayerName());
 					}
 				}
 			}

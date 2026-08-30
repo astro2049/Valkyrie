@@ -41,7 +41,7 @@ namespace
 	)
 	{
 		for (const ATDMPlayerState* const playerState : somePlayerStates) {
-			if (playerState && someRows.Num() < ValkGameRules::MaxPlayersPerTeam) {
+			if (someRows.Num() < ValkGameRules::MaxPlayersPerTeam) {
 				FValkTDMScoreboardRowData row;
 				row.myPlayerName = playerState->GetPlayerName();
 				row.myKills = playerState->GetKills();
@@ -74,12 +74,11 @@ void UUINode_GetTDMScoreboardData::GetTDMScoreboardData(
 		TArray<const ATDMPlayerState*> teamAPlayerStates;
 		TArray<const ATDMPlayerState*> teamBPlayerStates;
 		for (const APlayerState* const playerState : gameState->PlayerArray) {
-			if (const ATDMPlayerState* const tdmPlayerState = Cast<ATDMPlayerState>(playerState)) {
-				if (tdmPlayerState->GetTeamId() == EValkTeamId::TeamA) {
-					teamAPlayerStates.Add(tdmPlayerState);
-				} else if (tdmPlayerState->GetTeamId() == EValkTeamId::TeamB) {
-					teamBPlayerStates.Add(tdmPlayerState);
-				}
+			const ATDMPlayerState* const tdmPlayerState = CastChecked<ATDMPlayerState>(playerState);
+			if (tdmPlayerState->GetTeamId() == EValkTeamId::TeamA) {
+				teamAPlayerStates.Add(tdmPlayerState);
+			} else if (tdmPlayerState->GetTeamId() == EValkTeamId::TeamB) {
+				teamBPlayerStates.Add(tdmPlayerState);
 			}
 		}
 

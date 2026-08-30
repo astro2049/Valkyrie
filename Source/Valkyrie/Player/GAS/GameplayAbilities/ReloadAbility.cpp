@@ -30,31 +30,22 @@ void UReloadAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(ActorInfo->AvatarActor.Get())) {
-		if (const UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>(); weaponComponent && weaponComponent->CanReload()) {
-			if (const AGunActor* const currentGunActor = weaponComponent->GetCurrentGunActor()) {
-				if (UAnimMontage* const reloadMontage = currentGunActor->GetReloadMontage()) {
-					float montagePlayRate = 1.f;
-					const float reloadDuration = weaponComponent->GetReloadDuration();
-					if (reloadDuration > 0.f) {
-						montagePlayRate = reloadMontage->GetPlayLength() / reloadDuration;
-					}
-
-					UAbilityTask_PlayMontageAndWait* const montageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-						this,
-						NAME_None,
-						reloadMontage,
-						montagePlayRate
-					);
-					montageTask->OnCompleted.AddDynamic(this, &UReloadAbility::HandleReloadFinished);
-					montageTask->OnInterrupted.AddDynamic(this, &UReloadAbility::HandleReloadCancelled);
-					montageTask->OnCancelled.AddDynamic(this, &UReloadAbility::HandleReloadCancelled);
-					montageTask->ReadyForActivation();
-
-					return;
-				}
-			}
-		}
+	const AValkPlayerCharacter* const playerCharacter = CastChecked<AValkPlayerCharacter>(ActorInfo->AvatarActor.Get());
+	const UWeaponComponent* const weaponComponent = playerCharacter->GetWeaponComponent();
+	if (weaponComponent->GetCurrentGunActor() && weaponComponent->CanReload()) {
+		UAnimMontage* const reloadMontage = weaponComponent->GetCurrentGunActor()->GetReloadMontage();
+		const float montagePlayRate = reloadMontage->GetPlayLength() / weaponComponent->GetReloadDuration();
+		UAbilityTask_PlayMontageAndWait* const montageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+			this,
+			NAME_None,
+			reloadMontage,
+			montagePlayRate
+		);
+		montageTask->OnCompleted.AddDynamic(this, &UReloadAbility::HandleReloadFinished);
+		montageTask->OnInterrupted.AddDynamic(this, &UReloadAbility::HandleReloadCancelled);
+		montageTask->OnCancelled.AddDynamic(this, &UReloadAbility::HandleReloadCancelled);
+		montageTask->ReadyForActivation();
+		return;
 	}
 
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
@@ -62,29 +53,27 @@ void UReloadAbility::ActivateAbility(
 
 void UReloadAbility::HandleReloadFinished()
 {
-	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetAvatarActorFromActorInfo());
-	if (playerCharacter && playerCharacter->HasAuthority()) {
-		if (UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>()) {
-			weaponComponent->ApplyReloadAmmo();
-		}
+	const AValkPlayerCharacter* const playerCharacter = CastChecked<AValkPlayerCharacter>(GetAvatarActorFromActorInfo());
+	if (playerCharacter->HasAuthority()) {
+		playerCharacter->GetWeaponComponent()->ApplyReloadAmmo();
 	}
 	EndAbility(
 		GetCurrentAbilitySpecHandle(),
 		GetCurrentActorInfo(),
 		GetCurrentActivationInfo(),
-		playerCharacter && playerCharacter->HasAuthority(),
+		playerCharacter->HasAuthority(),
 		false
 	);
 }
 
 void UReloadAbility::HandleReloadCancelled()
 {
-	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetAvatarActorFromActorInfo());
+	const AValkPlayerCharacter* const playerCharacter = CastChecked<AValkPlayerCharacter>(GetAvatarActorFromActorInfo());
 	EndAbility(
 		GetCurrentAbilitySpecHandle(),
 		GetCurrentActorInfo(),
 		GetCurrentActivationInfo(),
-		playerCharacter && playerCharacter->HasAuthority(),
+		playerCharacter->HasAuthority(),
 		true
 	);
 }

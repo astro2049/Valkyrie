@@ -7,7 +7,7 @@
 #include "UIMessageSubsystem.generated.h"
 
 #define VALK_UIMESSAGESUBSYS() \
-	GetWorld() ? GetWorld()->GetSubsystem<UUIMessageSubsystem>() : nullptr
+	GetWorld()->GetSubsystem<UUIMessageSubsystem>()
 
 /**
  * 

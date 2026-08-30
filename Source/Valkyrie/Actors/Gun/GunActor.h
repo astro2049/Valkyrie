@@ -43,7 +43,7 @@ public:
 	int32 GetAmmoInMag() const { return myAmmoInMag; }
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	int32 GetReserveAmmo() const { return myReserveAmmo; }
-	FVector GetMuzzleLocation() const { return myMuzzleArrowComponent ? myMuzzleArrowComponent->GetComponentLocation() : GetActorLocation(); }
+	FVector GetMuzzleLocation() const { return myMuzzleArrowComponent->GetComponentLocation(); }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

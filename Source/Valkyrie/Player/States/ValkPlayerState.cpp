@@ -15,7 +15,5 @@ void AValkPlayerState::CopyProperties(APlayerState* const aPlayerState)
 {
 	Super::CopyProperties(aPlayerState);
 
-	if (AValkPlayerState* const newPlayerState = Cast<AValkPlayerState>(aPlayerState)) {
-		newPlayerState->SetTeamId(myTeamId);
-	}
+	CastChecked<AValkPlayerState>(aPlayerState)->SetTeamId(myTeamId);
 }

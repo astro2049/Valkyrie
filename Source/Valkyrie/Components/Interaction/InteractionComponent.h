@@ -23,6 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ClearInteractable(AActor* anInteractableActor);
 
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool HasInteractable() const { return myInteractableComponent.IsValid(); }
 
 private:

@@ -19,14 +19,9 @@ void AValkGameMode::PostLogin(APlayerController* const aNewPlayer)
 {
 	Super::PostLogin(aNewPlayer);
 
-	if (!aNewPlayer) {
-		return;
-	}
-
-	if (AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>()) {
-		if (playerState->GetTeamId() == EValkTeamId::None) {
-			AssignTeam(*playerState);
-		}
+	AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>();
+	if (playerState->GetTeamId() == EValkTeamId::None) {
+		AssignTeam(*playerState);
 	}
 }
 
@@ -43,15 +38,12 @@ void AValkGameMode::AssignTeam(AValkPlayerState& aPlayerState) const
 
 	int32 teamAPlayerCount = 0;
 	int32 teamBPlayerCount = 0;
-	if (const AGameStateBase* const gameState = GetGameState<AGameStateBase>()) {
-		for (const APlayerState* const playerState : gameState->PlayerArray) {
-			if (const AValkPlayerState* const valkPlayerState = Cast<AValkPlayerState>(playerState)) {
-				if (valkPlayerState->GetTeamId() == EValkTeamId::TeamA) {
-					teamAPlayerCount++;
-				} else if (valkPlayerState->GetTeamId() == EValkTeamId::TeamB) {
-					teamBPlayerCount++;
-				}
-			}
+	for (const APlayerState* const playerState : GetGameState<AGameStateBase>()->PlayerArray) {
+		const AValkPlayerState* const valkPlayerState = CastChecked<AValkPlayerState>(playerState);
+		if (valkPlayerState->GetTeamId() == EValkTeamId::TeamA) {
+			teamAPlayerCount++;
+		} else if (valkPlayerState->GetTeamId() == EValkTeamId::TeamB) {
+			teamBPlayerCount++;
 		}
 	}
 	aPlayerState.SetTeamId(teamAPlayerCount <= teamBPlayerCount ? EValkTeamId::TeamA : EValkTeamId::TeamB);
@@ -59,10 +51,6 @@ void AValkGameMode::AssignTeam(AValkPlayerState& aPlayerState) const
 
 AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlayer)
 {
-	if (!aPlayer) {
-		return Super::ChoosePlayerStart_Implementation(aPlayer);
-	}
-
 	static const TMap<EValkTeamId, FString> teamNameMap = {
 		{EValkTeamId::None, "None"},
 		{EValkTeamId::TeamA, "TeamA"},
@@ -70,32 +58,27 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 	};
 
 	// calculate index in team
-	if (const AValkPlayerState* const playerState = aPlayer->GetPlayerState<AValkPlayerState>()) {
-		int32 indexInTeam = 0;
-		if (const AGameStateBase* const gameState = GetGameState<AGameStateBase>()) {
-			for (const APlayerState* const currentPlayerState : gameState->PlayerArray) {
-				if (currentPlayerState == playerState) {
-					break;
-				}
-
-				if (const AValkPlayerState* const currentValkPlayerState = Cast<AValkPlayerState>(currentPlayerState);
-					currentValkPlayerState && currentValkPlayerState->GetTeamId() == playerState->GetTeamId()) {
-					indexInTeam++;
-				}
-			}
+	const AValkPlayerState* const playerState = aPlayer->GetPlayerState<AValkPlayerState>();
+	int32 indexInTeam = 0;
+	for (const APlayerState* const currentPlayerState : GetGameState<AGameStateBase>()->PlayerArray) {
+		if (currentPlayerState == playerState) {
+			break;
 		}
 
-		TArray<AActor*> playerStartActors;
-		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStartActors);
-		for (AActor* const playerStartActor : playerStartActors) {
-			if (APlayerStart* const playerStart = Cast<APlayerStart>(playerStartActor)) {
-				if (playerStart->PlayerStartTag.IsEqual(
-					// so PlayerStartTag should be like TeamA_0, TeamA_1...
-					FName(teamNameMap[playerState->GetTeamId()] + "_" + FString::FromInt(indexInTeam))
-				)) {
-					return playerStart;
-				}
-			}
+		if (CastChecked<AValkPlayerState>(currentPlayerState)->GetTeamId() == playerState->GetTeamId()) {
+			indexInTeam++;
+		}
+	}
+
+	TArray<AActor*> playerStartActors;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStartActors);
+	for (AActor* const playerStartActor : playerStartActors) {
+		APlayerStart* const playerStart = CastChecked<APlayerStart>(playerStartActor);
+		if (playerStart->PlayerStartTag.IsEqual(
+			// so PlayerStartTag should be like TeamA_0, TeamA_1...
+			FName(teamNameMap[playerState->GetTeamId()] + "_" + FString::FromInt(indexInTeam))
+		)) {
+			return playerStart;
 		}
 	}
 
@@ -104,18 +87,15 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 
 void AValkGameMode::PlayerDied(AController* const, AController* const aVictimController)
 {
-	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(aVictimController)) {
-		playerController->Client_OnPlayerDied();
-	}
+	CastChecked<AValkPlayerController>(aVictimController)->Client_OnPlayerDied();
 }
 
 void AValkGameMode::FinishMatch()
 {
-	if (AValkGameState* const gameState = GetGameState<AValkGameState>()) {
-		if (!gameState->HasMatchEnded()) {
-			gameState->SetMatchEnded();
-			ReturnToMainMenuAfterDelay();
-		}
+	AValkGameState* const gameState = GetGameState<AValkGameState>();
+	if (!gameState->HasMatchEnded()) {
+		gameState->SetMatchEnded();
+		ReturnToMainMenuAfterDelay();
 	}
 }
 
@@ -134,7 +114,5 @@ void AValkGameMode::ReturnToMainMenuAfterDelay()
 
 void AValkGameMode::ReturnPlayersToMainMenu() const
 {
-	if (UWorld* const world = GetWorld()) {
-		world->ServerTravel(TEXT("/Game/Maps/Level_MainMenu"));
-	}
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Level_MainMenu"));
 }

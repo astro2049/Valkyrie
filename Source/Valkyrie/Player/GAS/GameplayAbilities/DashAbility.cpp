@@ -28,43 +28,41 @@ void UDashAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	ACharacter* const character = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
+	ACharacter* const character = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
 	const FVector movementInputDirection = character->GetLastMovementInputVector().GetSafeNormal2D();
 	const FVector dashDirection = !movementInputDirection.IsNearlyZero() ? movementInputDirection : character->GetActorForwardVector().GetSafeNormal2D();
-	if (!dashDirection.IsNearlyZero() && myDashInitialSpeed > 0.f && myDashDuration > 0.f) {
-		if (CommitAbility(Handle, ActorInfo, ActivationInfo)) {
+	if (CommitAbility(Handle, ActorInfo, ActivationInfo)) {
 			GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(
 				AbilityTags::GameplayCue_Dash_Start,
 				FGameplayEffectContextHandle()
 			);
 			character->LaunchCharacter(FVector::UpVector * myDashUpwardSpeed, false, true);
 			UAbilityTask_ApplyRootMotionConstantForce* const dashTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(
-					this,
-					NAME_None,
-					dashDirection,
-					myDashInitialSpeed,
-					myDashDuration,
-					false,
-					myDashStrengthCurve,
-					ERootMotionFinishVelocityMode::ClampVelocity,
-					FVector::ZeroVector,
-					character->GetCharacterMovement()->MaxWalkSpeed,
-					true
-				);
+				this,
+				NAME_None,
+				dashDirection,
+				myDashInitialSpeed,
+				myDashDuration,
+				false,
+				myDashStrengthCurve,
+				ERootMotionFinishVelocityMode::ClampVelocity,
+				FVector::ZeroVector,
+				character->GetCharacterMovement()->MaxWalkSpeed,
+				true
+			);
 			dashTask->OnFinish.AddDynamic(this, &UDashAbility::EndDash);
 			dashTask->ReadyForActivation();
-		}
 	}
 }
 
 void UDashAbility::EndDash()
 {
-	const ACharacter* const character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+	const ACharacter* const character = CastChecked<ACharacter>(GetAvatarActorFromActorInfo());
 	EndAbility(
 		GetCurrentAbilitySpecHandle(),
 		GetCurrentActorInfo(),
 		GetCurrentActivationInfo(),
-		character && character->HasAuthority(),
+		character->HasAuthority(),
 		false
 	);
 }

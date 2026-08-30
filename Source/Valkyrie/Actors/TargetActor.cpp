@@ -14,9 +14,7 @@ void ATargetActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (myHealthComponent) {
-		myHealthComponent->GetOnDied().BindUObject(this, &ATargetActor::OnHealthDied);
-	}
+	myHealthComponent->GetOnDied().BindUObject(this, &ATargetActor::OnHealthDied);
 }
 
 void ATargetActor::OnHealthDied(AController* const)

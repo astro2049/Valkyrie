@@ -26,10 +26,10 @@ void AGunActor::BeginPlay()
 	Super::BeginPlay();
 	check(myGunDataAsset);
 
-	myFireInterval = myGunDataAsset->myRPM > 0.f ? 60.f / myGunDataAsset->myRPM : 0.f;
+	myFireInterval = 60.f / myGunDataAsset->myRPM;
 	if (HasAuthority()) {
-		myAmmoInMag = FMath::Max(myGunDataAsset->myMagazineSize, 1);
-		myReserveAmmo = FMath::Max(myGunDataAsset->myInitialReserveAmmo, 0);
+		myAmmoInMag = myGunDataAsset->myMagazineSize;
+		myReserveAmmo = myGunDataAsset->myInitialReserveAmmo;
 		myLastFiredTime = -1.f;
 	}
 }
@@ -44,18 +44,13 @@ void AGunActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 
 bool AGunActor::CanFire() const
 {
-	if (const UWorld* const world = GetWorld()) {
-		return myAmmoInMag > 0 && world->GetTimeSeconds() - myLastFiredTime >= myFireInterval;
-	}
-	return false;
+	return myAmmoInMag > 0 && GetWorld()->GetTimeSeconds() - myLastFiredTime >= myFireInterval;
 }
 
 void AGunActor::ConsumeAmmo()
 {
-	if (const UWorld* const world = GetWorld()) {
-		myLastFiredTime = world->GetTimeSeconds();
-		myAmmoInMag = FMath::Max(myAmmoInMag - 1, 0);
-	}
+	myLastFiredTime = GetWorld()->GetTimeSeconds();
+	--myAmmoInMag;
 }
 
 void AGunActor::ApplyReloadAmmo()
@@ -72,18 +67,16 @@ void AGunActor::Multicast_PlayFirePresentation_Implementation()
 
 void AGunActor::PlayFirePresentation()
 {
-	if (myMuzzleArrowComponent) {
-		const FTransform muzzleTransform = myMuzzleArrowComponent->GetComponentTransform();
-		if (myFireSound) {
-			UGameplayStatics::PlaySoundAtLocation(this, myFireSound, muzzleTransform.GetLocation());
-		}
-		if (myMuzzleFlashVFX) {
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-				GetWorld(),
-				myMuzzleFlashVFX,
-				muzzleTransform.GetLocation(),
-				muzzleTransform.GetRotation().Rotator()
-			);
-		}
+	const FTransform muzzleTransform = myMuzzleArrowComponent->GetComponentTransform();
+	if (myFireSound) {
+		UGameplayStatics::PlaySoundAtLocation(this, myFireSound, muzzleTransform.GetLocation());
+	}
+	if (myMuzzleFlashVFX) {
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			myMuzzleFlashVFX,
+			muzzleTransform.GetLocation(),
+			muzzleTransform.GetRotation().Rotator()
+		);
 	}
 }

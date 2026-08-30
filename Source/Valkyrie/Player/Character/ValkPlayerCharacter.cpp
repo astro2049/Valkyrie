@@ -40,33 +40,19 @@ void AValkPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (myHealthComponent) {
-		myHealthComponent->GetOnDamaged().BindUObject(this, &AValkPlayerCharacter::OnDamaged);
-		myHealthComponent->GetOnDied().BindUObject(this, &AValkPlayerCharacter::OnDied);
-	}
+	myHealthComponent->GetOnDamaged().BindUObject(this, &AValkPlayerCharacter::OnDamaged);
+	myHealthComponent->GetOnDied().BindUObject(this, &AValkPlayerCharacter::OnDied);
 	myAimTransitionSpeed = (myAimFov - myDefaultFov) / myAimTransitionDuration;
 	UpdateMaxMoveSpeed();
 
 	if (HasAuthority()) {
-		if (ensureMsgf(myAimAbilityType != nullptr, TEXT("%s has no Aim ability type assigned."), *GetNameSafe(this))) {
-			myAsc->GiveAbility(FGameplayAbilitySpec(myAimAbilityType, 1, EAbilityInputId::Aim));
-		}
-		if (ensureMsgf(myReloadAbilityType != nullptr, TEXT("%s has no Reload ability type assigned."), *GetNameSafe(this))) {
-			myAsc->GiveAbility(FGameplayAbilitySpec(myReloadAbilityType, 1, EAbilityInputId::Reload));
-		}
-		if (ensureMsgf(myFireAbilityType != nullptr, TEXT("%s has no Fire ability type assigned."), *GetNameSafe(this))) {
-			myAsc->GiveAbility(FGameplayAbilitySpec(myFireAbilityType, 1, EAbilityInputId::Fire));
-		}
-		if (ensureMsgf(mySwitchWeaponAbilityType != nullptr, TEXT("%s has no Switch Weapon ability type assigned."), *GetNameSafe(this))) {
-			myAsc->GiveAbility(FGameplayAbilitySpec(mySwitchWeaponAbilityType, 1, EAbilityInputId::PrimaryWeapon));
-			myAsc->GiveAbility(FGameplayAbilitySpec(mySwitchWeaponAbilityType, 1, EAbilityInputId::SecondaryWeapon));
-		}
-		if (ensureMsgf(myDashAbilityType != nullptr, TEXT("%s has no Dash ability type assigned."), *GetNameSafe(this))) {
-			myAsc->GiveAbility(FGameplayAbilitySpec(myDashAbilityType, 1, EAbilityInputId::Dash));
-		}
-		if (ensureMsgf(myThrowGrenadeAbilityType != nullptr, TEXT("%s has no Throw Grenade ability type assigned."), *GetNameSafe(this))) {
-			myAsc->GiveAbility(FGameplayAbilitySpec(myThrowGrenadeAbilityType, 1, EAbilityInputId::ThrowGrenade));
-		}
+		myAsc->GiveAbility(FGameplayAbilitySpec(myAimAbilityType, 1, EAbilityInputId::Aim));
+		myAsc->GiveAbility(FGameplayAbilitySpec(myReloadAbilityType, 1, EAbilityInputId::Reload));
+		myAsc->GiveAbility(FGameplayAbilitySpec(myFireAbilityType, 1, EAbilityInputId::Fire));
+		myAsc->GiveAbility(FGameplayAbilitySpec(mySwitchWeaponAbilityType, 1, EAbilityInputId::PrimaryWeapon));
+		myAsc->GiveAbility(FGameplayAbilitySpec(mySwitchWeaponAbilityType, 1, EAbilityInputId::SecondaryWeapon));
+		myAsc->GiveAbility(FGameplayAbilitySpec(myDashAbilityType, 1, EAbilityInputId::Dash));
+		myAsc->GiveAbility(FGameplayAbilitySpec(myThrowGrenadeAbilityType, 1, EAbilityInputId::ThrowGrenade));
 	}
 
 	myAsc->RegisterGameplayTagEvent(
@@ -89,125 +75,100 @@ void AValkPlayerCharacter::SetupPlayerInputComponent(UInputComponent* const aPla
 {
 	Super::SetupPlayerInputComponent(aPlayerInputComponent);
 
-	if (UEnhancedInputComponent* const enhancedInputComponent = Cast<UEnhancedInputComponent>(aPlayerInputComponent)) {
-		if (myMoveAction) {
-			enhancedInputComponent->BindAction(
-				myMoveAction,
-				ETriggerEvent::Triggered,
-				this,
-				&AValkPlayerCharacter::HandleMove
-			);
-		}
-		if (myLookAction) {
-			enhancedInputComponent->BindAction(
-				myLookAction,
-				ETriggerEvent::Triggered,
-				this,
-				&AValkPlayerCharacter::HandleLook
-			);
-		}
-		if (myJumpAction) {
-			enhancedInputComponent->BindAction(
-				myJumpAction,
-				ETriggerEvent::Started,
-				this,
-				&ACharacter::Jump
-			);
-			enhancedInputComponent->BindAction(
-				myJumpAction,
-				ETriggerEvent::Completed,
-				this,
-				&ACharacter::StopJumping
-			);
-		}
-		if (myFireAction) {
-			enhancedInputComponent->BindAction(
-				myFireAction,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerCharacter::StartFiring
-			);
-			enhancedInputComponent->BindAction(
-				myFireAction,
-				ETriggerEvent::Completed,
-				this,
-				&AValkPlayerCharacter::StopFiring
-			);
-		}
-		if (myReloadAction) {
-			enhancedInputComponent->BindAction(
-				myReloadAction,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerCharacter::HandleReload
-			);
-		}
-		if (myInteractAction) {
-			enhancedInputComponent->BindAction(
-				myInteractAction,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerCharacter::HandleInteract
-			);
-		}
-		if (myPrimaryWeaponAction) {
-			enhancedInputComponent->BindAction(
-				myPrimaryWeaponAction,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerCharacter::HandleEquipPrimaryGun
-			);
-		}
-		if (mySecondaryWeaponAction) {
-			enhancedInputComponent->BindAction(
-				mySecondaryWeaponAction,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerCharacter::HandleEquipSecondaryGun
-			);
-		}
-		if (myAimAction) {
-			enhancedInputComponent->BindAction(
-				myAimAction,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerCharacter::StartAiming
-			);
-			enhancedInputComponent->BindAction(
-				myAimAction,
-				ETriggerEvent::Completed,
-				this,
-				&AValkPlayerCharacter::StopAiming
-			);
-		}
-		if (myDashAction) {
-			enhancedInputComponent->BindAction(
-				myDashAction,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerCharacter::StartDashing
-			);
-		}
-		if (myThrowGrenadeAction) {
-			enhancedInputComponent->BindAction(
-				myThrowGrenadeAction,
-				ETriggerEvent::Started,
-				this,
-				&AValkPlayerCharacter::ThrowGrenade
-			);
-		}
-	}
+	UEnhancedInputComponent* const enhancedInputComponent = CastChecked<UEnhancedInputComponent>(aPlayerInputComponent);
+	enhancedInputComponent->BindAction(
+		myMoveAction,
+		ETriggerEvent::Triggered,
+		this,
+		&AValkPlayerCharacter::HandleMove
+	);
+	enhancedInputComponent->BindAction(
+		myLookAction,
+		ETriggerEvent::Triggered,
+		this,
+		&AValkPlayerCharacter::HandleLook
+	);
+	enhancedInputComponent->BindAction(
+		myJumpAction,
+		ETriggerEvent::Started,
+		this,
+		&ACharacter::Jump
+	);
+	enhancedInputComponent->BindAction(
+		myJumpAction,
+		ETriggerEvent::Completed,
+		this,
+		&ACharacter::StopJumping
+	);
+	enhancedInputComponent->BindAction(
+		myFireAction,
+		ETriggerEvent::Started,
+		this,
+		&AValkPlayerCharacter::StartFiring
+	);
+	enhancedInputComponent->BindAction(
+		myFireAction,
+		ETriggerEvent::Completed,
+		this,
+		&AValkPlayerCharacter::StopFiring
+	);
+	enhancedInputComponent->BindAction(
+		myReloadAction,
+		ETriggerEvent::Started,
+		this,
+		&AValkPlayerCharacter::HandleReload
+	);
+	enhancedInputComponent->BindAction(
+		myInteractAction,
+		ETriggerEvent::Started,
+		this,
+		&AValkPlayerCharacter::HandleInteract
+	);
+	enhancedInputComponent->BindAction(
+		myPrimaryWeaponAction,
+		ETriggerEvent::Started,
+		this,
+		&AValkPlayerCharacter::HandleEquipPrimaryGun
+	);
+	enhancedInputComponent->BindAction(
+		mySecondaryWeaponAction,
+		ETriggerEvent::Started,
+		this,
+		&AValkPlayerCharacter::HandleEquipSecondaryGun
+	);
+	enhancedInputComponent->BindAction(
+		myAimAction,
+		ETriggerEvent::Started,
+		this,
+		&AValkPlayerCharacter::StartAiming
+	);
+	enhancedInputComponent->BindAction(
+		myAimAction,
+		ETriggerEvent::Completed,
+		this,
+		&AValkPlayerCharacter::StopAiming
+	);
+	enhancedInputComponent->BindAction(
+		myDashAction,
+		ETriggerEvent::Started,
+		this,
+		&AValkPlayerCharacter::StartDashing
+	);
+	enhancedInputComponent->BindAction(
+		myThrowGrenadeAction,
+		ETriggerEvent::Started,
+		this,
+		&AValkPlayerCharacter::ThrowGrenade
+	);
 }
 
 void AValkPlayerCharacter::HandleMove(const FInputActionValue& anInputValue)
 {
 	if (const FVector2D moveInput = anInputValue.Get<FVector2D>(); !moveInput.IsNearlyZero()) {
-		if (const AController* const controller = GetController()) {
-			const FRotator controlRotation = controller->GetControlRotation();
-			const FRotator yawRotation(0.f, controlRotation.Yaw, 0.f);
-			AddMovementInput(FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X), moveInput.Y);
-			AddMovementInput(FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y), moveInput.X);
-		}
+		const FRotator controlRotation = GetControlRotation();
+		const FRotator yawRotation(0.f, controlRotation.Yaw, 0.f);
+		AddMovementInput(FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X), moveInput.Y);
+		AddMovementInput(FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y), moveInput.X);
 	}
 }
 
@@ -221,9 +182,7 @@ void AValkPlayerCharacter::HandleLook(const FInputActionValue& anInputValue)
 
 void AValkPlayerCharacter::HandleInteract()
 {
-	if (myInteractionComponent) {
-		myInteractionComponent->Server_Interact();
-	}
+	myInteractionComponent->Server_Interact();
 }
 
 void AValkPlayerCharacter::OnDamaged(const float, AController* const aDamageInstigator)
@@ -233,9 +192,9 @@ void AValkPlayerCharacter::OnDamaged(const float, AController* const aDamageInst
 
 	// play damage indicator
 	if (aDamageInstigator) {
-		AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController());
+		AValkPlayerController* const playerController = CastChecked<AValkPlayerController>(GetController());
 		const APawn* const damageInstigatorPawn = aDamageInstigator->GetPawn();
-		if (playerController && damageInstigatorPawn) {
+		if (damageInstigatorPawn) {
 			playerController->Client_PlayDamageRepresentations(damageInstigatorPawn->GetActorLocation());
 		}
 	}
@@ -243,16 +202,12 @@ void AValkPlayerCharacter::OnDamaged(const float, AController* const aDamageInst
 
 void AValkPlayerCharacter::Multicast_PlayHitReact_Implementation()
 {
-	if (myHitReactMontage) {
-		PlayAnimMontage(myHitReactMontage);
-	}
+	PlayAnimMontage(myHitReactMontage);
 }
 
 void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
 {
-	if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(GetController())) {
-		playerController->OnControlledPawnDied(aDamageInstigator);
-	}
+	CastChecked<AValkPlayerController>(GetController())->OnControlledPawnDied(aDamageInstigator);
 }
 
 void AValkPlayerCharacter::UpdateFov(const float aDeltaSecond)

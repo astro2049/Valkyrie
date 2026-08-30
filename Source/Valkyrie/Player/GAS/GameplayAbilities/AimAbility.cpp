@@ -25,10 +25,9 @@ void UAimAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (UAbilityTask_WaitInputRelease* const waitTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this, true)) {
-		waitTask->OnRelease.AddDynamic(this, &UAimAbility::HandleInputReleased);
-		waitTask->ReadyForActivation();
-	}
+	UAbilityTask_WaitInputRelease* const waitTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this, true);
+	waitTask->OnRelease.AddDynamic(this, &UAimAbility::HandleInputReleased);
+	waitTask->ReadyForActivation();
 }
 
 void UAimAbility::HandleInputReleased(float aTimeHeld)

@@ -14,13 +14,9 @@ void ATDMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void ATDMPlayerState::AddKill()
 {
-	if (HasAuthority()) {
-		++myKills;
-	}
+	++myKills;
 }
 void ATDMPlayerState::AddDeath()
 {
-	if (HasAuthority()) {
-		++myDeaths;
-	}
+	++myDeaths;
 }

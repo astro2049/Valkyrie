@@ -20,24 +20,11 @@ ATDMGameMode::ATDMGameMode()
 
 void ATDMGameMode::PlayerDied(AController* const aKillerController, AController* const aVictimController)
 {
-	if (!aVictimController) {
-		return;
-	}
-
 	Super::PlayerDied(aKillerController, aVictimController);
 
-	bool canHandleDeath = true;
-	if (const AValkGameState* const gameState = GetGameState<AValkGameState>()) {
-		canHandleDeath = !gameState->HasMatchEnded();
-	}
-
-	if (canHandleDeath) {
+	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
 		HandlePlayerKilled(aVictimController, aKillerController);
-		bool canRespawn = true;
-		if (const AValkGameState* const gameState = GetGameState<AValkGameState>()) {
-			canRespawn = !gameState->HasMatchEnded();
-		}
-		if (canRespawn) {
+		if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
 			FTimerDelegate respawnDelegate;
 			respawnDelegate.BindUObject(this, &ATDMGameMode::RespawnPlayer, aVictimController);
 			FTimerHandle respawnTimerHandle;
@@ -56,24 +43,15 @@ void ATDMGameMode::HandlePlayerKilled(
 	AController* const aKillerController
 )
 {
-	if (!aVictimController) {
-		return;
-	}
-
-	if (ATDMPlayerState* const victimPlayerState = aVictimController->GetPlayerState<ATDMPlayerState>()) {
-		victimPlayerState->AddDeath();
-		if (aKillerController) {
-			if (ATDMPlayerState* const killerPlayerState = aKillerController->GetPlayerState<ATDMPlayerState>()) {
-				if (victimPlayerState != killerPlayerState
-					&& victimPlayerState->GetTeamId() != killerPlayerState->GetTeamId()) {
-					killerPlayerState->AddKill();
-					if (ATDMGameState* const gameState = GetGameState<ATDMGameState>()) {
-						const int32 teamKills = gameState->AddTeamKill(killerPlayerState->GetTeamId());
-						if (teamKills >= myScoreLimit) {
-							EndTDMMatch(killerPlayerState->GetTeamId());
-						}
-					}
-				}
+	ATDMPlayerState* const victimPlayerState = aVictimController->GetPlayerState<ATDMPlayerState>();
+	victimPlayerState->AddDeath();
+	if (aKillerController) {
+		ATDMPlayerState* const killerPlayerState = aKillerController->GetPlayerState<ATDMPlayerState>();
+		if (victimPlayerState != killerPlayerState && victimPlayerState->GetTeamId() != killerPlayerState->GetTeamId()) {
+			killerPlayerState->AddKill();
+			const int32 teamKills = GetGameState<ATDMGameState>()->AddTeamKill(killerPlayerState->GetTeamId());
+			if (teamKills >= myScoreLimit) {
+				EndTDMMatch(killerPlayerState->GetTeamId());
 			}
 		}
 	}
@@ -81,32 +59,19 @@ void ATDMGameMode::HandlePlayerKilled(
 
 void ATDMGameMode::EndTDMMatch(const EValkTeamId aWinningTeamId)
 {
-	if (AValkGameState* const gameState = GetGameState<AValkGameState>()) {
-		gameState->SetWinningTeamId(aWinningTeamId);
-		FinishMatch();
-	}
+	GetGameState<AValkGameState>()->SetWinningTeamId(aWinningTeamId);
+	FinishMatch();
 }
 
 void ATDMGameMode::RespawnPlayer(AController* const aController)
 {
-	if (!aController) {
-		return;
-	}
-
-	bool canRespawn = true;
-	if (const AValkGameState* const gameState = GetGameState<AValkGameState>()) {
-		canRespawn = !gameState->HasMatchEnded();
-	}
-
-	if (canRespawn) {
+	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
 		APawn* const oldPawn = aController->GetPawn();
 		aController->UnPossess();
 		if (oldPawn) {
 			oldPawn->Destroy();
 		}
 		RestartPlayer(aController);
-		if (AValkPlayerController* const playerController = Cast<AValkPlayerController>(aController)) {
-			playerController->Client_OnPlayerRespawned();
-		}
+		CastChecked<AValkPlayerController>(aController)->Client_OnPlayerRespawned();
 	}
 }

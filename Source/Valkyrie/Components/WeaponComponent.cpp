@@ -39,11 +39,9 @@ void UWeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	SetComponentTickEnabled(true);
-	if (const AActor* const owner = GetOwner()) {
-		if (owner->HasAuthority()) {
-			SpawnGunActors();
-			SetCurrentGun(EValkWeaponSlot::Primary);
-		}
+	if (GetOwner()->HasAuthority()) {
+		SpawnGunActors();
+		SetCurrentGun(EValkWeaponSlot::Primary);
 	}
 }
 
@@ -62,12 +60,14 @@ void UWeaponComponent::TickComponent(
 
 void UWeaponComponent::UpdateSpread(const float aDeltaTime)
 {
-	myFireSpreadAngle = FMath::FInterpConstantTo(
-		myFireSpreadAngle,
-		0.f,
-		aDeltaTime,
-		GetCurrentGunActor()->GetGunDataAsset()->mySpreadInterpSpeed
-	);
+	if (const AGunActor* const currentGunActor = GetCurrentGunActor()) {
+		myFireSpreadAngle = FMath::FInterpConstantTo(
+			myFireSpreadAngle,
+			0.f,
+			aDeltaTime,
+			currentGunActor->GetGunDataAsset()->mySpreadInterpSpeed
+		);
+	}
 }
 
 void UWeaponComponent::AddFireSpread()
@@ -78,41 +78,21 @@ void UWeaponComponent::AddFireSpread()
 
 void UWeaponComponent::SpawnGunActors()
 {
-	if (UWorld* const world = GetWorld()) {
-		if (AValkPlayerCharacter* const ownerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
-			FActorSpawnParameters spawnParams;
-			spawnParams.Owner = ownerCharacter;
-			if (myPrimaryGunType) {
-				myPrimaryGunActor = world->SpawnActor<AGunActor>(myPrimaryGunType, FTransform::Identity, spawnParams);
-				if (myPrimaryGunActor) {
-					AttachGun(myPrimaryGunActor);
-				}
-			}
-			if (mySecondaryGunType) {
-				mySecondaryGunActor = world->SpawnActor<AGunActor>(mySecondaryGunType, FTransform::Identity, spawnParams);
-				if (mySecondaryGunActor) {
-					AttachGun(mySecondaryGunActor);
-				}
-			}
-		}
-	}
+	FActorSpawnParameters spawnParams;
+	spawnParams.Owner = GetOwner();
+	myPrimaryGunActor = GetWorld()->SpawnActor<AGunActor>(myPrimaryGunType, FTransform::Identity, spawnParams);
+	AttachGun(myPrimaryGunActor);
+	mySecondaryGunActor = GetWorld()->SpawnActor<AGunActor>(mySecondaryGunType, FTransform::Identity, spawnParams);
+	AttachGun(mySecondaryGunActor);
 }
 
 void UWeaponComponent::AttachGun(AGunActor* const aGunActor) const
 {
-	if (!aGunActor) {
-		return;
-	}
-
-	if (const AValkPlayerCharacter* const ownerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
-		if (USkeletalMeshComponent* const characterMesh = ownerCharacter->GetMesh()) {
-			aGunActor->AttachToComponent(
-				characterMesh,
-				FAttachmentTransformRules::SnapToTargetIncludingScale,
-				myHandSocketName
-			);
-		}
-	}
+	aGunActor->AttachToComponent(
+		CastChecked<AValkPlayerCharacter>(GetOwner())->GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		myHandSocketName
+	);
 }
 
 void UWeaponComponent::SetCurrentGun(const EValkWeaponSlot aWeaponSlot)
@@ -141,6 +121,9 @@ void UWeaponComponent::StartFiring()
 {
 	const APawn* const ownerPawn = CastChecked<APawn>(GetOwner());
 	const AGunActor* const currentGunActor = GetCurrentGunActor();
+	if (!currentGunActor) {
+		return;
+	}
 	if (!IsReloading() && currentGunActor->GetAmmoInMag() == 0) {
 		if (ownerPawn->IsLocallyControlled()) {
 			UGameplayStatics::PlaySoundAtLocation(this, myEmptyFireSound, currentGunActor->GetMuzzleLocation());
@@ -163,9 +146,9 @@ void UWeaponComponent::TryFireOnce()
 void UWeaponComponent::FireOnce()
 {
 	const UWorld* const world = GetWorld();
-	const APawn* const owner = Cast<APawn>(GetOwner());
+	const APawn* const owner = CastChecked<APawn>(GetOwner());
 	AGunActor* const currentGunActor = GetCurrentGunActor();
-	const APlayerController* const playerController = Cast<APlayerController>(owner->GetController());
+	const APlayerController* const playerController = CastChecked<APlayerController>(owner->GetController());
 	if (!IsReloading() && currentGunActor->CanFire()) {
 		FVector traceStart;
 		FRotator traceRotation;
@@ -197,21 +180,14 @@ void UWeaponComponent::FireOnce()
 		Multicast_PlayBulletTrailPresentation(currentGunActor->GetMuzzleLocation(), hasHit ? hitResult.ImpactPoint : end);
 		// if hit
 		if (hasHit) {
-			if (const AActor* const hitActor = hitResult.GetActor()) {
-				if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
-					AController* damageInstigator = nullptr;
-					if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
-						damageInstigator = ownerPawn->GetController();
-						if (AValkPlayerController* const ownerController = Cast<AValkPlayerController>(owner->GetController())) {
-							// HUD: hit marker and sound (on shooter's side)
-							ownerController->Client_PlayHitRepresentations();
-						}
-					}
-					// apply damage
-					health->ApplyDamage(currentGunActor->GetGunDataAsset()->myDamage, damageInstigator);
-					// blood mist VFX at impact point
-					Multicast_PlayHitPresentation(hitResult.ImpactPoint, hitResult.ImpactNormal);
-				}
+			if (UHealthComponent* health = hitResult.GetActor()->FindComponentByClass<UHealthComponent>()) {
+				AController* const damageInstigator = owner->GetController();
+				// HUD: hit marker and sound (on shooter's side)
+				CastChecked<AValkPlayerController>(owner->GetController())->Client_PlayHitRepresentations();
+				// apply damage
+				health->ApplyDamage(currentGunActor->GetGunDataAsset()->myDamage, damageInstigator);
+				// blood mist VFX at impact point
+				Multicast_PlayHitPresentation(hitResult.ImpactPoint, hitResult.ImpactNormal);
 			}
 		}
 
@@ -233,7 +209,7 @@ void UWeaponComponent::FireOnce()
 
 void UWeaponComponent::Client_AddFireSpread_Implementation(const EValkWeaponSlot aWeaponSlot)
 {
-	if (const AActor* const owner = GetOwner(); owner && !owner->HasAuthority() && myCurrentSlot == aWeaponSlot) {
+	if (!GetOwner()->HasAuthority() && myCurrentSlot == aWeaponSlot && GetCurrentGunActor()) {
 		AddFireSpread();
 	}
 }
@@ -252,23 +228,19 @@ void UWeaponComponent::Multicast_PlayHitPresentation_Implementation(const FVecto
 
 AGunActor* UWeaponComponent::GetCurrentGunActor() const
 {
-	if (myCurrentSlot == EValkWeaponSlot::Primary) {
-		return myPrimaryGunActor;
-	}
-	if (myCurrentSlot == EValkWeaponSlot::Secondary) {
-		return mySecondaryGunActor;
-	}
-	return nullptr;
+	return myCurrentSlot == EValkWeaponSlot::Primary ? myPrimaryGunActor : mySecondaryGunActor;
 }
 
 float UWeaponComponent::GetSpreadAngle() const
 {
-	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner());
-	if (currentGunActor && playerCharacter) {
+	if (const AGunActor* const currentGunActor = GetCurrentGunActor()) {
+		const AValkPlayerCharacter* const playerCharacter = CastChecked<AValkPlayerCharacter>(GetOwner());
 		const UGunDataAsset* const gunDataAsset = currentGunActor->GetGunDataAsset();
-		const float maxWalkSpeed = playerCharacter->GetCharacterMovement()->MaxWalkSpeed;
-		const float speedRatio = FMath::Clamp(playerCharacter->GetVelocity().Size2D() / maxWalkSpeed, 0.f, 1.f);
+		const float speedRatio = FMath::Clamp(
+			playerCharacter->GetVelocity().Size2D() / playerCharacter->GetCharacterMovement()->MaxWalkSpeed,
+			0.f,
+			1.f
+		);
 		const float movementSpreadAngle = FMath::Lerp(0.f, gunDataAsset->mySpreadMaxSpeedDegs, speedRatio);
 		const float aimMultiplier = FMath::Lerp(1.f, gunDataAsset->mySpreadAimMultiplier, playerCharacter->GetAimProgress());
 		return (gunDataAsset->mySpreadBaseDegs + movementSpreadAngle + myFireSpreadAngle) * aimMultiplier;
@@ -278,10 +250,7 @@ float UWeaponComponent::GetSpreadAngle() const
 
 bool UWeaponComponent::IsReloading() const
 {
-	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
-		return playerCharacter->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::Ability_Reload);
-	}
-	return false;
+	return CastChecked<AValkPlayerCharacter>(GetOwner())->GetAbilitySystemComponent()->HasMatchingGameplayTag(AbilityTags::Ability_Reload);
 }
 
 void UWeaponComponent::Multicast_PlayBulletTrailPresentation_Implementation(const FVector aTrailStart, const FVector aTrailEnd)

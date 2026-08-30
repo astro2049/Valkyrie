@@ -4,6 +4,7 @@
 
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
 #include "Valkyrie/Components/WeaponComponent.h"
+#include "Valkyrie/Player/Character/ValkPlayerCharacter.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
 
 UFireAbility::UFireAbility()
@@ -26,7 +27,7 @@ void UFireAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	ActorInfo->AvatarActor->FindComponentByClass<UWeaponComponent>()->StartFiring();
+	CastChecked<AValkPlayerCharacter>(ActorInfo->AvatarActor.Get())->GetWeaponComponent()->StartFiring();
 	UAbilityTask_WaitInputRelease* const waitTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this, true);
 	waitTask->OnRelease.AddDynamic(this, &UFireAbility::HandleInputReleased);
 	waitTask->ReadyForActivation();
@@ -39,7 +40,7 @@ void UFireAbility::EndAbility(
 	const bool bReplicateEndAbility,
 	const bool bWasCancelled)
 {
-	ActorInfo->AvatarActor->FindComponentByClass<UWeaponComponent>()->StopFiring();
+	CastChecked<AValkPlayerCharacter>(ActorInfo->AvatarActor.Get())->GetWeaponComponent()->StopFiring();
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

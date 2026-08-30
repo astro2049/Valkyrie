@@ -18,13 +18,7 @@ void AValkPlayerController::BeginPlay()
 	if (IsLocalController()) {
 		// I. input
 		// I.1. add input mapping context
-		if (myInputMappingContext) {
-			if (const ULocalPlayer* const localPlayer = GetLocalPlayer()) {
-				if (UEnhancedInputLocalPlayerSubsystem* const inputSubsystem = localPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
-					inputSubsystem->AddMappingContext(myInputMappingContext, 0);
-				}
-			}
-		}
+		GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->AddMappingContext(myInputMappingContext, 0);
 		// I.2. set input mode to game only
 		bShowMouseCursor = false;
 		const FInputModeGameOnly inputMode;
@@ -32,20 +26,12 @@ void AValkPlayerController::BeginPlay()
 
 		// II. UI
 		// II.1. HUD
-		if (myHUDWidgetClass) {
-			myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
-			if (myHUDWidget) {
-				myHUDWidget->AddToViewport();
-			}
-		}
+		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
+		myHUDWidget->AddToViewport();
 		// II.2. scoreboard
-		if (myScoreboardWidgetClass) {
-			myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
-			if (myScoreboardWidget) {
-				myScoreboardWidget->AddToViewport();
-				myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
-			}
-		}
+		myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
+		myScoreboardWidget->AddToViewport();
+		myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -54,32 +40,25 @@ void AValkPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	if (IsLocalController()) {
-		if (UEnhancedInputComponent* const enhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)) {
-			if (myInputActionOpenScoreboard) {
-				enhancedInputComponent->BindAction(
-					myInputActionOpenScoreboard,
-					ETriggerEvent::Started,
-					this,
-					&AValkPlayerController::ShowScoreboard
-				);
-				enhancedInputComponent->BindAction(
-					myInputActionOpenScoreboard,
-					ETriggerEvent::Completed,
-					this,
-					&AValkPlayerController::HideScoreboard
-				);
-			}
-		}
+		UEnhancedInputComponent* const enhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
+		enhancedInputComponent->BindAction(
+			myInputActionOpenScoreboard,
+			ETriggerEvent::Started,
+			this,
+			&AValkPlayerController::ShowScoreboard
+		);
+		enhancedInputComponent->BindAction(
+			myInputActionOpenScoreboard,
+			ETriggerEvent::Completed,
+			this,
+			&AValkPlayerController::HideScoreboard
+		);
 	}
 }
 
 void AValkPlayerController::OnControlledPawnDied(AController* const aKillerController)
 {
-	if (const UWorld* const world = GetWorld()) {
-		if (AValkGameMode* const gameMode = world->GetAuthGameMode<AValkGameMode>()) {
-			gameMode->PlayerDied(aKillerController, this);
-		}
-	}
+	GetWorld()->GetAuthGameMode<AValkGameMode>()->PlayerDied(aKillerController, this);
 }
 
 void AValkPlayerController::Client_OnPlayerDied_Implementation()
@@ -94,57 +73,31 @@ void AValkPlayerController::Client_OnPlayerRespawned_Implementation()
 
 void AValkPlayerController::OnPlayerDied()
 {
-	if (!IsLocalController()) {
-		return;
-	}
-
 	SetIgnoreMoveInput(true);
 }
 
 void AValkPlayerController::OnPlayerRespawned()
 {
-	if (!IsLocalController()) {
-		return;
-	}
-
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);
 }
 
 void AValkPlayerController::ShowScoreboard()
 {
-	if (!IsLocalController()) {
-		return;
-	}
-
-	if (myScoreboardWidget) {
-		myScoreboardWidget->SetVisibility(ESlateVisibility::Visible);
-	}
+	myScoreboardWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void AValkPlayerController::HideScoreboard()
 {
-	if (!IsLocalController()) {
-		return;
-	}
-
-	if (myScoreboardWidget) {
-		myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
-	}
+	myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void AValkPlayerController::Client_PlayHitRepresentations_Implementation()
 {
-	if (UUIMessageSubsystem* const uiMessageSubsystem = VALK_UIMESSAGESUBSYS()) {
-		uiMessageSubsystem->BroadcastUIMessage(UIMessage::LocalPlayerHitConfirmed);
-	}
+	VALK_UIMESSAGESUBSYS()->BroadcastUIMessage(UIMessage::LocalPlayerHitConfirmed);
 }
 
 void AValkPlayerController::Client_PlayDamageRepresentations_Implementation(const FVector aDamageSourceLocation)
 {
-	if (myHUDWidget) {
-		if (myHUDWidget->Implements<UDamageIndicatorInterface>()) {
-			IDamageIndicatorInterface::Execute_PlayDamageIndicator(myHUDWidget, aDamageSourceLocation);
-		}
-	}
+	IDamageIndicatorInterface::Execute_PlayDamageIndicator(myHUDWidget, aDamageSourceLocation);
 }

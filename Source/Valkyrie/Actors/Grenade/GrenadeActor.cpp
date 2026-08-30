@@ -43,59 +43,49 @@ void AGrenadeActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (APawn* const instigatorPawn = GetInstigator()) {
-		myCollisionComponent->IgnoreActorWhenMoving(instigatorPawn, true);
-	}
+	myCollisionComponent->IgnoreActorWhenMoving(GetInstigator(), true);
 
 	if (HasAuthority()) {
-		if (myFuseDuration > 0.f) {
-			GetWorldTimerManager().SetTimer(
-				myFuseTimerHandle,
-				this,
-				&AGrenadeActor::Explode,
-				myFuseDuration,
-				false
-			);
-		} else {
-			Explode();
-		}
+		GetWorldTimerManager().SetTimer(
+			myFuseTimerHandle,
+			this,
+			&AGrenadeActor::Explode,
+			myFuseDuration,
+			false
+		);
 	}
 }
 
 void AGrenadeActor::Launch(const FVector aDirection, const float aSpeed)
 {
 	const FVector launchDirection = aDirection.GetSafeNormal();
-	if (!launchDirection.IsNearlyZero() && aSpeed > 0.f) {
-		SetActorRotation(launchDirection.Rotation());
-		myProjectileMovementComponent->Velocity = launchDirection * aSpeed;
-	}
+	SetActorRotation(launchDirection.Rotation());
+	myProjectileMovementComponent->Velocity = launchDirection * aSpeed;
 }
 
 void AGrenadeActor::Explode()
 {
-	if (UWorld* const world = GetWorld()) {
-		TArray<FOverlapResult> overlapResults;
-		const FCollisionObjectQueryParams objectQueryParams(FCollisionObjectQueryParams::AllObjects);
-		FCollisionQueryParams queryParams;
-		queryParams.AddIgnoredActor(this);
+	TArray<FOverlapResult> overlapResults;
+	const FCollisionObjectQueryParams objectQueryParams(FCollisionObjectQueryParams::AllObjects);
+	FCollisionQueryParams queryParams;
+	queryParams.AddIgnoredActor(this);
 
-		world->OverlapMultiByObjectType(
-			overlapResults,
-			GetActorLocation(),
-			FQuat::Identity,
-			objectQueryParams,
-			FCollisionShape::MakeSphere(myExplosionRadius),
-			queryParams
-		);
+	GetWorld()->OverlapMultiByObjectType(
+		overlapResults,
+		GetActorLocation(),
+		FQuat::Identity,
+		objectQueryParams,
+		FCollisionShape::MakeSphere(myExplosionRadius),
+		queryParams
+	);
 
-		TSet<AActor*> damagedActors;
-		for (const FOverlapResult& overlapResult : overlapResults) {
-			AActor* const actor = overlapResult.GetActor();
-			if (actor && !damagedActors.Contains(actor)) {
-				damagedActors.Add(actor);
-				if (UHealthComponent* const healthComponent = actor->FindComponentByClass<UHealthComponent>()) {
-					healthComponent->ApplyDamage(myDamage, GetInstigatorController());
-				}
+	TSet<AActor*> damagedActors;
+	for (const FOverlapResult& overlapResult : overlapResults) {
+		AActor* const actor = overlapResult.GetActor();
+		if (!damagedActors.Contains(actor)) {
+			damagedActors.Add(actor);
+			if (UHealthComponent* const healthComponent = actor->FindComponentByClass<UHealthComponent>()) {
+				healthComponent->ApplyDamage(myDamage, GetInstigatorController());
 			}
 		}
 	}

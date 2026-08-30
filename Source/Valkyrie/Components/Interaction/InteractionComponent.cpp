@@ -12,10 +12,6 @@ UInteractionComponent::UInteractionComponent()
 
 void UInteractionComponent::SetInteractable(AActor* const anInteractableActor)
 {
-	if (!anInteractableActor) {
-		return;
-	}
-
 	if (UInteractableComponent* const interactableComponent = anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 		myInteractableComponent = interactableComponent;
 	}
@@ -23,10 +19,6 @@ void UInteractionComponent::SetInteractable(AActor* const anInteractableActor)
 
 void UInteractionComponent::ClearInteractable(AActor* const anInteractableActor)
 {
-	if (!anInteractableActor) {
-		return;
-	}
-
 	if (myInteractableComponent.IsValid() && myInteractableComponent.Get() == anInteractableActor->GetComponentByClass<UInteractableComponent>()) {
 		myInteractableComponent.Reset();
 	}

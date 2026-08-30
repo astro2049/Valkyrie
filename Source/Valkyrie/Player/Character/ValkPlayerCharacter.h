@@ -42,6 +42,10 @@ public:
 	float GetAimProgress() const { return (myDefaultFov - myCurrentFov) / (myDefaultFov - myAimFov); }
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	UWeaponComponent* GetWeaponComponent() const { return myWeaponComponent; }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
+	UHealthComponent* GetHealthComponent() const { return myHealthComponent; }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
+	UInteractionComponent* GetInteractionComponent() const { return myInteractionComponent; }
 
 private:
 	// GAS

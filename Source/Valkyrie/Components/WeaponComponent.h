@@ -34,8 +34,11 @@ public:
 	bool CanReload() const { return GetCurrentGunActor()->CanReload(); }
 	float GetReloadDuration() const { return GetCurrentGunActor()->GetGunDataAsset()->myReloadDuration; }
 	void ApplyReloadAmmo() { GetCurrentGunActor()->ApplyReloadAmmo(); }
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	bool IsReloading() const;
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	float GetSpreadAngle() const;
+	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	float GetBaseSpreadAngle() const { return GetCurrentGunActor()->GetGunDataAsset()->mySpreadBaseDegs; }
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	EValkWeaponSlot GetCurrentSlot() const { return myCurrentSlot; }

@@ -32,46 +32,29 @@ void UThrowGrenadeAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	const ACharacter* const character = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
-	if (character && myGrenadeActorType && myThrowMontage
-		&& myThrowReleaseTime >= 0.f && myThrowReleaseTime <= myThrowMontage->GetPlayLength()
-		&& myThrowSpeed > 0.f && myAimDistance > 0.f) {
-		UAbilityTask_PlayMontageAndWait* const montageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-			this,
-			NAME_None,
-			myThrowMontage
-		);
-		montageTask->OnCompleted.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowFinished);
-		montageTask->OnInterrupted.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowCancelled);
-		montageTask->OnCancelled.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowCancelled);
-		montageTask->ReadyForActivation();
+	UAbilityTask_PlayMontageAndWait* const montageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+		this,
+		NAME_None,
+		myThrowMontage
+	);
+	montageTask->OnCompleted.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowFinished);
+	montageTask->OnInterrupted.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowCancelled);
+	montageTask->OnCancelled.AddDynamic(this, &UThrowGrenadeAbility::HandleThrowCancelled);
+	montageTask->ReadyForActivation();
 
-		UAbilityTask_WaitDelay* const releaseTask = UAbilityTask_WaitDelay::WaitDelay(this, myThrowReleaseTime);
-		releaseTask->OnFinish.AddDynamic(this, &UThrowGrenadeAbility::HandleGrenadeReleased);
-		releaseTask->ReadyForActivation();
-		return;
-	}
-
-	EndThrow(true);
+	UAbilityTask_WaitDelay* const releaseTask = UAbilityTask_WaitDelay::WaitDelay(this, myThrowReleaseTime);
+	releaseTask->OnFinish.AddDynamic(this, &UThrowGrenadeAbility::HandleGrenadeReleased);
+	releaseTask->ReadyForActivation();
 }
 
 void UThrowGrenadeAbility::HandleGrenadeReleased()
 {
-	ACharacter* const character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
-	UWorld* const world = GetWorld();
-	if (character && character->HasAuthority() && world) {
-		FVector spawnLocation = character->GetActorLocation()
-			+ character->GetActorForwardVector() * 50.f
-			+ FVector::UpVector * 50.f;
-		if (const USkeletalMeshComponent* const characterMesh = character->GetMesh(); characterMesh && characterMesh->DoesSocketExist(myGrenadeSpawnSocketName)) {
-			spawnLocation = characterMesh->GetSocketLocation(myGrenadeSpawnSocketName);
-		}
-
-		FVector viewLocation = spawnLocation;
-		FRotator viewRotation = character->GetControlRotation();
-		if (const AController* const controller = character->GetController()) {
-			controller->GetPlayerViewPoint(viewLocation, viewRotation);
-		}
+	ACharacter* const character = CastChecked<ACharacter>(GetAvatarActorFromActorInfo());
+	if (character->HasAuthority()) {
+		const FVector spawnLocation = character->GetMesh()->GetSocketLocation(myGrenadeSpawnSocketName);
+		FVector viewLocation;
+		FRotator viewRotation;
+		character->GetController()->GetPlayerViewPoint(viewLocation, viewRotation);
 		const FVector aimPoint = viewLocation + viewRotation.Vector() * myAimDistance;
 		const FVector throwDirection = (aimPoint - spawnLocation).GetSafeNormal();
 
@@ -79,25 +62,24 @@ void UThrowGrenadeAbility::HandleGrenadeReleased()
 		spawnParams.Owner = character;
 		spawnParams.Instigator = character;
 		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		if (AGrenadeActor* const grenadeActor = world->SpawnActor<AGrenadeActor>(
+		AGrenadeActor* const grenadeActor = GetWorld()->SpawnActor<AGrenadeActor>(
 			myGrenadeActorType,
 			spawnLocation,
 			throwDirection.Rotation(),
 			spawnParams
-		)) {
-			grenadeActor->Launch(throwDirection, myThrowSpeed);
-		}
+		);
+		grenadeActor->Launch(throwDirection, myThrowSpeed);
 	}
 }
 
 void UThrowGrenadeAbility::EndThrow(const bool aWasCancelled)
 {
-	const ACharacter* const character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+	const ACharacter* const character = CastChecked<ACharacter>(GetAvatarActorFromActorInfo());
 	EndAbility(
 		GetCurrentAbilitySpecHandle(),
 		GetCurrentActorInfo(),
 		GetCurrentActivationInfo(),
-		character && character->HasAuthority(),
+		character->HasAuthority(),
 		aWasCancelled
 	);
 }

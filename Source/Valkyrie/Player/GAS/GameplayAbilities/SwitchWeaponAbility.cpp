@@ -32,42 +32,25 @@ void USwitchWeaponAbility::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (const FGameplayAbilitySpec* const abilitySpec = GetCurrentAbilitySpec()) {
-		if (abilitySpec->InputID == EAbilityInputId::PrimaryWeapon) {
-			myTargetWeaponSlot = EValkWeaponSlot::Primary;
-		} else if (abilitySpec->InputID == EAbilityInputId::SecondaryWeapon) {
-			myTargetWeaponSlot = EValkWeaponSlot::Secondary;
-		} else {
-			EndSwitch(true);
-			return;
-		}
+	const FGameplayAbilitySpec* const abilitySpec = GetCurrentAbilitySpec();
+	check(abilitySpec->InputID == EAbilityInputId::PrimaryWeapon || abilitySpec->InputID == EAbilityInputId::SecondaryWeapon);
+	myTargetWeaponSlot = abilitySpec->InputID == EAbilityInputId::PrimaryWeapon ? EValkWeaponSlot::Primary : EValkWeaponSlot::Secondary;
 
-		if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(ActorInfo->AvatarActor.Get())) {
-			if (UWeaponComponent* const weaponComponent = playerCharacter->FindComponentByClass<UWeaponComponent>()) {
-				if (weaponComponent->GetCurrentSlot() != myTargetWeaponSlot) {
-					weaponComponent->EquipGun(myTargetWeaponSlot);
-					if (mySwitchWeaponMontage) {
-						const float switchDuration = FMath::Max(mySwitchDuration, UE_KINDA_SMALL_NUMBER);
-						const float montagePlayRate = mySwitchWeaponMontage->GetPlayLength() / switchDuration;
-
-						UAbilityTask_PlayMontageAndWait* const montageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-							this,
-							NAME_None,
-							mySwitchWeaponMontage,
-							montagePlayRate
-						);
-						montageTask->OnCompleted.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchFinished);
-						montageTask->OnInterrupted.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchCancelled);
-						montageTask->OnCancelled.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchCancelled);
-						montageTask->ReadyForActivation();
-						return;
-					} else {
-						HandleSwitchFinished();
-						return;
-					}
-				}
-			}
-		}
+	UWeaponComponent* const weaponComponent = CastChecked<AValkPlayerCharacter>(ActorInfo->AvatarActor.Get())->GetWeaponComponent();
+	if (weaponComponent->GetCurrentSlot() != myTargetWeaponSlot) {
+		weaponComponent->EquipGun(myTargetWeaponSlot);
+		const float montagePlayRate = mySwitchWeaponMontage->GetPlayLength() / mySwitchDuration;
+		UAbilityTask_PlayMontageAndWait* const montageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+			this,
+			NAME_None,
+			mySwitchWeaponMontage,
+			montagePlayRate
+		);
+		montageTask->OnCompleted.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchFinished);
+		montageTask->OnInterrupted.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchCancelled);
+		montageTask->OnCancelled.AddDynamic(this, &USwitchWeaponAbility::HandleSwitchCancelled);
+		montageTask->ReadyForActivation();
+		return;
 	}
 
 	EndSwitch(true);
@@ -75,12 +58,12 @@ void USwitchWeaponAbility::ActivateAbility(
 
 void USwitchWeaponAbility::EndSwitch(const bool aWasCancelled)
 {
-	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetAvatarActorFromActorInfo());
+	const AValkPlayerCharacter* const playerCharacter = CastChecked<AValkPlayerCharacter>(GetAvatarActorFromActorInfo());
 	EndAbility(
 		GetCurrentAbilitySpecHandle(),
 		GetCurrentActorInfo(),
 		GetCurrentActivationInfo(),
-		playerCharacter && playerCharacter->HasAuthority(),
+		playerCharacter->HasAuthority(),
 		aWasCancelled
 	);
 }
