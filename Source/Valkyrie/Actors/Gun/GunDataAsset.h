@@ -33,18 +33,15 @@ public:
 	float myReloadDuration{2.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	EValkFireMode myFireMode{EValkFireMode::Auto};
+	
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myBaseSpreadHalfAngleDegrees{4.f};
+	float mySpreadBaseDegs{1.25f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myAimSpreadHalfAngleDegrees{1.f};
+	float mySpreadMaxSpeedDegs{1.75f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myMaxMoveSpreadHalfAngleDegrees{7.f};
+	float mySpreadAimMultiplier{0.08f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float mySpreadInterpSpeed{8.f};
+	float mySpreadInterpSpeed{1.5f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myFireSpreadPerShotDegrees{0.6f};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myMaxFireSpreadOffsetDegrees{6.f};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myFireSpreadRecoverySpeedDegreesPerSecond{4.f};
+	float mySpreadPerShotDegs{0.25f};
 };

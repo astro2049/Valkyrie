@@ -54,9 +54,7 @@ void UWeaponComponent::TickComponent(
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner())) {
-		UpdateSpread(DeltaTime);
-	}
+	UpdateSpread(DeltaTime);
 	if (myIsFiring) {
 		TryFireOnce();
 	}
@@ -64,51 +62,18 @@ void UWeaponComponent::TickComponent(
 
 void UWeaponComponent::UpdateSpread(const float aDeltaTime)
 {
-	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner());
-	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	if (playerCharacter && currentGunActor) {
-		const UGunDataAsset* const gunDataAsset = currentGunActor->GetGunDataAsset();
-		float desiredSpreadHalfAngleDegrees = gunDataAsset->myAimSpreadHalfAngleDegrees;
-		if (!playerCharacter->IsAiming()) {
-			const float maxWalkSpeed = playerCharacter->GetCharacterMovement()->MaxWalkSpeed;
-			const float speedRatio = maxWalkSpeed > 0.f
-				                         ? FMath::Clamp(playerCharacter->GetVelocity().Size2D() / maxWalkSpeed, 0.f, 1.f)
-				                         : 0.f;
-			desiredSpreadHalfAngleDegrees = FMath::Lerp(
-				gunDataAsset->myBaseSpreadHalfAngleDegrees,
-				gunDataAsset->myMaxMoveSpreadHalfAngleDegrees,
-				speedRatio
-			);
-		}
-		if (myCurrentBaseSpreadHalfAngleDegrees < 0.f) {
-			myCurrentBaseSpreadHalfAngleDegrees = desiredSpreadHalfAngleDegrees;
-		} else {
-			myCurrentBaseSpreadHalfAngleDegrees = FMath::FInterpTo(
-				myCurrentBaseSpreadHalfAngleDegrees,
-				desiredSpreadHalfAngleDegrees,
-				aDeltaTime,
-				gunDataAsset->mySpreadInterpSpeed
-			);
-		}
-		myFireSpreadOffsetDegrees = FMath::FInterpConstantTo(
-			myFireSpreadOffsetDegrees,
-			0.f,
-			aDeltaTime,
-			gunDataAsset->myFireSpreadRecoverySpeedDegreesPerSecond
-		);
-	}
+	myFireSpreadAngle = FMath::FInterpConstantTo(
+		myFireSpreadAngle,
+		0.f,
+		aDeltaTime,
+		GetCurrentGunActor()->GetGunDataAsset()->mySpreadInterpSpeed
+	);
 }
 
 void UWeaponComponent::AddFireSpread()
 {
-	if (const AGunActor* const currentGunActor = GetCurrentGunActor()) {
-		const UGunDataAsset* const gunDataAsset = currentGunActor->GetGunDataAsset();
-		myFireSpreadOffsetDegrees = FMath::Clamp(
-			myFireSpreadOffsetDegrees + FMath::Max(gunDataAsset->myFireSpreadPerShotDegrees, 0.f),
-			0.f,
-			FMath::Max(gunDataAsset->myMaxFireSpreadOffsetDegrees, 0.f)
-		);
-	}
+	const UGunDataAsset* const gunDataAsset = GetCurrentGunActor()->GetGunDataAsset();
+	myFireSpreadAngle += gunDataAsset->mySpreadPerShotDegs;
 }
 
 void UWeaponComponent::SpawnGunActors()
@@ -169,8 +134,7 @@ void UWeaponComponent::OnRep_UpdateGunVisibility()
 		mySecondaryGunActor->SetActorEnableCollision(!shouldShowSecondaryGun);
 	}
 
-	myCurrentBaseSpreadHalfAngleDegrees = GetCurrentGunActor() ? GetBaseSpreadHalfAngleDegrees() : -1.f;
-	myFireSpreadOffsetDegrees = 0.f;
+	myFireSpreadAngle = 0.f;
 }
 
 void UWeaponComponent::StartFiring()
@@ -208,7 +172,7 @@ void UWeaponComponent::FireOnce()
 		playerController->GetPlayerViewPoint(traceStart, traceRotation);
 		const FVector traceDirection = FMath::VRandCone(
 			traceRotation.Vector(),
-			FMath::DegreesToRadians(GetCurrentSpreadHalfAngleDegrees())
+			FMath::DegreesToRadians(GetSpreadAngle())
 		);
 
 		// consume ammo
@@ -233,8 +197,8 @@ void UWeaponComponent::FireOnce()
 		Multicast_PlayBulletTrailPresentation(currentGunActor->GetMuzzleLocation(), hasHit ? hitResult.ImpactPoint : end);
 		// if hit
 		if (hasHit) {
-			if (const APawn* const hitPawn = Cast<APawn>(hitResult.GetActor())) {
-				if (UHealthComponent* health = hitPawn->FindComponentByClass<UHealthComponent>()) {
+			if (const AActor* const hitActor = hitResult.GetActor()) {
+				if (UHealthComponent* health = hitActor->FindComponentByClass<UHealthComponent>()) {
 					AController* damageInstigator = nullptr;
 					if (const APawn* const ownerPawn = Cast<APawn>(owner)) {
 						damageInstigator = ownerPawn->GetController();
@@ -297,29 +261,19 @@ AGunActor* UWeaponComponent::GetCurrentGunActor() const
 	return nullptr;
 }
 
-float UWeaponComponent::GetBaseSpreadHalfAngleDegrees() const
+float UWeaponComponent::GetSpreadAngle() const
 {
 	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	return currentGunActor ? currentGunActor->GetGunDataAsset()->myBaseSpreadHalfAngleDegrees : 0.f;
-}
-
-bool UWeaponComponent::CanReload() const
-{
-	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	return currentGunActor && currentGunActor->CanReload();
-}
-
-float UWeaponComponent::GetReloadDuration() const
-{
-	const AGunActor* const currentGunActor = GetCurrentGunActor();
-	return currentGunActor ? currentGunActor->GetGunDataAsset()->myReloadDuration : 0.f;
-}
-
-void UWeaponComponent::ApplyReloadAmmo()
-{
-	if (AGunActor* const currentGunActor = GetCurrentGunActor()) {
-		currentGunActor->ApplyReloadAmmo();
+	const AValkPlayerCharacter* const playerCharacter = Cast<AValkPlayerCharacter>(GetOwner());
+	if (currentGunActor && playerCharacter) {
+		const UGunDataAsset* const gunDataAsset = currentGunActor->GetGunDataAsset();
+		const float maxWalkSpeed = playerCharacter->GetCharacterMovement()->MaxWalkSpeed;
+		const float speedRatio = FMath::Clamp(playerCharacter->GetVelocity().Size2D() / maxWalkSpeed, 0.f, 1.f);
+		const float movementSpreadAngle = FMath::Lerp(0.f, gunDataAsset->mySpreadMaxSpeedDegs, speedRatio);
+		const float aimMultiplier = FMath::Lerp(1.f, gunDataAsset->mySpreadAimMultiplier, playerCharacter->GetAimProgress());
+		return (gunDataAsset->mySpreadBaseDegs + movementSpreadAngle + myFireSpreadAngle) * aimMultiplier;
 	}
+	return 0.f;
 }
 
 bool UWeaponComponent::IsReloading() const

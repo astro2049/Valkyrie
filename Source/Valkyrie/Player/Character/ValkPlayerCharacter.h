@@ -39,6 +39,7 @@ public:
 	
 	UFUNCTION(BlueprintPure)
 	bool IsAiming() const { return myAsc->HasMatchingGameplayTag(AbilityTags::Ability_Aim); }
+	float GetAimProgress() const { return (myDefaultFov - myCurrentFov) / (myDefaultFov - myAimFov); }
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
 	UWeaponComponent* GetWeaponComponent() const { return myWeaponComponent; }
 

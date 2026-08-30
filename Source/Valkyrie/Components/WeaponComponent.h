@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "NiagaraSystem.h"
 #include "Components/ActorComponent.h"
+#include "Valkyrie/Actors/Gun/GunActor.h"
 #include "WeaponComponent.generated.h"
 
-class AGunActor;
 class USoundBase;
 
 UENUM(BlueprintType)
@@ -31,15 +31,12 @@ public:
 	void EquipGun(const EValkWeaponSlot aWeaponSlot) { SetCurrentGun(aWeaponSlot); }
 	void StartFiring();
 	void StopFiring() { myIsFiring = false; }
-	bool CanReload() const;
-	float GetReloadDuration() const;
-	void ApplyReloadAmmo();
+	bool CanReload() const { return GetCurrentGunActor()->CanReload(); }
+	float GetReloadDuration() const { return GetCurrentGunActor()->GetGunDataAsset()->myReloadDuration; }
+	void ApplyReloadAmmo() { GetCurrentGunActor()->ApplyReloadAmmo(); }
 	bool IsReloading() const;
-	float GetCurrentSpreadHalfAngleDegrees() const
-	{
-		return FMath::Max(myCurrentBaseSpreadHalfAngleDegrees, 0.f) + myFireSpreadOffsetDegrees;
-	}
-	float GetBaseSpreadHalfAngleDegrees() const;
+	float GetSpreadAngle() const;
+	float GetBaseSpreadAngle() const { return GetCurrentGunActor()->GetGunDataAsset()->mySpreadBaseDegs; }
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	EValkWeaponSlot GetCurrentSlot() const { return myCurrentSlot; }
 
@@ -73,8 +70,7 @@ private:
 	float myTraceDistance{10000.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	bool myDrawDebugTrace{false};
-	float myCurrentBaseSpreadHalfAngleDegrees{-1.f};
-	float myFireSpreadOffsetDegrees{0.f};
+	float myFireSpreadAngle{0.f};
 	bool myIsFiring{false};
 
 	// primary and secondary gun types

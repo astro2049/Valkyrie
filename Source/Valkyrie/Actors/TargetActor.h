@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "GameFramework/Actor.h"
 #include "TimerManager.h"
 #include "TargetActor.generated.h"
 
@@ -11,7 +11,7 @@ class AController;
 class UHealthComponent;
 
 UCLASS(Blueprintable)
-class VALKYRIE_API ATargetActor : public APawn
+class VALKYRIE_API ATargetActor : public AActor
 {
 	GENERATED_BODY()
 
