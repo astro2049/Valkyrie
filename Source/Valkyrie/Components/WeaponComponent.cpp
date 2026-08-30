@@ -181,11 +181,11 @@ void UWeaponComponent::FireOnce()
 		// if hit
 		if (hasHit) {
 			if (UHealthComponent* health = hitResult.GetActor()->FindComponentByClass<UHealthComponent>()) {
-				AController* const damageInstigator = owner->GetController();
+				AController* const attacker = owner->GetController();
 				// HUD: hit marker and sound (on shooter's side)
 				CastChecked<AValkPlayerController>(owner->GetController())->Client_PlayHitRepresentations();
 				// apply damage
-				health->ApplyDamage(currentGunActor->GetGunDataAsset()->myDamage, damageInstigator);
+				health->ApplyDamage(currentGunActor->GetGunDataAsset()->myDamage, attacker);
 				// blood mist VFX at impact point
 				Multicast_PlayHitPresentation(hitResult.ImpactPoint, hitResult.ImpactNormal);
 			}

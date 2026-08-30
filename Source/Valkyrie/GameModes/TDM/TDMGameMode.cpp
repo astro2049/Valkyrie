@@ -3,9 +3,6 @@
 #include "TDMGameMode.h"
 
 #include "TDMGameState.h"
-#include "GameFramework/Controller.h"
-#include "GameFramework/Pawn.h"
-#include "TimerManager.h"
 #include "Valkyrie/GameModes/ValkGameState.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/States/TDM/TDMPlayerState.h"
@@ -24,17 +21,6 @@ void ATDMGameMode::PlayerDied(AController* const aKillerController, AController*
 
 	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
 		HandlePlayerKilled(aVictimController, aKillerController);
-		if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
-			FTimerDelegate respawnDelegate;
-			respawnDelegate.BindUObject(this, &ATDMGameMode::RespawnPlayer, aVictimController);
-			FTimerHandle respawnTimerHandle;
-			GetWorldTimerManager().SetTimer(
-				respawnTimerHandle,
-				respawnDelegate,
-				myRespawnDelay,
-				false
-			);
-		}
 	}
 }
 
@@ -61,17 +47,4 @@ void ATDMGameMode::EndTDMMatch(const EValkTeamId aWinningTeamId)
 {
 	GetGameState<AValkGameState>()->SetWinningTeamId(aWinningTeamId);
 	FinishMatch();
-}
-
-void ATDMGameMode::RespawnPlayer(AController* const aController)
-{
-	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
-		APawn* const oldPawn = aController->GetPawn();
-		aController->UnPossess();
-		if (oldPawn) {
-			oldPawn->Destroy();
-		}
-		RestartPlayer(aController);
-		CastChecked<AValkPlayerController>(aController)->Client_OnPlayerRespawned();
-	}
 }

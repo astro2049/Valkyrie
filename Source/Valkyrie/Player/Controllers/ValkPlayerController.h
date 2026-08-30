@@ -16,24 +16,17 @@ class VALKYRIE_API AValkPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	void OnControlledPawnDied(AController* aKillerController = nullptr); // called from player character
 	UFUNCTION(Client, Reliable)
-	void Client_OnPlayerDied(); // called from game mode (general)
+	void Client_OnPlayerDied(); // called from player character
 	UFUNCTION(Client, Reliable)
-	void Client_OnPlayerRespawned(); // called from game mode (TDM)
+	void Client_OnPlayerRespawned(); // called from game mode
 	UFUNCTION(Client, Unreliable)
 	void Client_PlayHitRepresentations(); // called from weapon component
 	UFUNCTION(Client, Unreliable)
 	void Client_PlayDamageRepresentations(FVector aDamageSourceLocation); // called from player character
-
-protected:
-	virtual void OnPlayerDied(); // Client_OnPlayerDied() -> OnPlayerDied()
-
 private:
 	virtual void BeginPlay() override; // bind input mapping context, add HUD and scoreboard to viewport
 	virtual void SetupInputComponent() override; // bind open/close scoreboard action
-
-	virtual void OnPlayerRespawned(); // Client_OnPlayerRespawned() -> OnPlayerRespawned()
 
 	// I. input
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

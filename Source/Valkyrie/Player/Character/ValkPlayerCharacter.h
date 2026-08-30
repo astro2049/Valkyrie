@@ -78,8 +78,10 @@ private:
 	void HandleEquipSecondaryGun() { myAsc->AbilityLocalInputPressed(EAbilityInputId::SecondaryWeapon); }
 
 	// gameplay events
-	void OnDamaged(float aDamage, AController* aDamageInstigator);
-	void OnDied(AController* aDamageInstigator) const;
+	void OnDamaged(float aDamage, AController* anAttacker);
+	void OnDied(AController* anAttacker);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDeathPresentation(FVector anAttackerLocation);
 
 	// hit react
 	UFUNCTION(NetMulticast, Unreliable)
@@ -130,6 +132,8 @@ private:
 	// hit react montage
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UAnimMontage> myHitReactMontage{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myDeathImpulseStrength{3000.f};
 
 	// ADS
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

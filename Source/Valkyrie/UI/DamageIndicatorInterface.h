@@ -17,6 +17,6 @@ class VALKYRIE_API IDamageIndicatorInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintImplementableEvent, Category="Valkyrie")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="Valkyrie")
 	void PlayDamageIndicator(FVector aDamageSourceLocation);
 };

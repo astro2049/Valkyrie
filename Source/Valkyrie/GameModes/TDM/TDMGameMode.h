@@ -21,10 +21,7 @@ protected:
 private:
 	void HandlePlayerKilled(AController* aVictimController, AController* aKillerController);
 	void EndTDMMatch(EValkTeamId aWinningTeamId);
-	void RespawnPlayer(AController* aController);
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	int32 myScoreLimit{10};
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myRespawnDelay{1.5f};
 };

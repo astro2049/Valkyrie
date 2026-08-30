@@ -2,7 +2,9 @@
 
 #include "ValkGameMode.h"
 
+#include "GameFramework/Controller.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "ValkGameState.h"
@@ -12,6 +14,8 @@
 AValkGameMode::AValkGameMode()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	GameStateClass = AValkGameState::StaticClass();
+	PlayerControllerClass = AValkPlayerController::StaticClass();
 	PlayerStateClass = AValkPlayerState::StaticClass();
 }
 
@@ -87,7 +91,28 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 
 void AValkGameMode::PlayerDied(AController* const, AController* const aVictimController)
 {
-	CastChecked<AValkPlayerController>(aVictimController)->Client_OnPlayerDied();
+	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
+		FTimerDelegate respawnDelegate;
+		respawnDelegate.BindUObject(this, &AValkGameMode::RespawnPlayer, aVictimController);
+		FTimerHandle respawnTimerHandle;
+		GetWorldTimerManager().SetTimer(
+			respawnTimerHandle,
+			respawnDelegate,
+			myRespawnDelay,
+			false
+		);
+	}
+}
+
+void AValkGameMode::RespawnPlayer(AController* const aController)
+{
+	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
+		APawn* const oldPawn = aController->GetPawn();
+		aController->UnPossess();
+		oldPawn->Destroy();
+		RestartPlayer(aController);
+		CastChecked<AValkPlayerController>(aController)->Client_OnPlayerRespawned();
+	}
 }
 
 void AValkGameMode::FinishMatch()

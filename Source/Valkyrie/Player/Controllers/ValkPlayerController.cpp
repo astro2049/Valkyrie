@@ -6,7 +6,6 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
-#include "Valkyrie/GameModes/ValkGameMode.h"
 #include "Valkyrie/UI/DamageIndicatorInterface.h"
 #include "Valkyrie/UI/UIMessageSubsystem.h"
 
@@ -56,27 +55,13 @@ void AValkPlayerController::SetupInputComponent()
 	}
 }
 
-void AValkPlayerController::OnControlledPawnDied(AController* const aKillerController)
-{
-	GetWorld()->GetAuthGameMode<AValkGameMode>()->PlayerDied(aKillerController, this);
-}
-
 void AValkPlayerController::Client_OnPlayerDied_Implementation()
 {
-	OnPlayerDied();
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
 }
 
 void AValkPlayerController::Client_OnPlayerRespawned_Implementation()
-{
-	OnPlayerRespawned();
-}
-
-void AValkPlayerController::OnPlayerDied()
-{
-	SetIgnoreMoveInput(true);
-}
-
-void AValkPlayerController::OnPlayerRespawned()
 {
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);

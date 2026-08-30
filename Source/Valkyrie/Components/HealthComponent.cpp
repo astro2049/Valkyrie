@@ -33,16 +33,16 @@ void UHealthComponent::Reset()
 	myIsDead = false;
 }
 
-void UHealthComponent::ApplyDamage(const float aDamage, AController* const aDamageInstigator)
+void UHealthComponent::ApplyDamage(const float aDamage, AController* const anAttacker)
 {
 	if (myIsDead) {
 		return;
 	}
 
 	myHealth = FMath::Clamp(myHealth - aDamage, 0.f, myMaxHealth);
-	myDamagedDelegate.ExecuteIfBound(aDamage, aDamageInstigator);
+	myDamagedDelegate.ExecuteIfBound(aDamage, anAttacker);
 	if (myHealth <= 0.f) {
 		myIsDead = true;
-		myDiedDelegate.ExecuteIfBound(aDamageInstigator);
+		myDiedDelegate.ExecuteIfBound(anAttacker);
 	}
 }

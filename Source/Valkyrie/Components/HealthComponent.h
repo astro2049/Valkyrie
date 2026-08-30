@@ -21,7 +21,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void Reset();
-	void ApplyDamage(float aDamage, AController* aDamageInstigator);
+	void ApplyDamage(float aDamage, AController* anAttacker);
 
 	FHealthComponentDamaged& GetOnDamaged() { return myDamagedDelegate; }
 	FHealthComponentDied& GetOnDied() { return myDiedDelegate; }

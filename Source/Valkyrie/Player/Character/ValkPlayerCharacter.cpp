@@ -4,10 +4,13 @@
 
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "Valkyrie/GameModes/ValkGameMode.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/GAS/AbilityInputId.h"
 #include "Valkyrie/Player/GAS/AbilityTags.h"
@@ -185,17 +188,16 @@ void AValkPlayerCharacter::HandleInteract()
 	myInteractionComponent->Server_Interact();
 }
 
-void AValkPlayerCharacter::OnDamaged(const float, AController* const aDamageInstigator)
+void AValkPlayerCharacter::OnDamaged(const float, AController* const anAttacker)
 {
 	// play hit react montage
 	Multicast_PlayHitReact();
 
 	// play damage indicator
-	if (aDamageInstigator) {
+	if (anAttacker) {
 		AValkPlayerController* const playerController = CastChecked<AValkPlayerController>(GetController());
-		const APawn* const damageInstigatorPawn = aDamageInstigator->GetPawn();
-		if (damageInstigatorPawn) {
-			playerController->Client_PlayDamageRepresentations(damageInstigatorPawn->GetActorLocation());
+		if (const APawn* const attackerPawn = anAttacker->GetPawn()) {
+			playerController->Client_PlayDamageRepresentations(attackerPawn->GetActorLocation());
 		}
 	}
 }
@@ -205,9 +207,29 @@ void AValkPlayerCharacter::Multicast_PlayHitReact_Implementation()
 	PlayAnimMontage(myHitReactMontage);
 }
 
-void AValkPlayerCharacter::OnDied(AController* const aDamageInstigator) const
+void AValkPlayerCharacter::OnDied(AController* const anAttacker)
 {
-	CastChecked<AValkPlayerController>(GetController())->OnControlledPawnDied(aDamageInstigator);
+	AController* const controller = GetController();
+	FVector attackerLocation = GetActorLocation();
+	if (anAttacker) {
+		if (const APawn* const attackerPawn = anAttacker->GetPawn()) {
+			attackerLocation = attackerPawn->GetActorLocation();
+		}
+	}
+	Multicast_PlayDeathPresentation(attackerLocation);
+	CastChecked<AValkPlayerController>(controller)->Client_OnPlayerDied();
+	GetWorld()->GetAuthGameMode<AValkGameMode>()->PlayerDied(anAttacker, controller);
+}
+
+void AValkPlayerCharacter::Multicast_PlayDeathPresentation_Implementation(const FVector anAttackerLocation)
+{
+	const FVector deathImpulse = (GetActorLocation() - anAttackerLocation).GetSafeNormal() * myDeathImpulseStrength;
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	GetMesh()->WakeAllRigidBodies();
+	GetMesh()->AddImpulse(deathImpulse, TEXT("spine_05"), true);
 }
 
 void AValkPlayerCharacter::UpdateFov(const float aDeltaSecond)

@@ -21,7 +21,7 @@ public:
 private:
 	virtual void BeginPlay() override;
 
-	void OnHealthDied(AController* aDamageInstigator);
+	void OnHealthDied(AController* anAttacker);
 	void Respawn();
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

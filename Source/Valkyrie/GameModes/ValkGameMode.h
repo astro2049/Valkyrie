@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "TimerManager.h"
-#include "Valkyrie/Common/ValkTypes.h"
 #include "ValkGameMode.generated.h"
 
 class AValkPlayerState;
@@ -29,10 +28,13 @@ protected:
 
 private:
 	void AssignTeam(AValkPlayerState& aPlayerState) const;
+	void RespawnPlayer(AController* aController);
 	void ReturnToMainMenuAfterDelay();
 	void ReturnPlayersToMainMenu() const;
 	FTimerHandle myReturnToMainMenuTimerHandle;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myPostMatchDelay{5.f};
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myRespawnDelay{3.f};
 };
