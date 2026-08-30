@@ -34,7 +34,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	EValkFireMode myFireMode{EValkFireMode::Auto};
 	
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Valkyrie")
 	float mySpreadBaseDegs{1.25f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float mySpreadMaxSpeedDegs{1.75f};
