@@ -16,7 +16,7 @@ class VALKYRIE_API AValkGameMode : public AGameModeBase
 
 public:
 	AValkGameMode();
-	virtual void PostLogin(APlayerController* aNewPlayer) override;
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* aNewPlayer) override;
 	virtual AActor* ChoosePlayerStart_Implementation(AController* aPlayer) override;
 	virtual void PlayerDied(AController* aKillerController, AController* aVictimController);
 
@@ -27,7 +27,6 @@ protected:
 	int32 myTeamCount{1};
 
 private:
-	void AssignTeam(AValkPlayerState& aPlayerState) const;
 	void RespawnPlayer(AController* aController);
 	void ReturnToMainMenuAfterDelay();
 	void ReturnPlayersToMainMenu() const;

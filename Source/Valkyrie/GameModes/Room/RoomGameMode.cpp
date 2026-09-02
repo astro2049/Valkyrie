@@ -2,26 +2,26 @@
 
 #include "RoomGameMode.h"
 
+#include "GameFramework/GameStateBase.h"
+#include "Valkyrie/Common/ValkTeamAssignment.h"
 #include "Valkyrie/GameModes/MainMenu/MapDataAsset.h"
 #include "Valkyrie/GameModes/MainMenu/ValkGameInstance.h"
+#include "Valkyrie/Player/States/ValkPlayerState.h"
 
 ARoomGameMode::ARoomGameMode()
 {
+	PrimaryActorTick.bCanEverTick = false;
+	PlayerStateClass = AValkPlayerState::StaticClass();
 	bUseSeamlessTravel = true;
 }
 
-void ARoomGameMode::InitGame(
-	const FString& aMapName,
-	const FString& someOptions,
-	FString& anErrorMessage
-)
+void ARoomGameMode::PostLogin(APlayerController* const aNewPlayer)
 {
-	Super::InitGame(aMapName, someOptions, anErrorMessage);
+	const UMapDataAsset* const mapDataAsset = GetGameInstance<UValkGameInstance>()->GetSelectedMapDataAsset();
+	AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>();
+	ValkTeamAssignment::AssignTeam(*GetGameState<AGameStateBase>(), *playerState, mapDataAsset->myTeamCount);
 
-	const UValkGameInstance* const gameInstance = GetGameInstance<UValkGameInstance>();
-	if (const UMapDataAsset* const mapDataAsset = gameInstance->GetSelectedMapDataAsset()) {
-		myTeamCount = mapDataAsset->myTeamCount;
-	}
+	Super::PostLogin(aNewPlayer);
 }
 
 void ARoomGameMode::StartGame(const TSoftObjectPtr<UWorld> aLevel) const

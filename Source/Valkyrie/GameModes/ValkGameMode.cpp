@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "ValkGameState.h"
+#include "Valkyrie/Common/ValkTeamAssignment.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/States/ValkPlayerState.h"
 
@@ -19,38 +20,13 @@ AValkGameMode::AValkGameMode()
 	PlayerStateClass = AValkPlayerState::StaticClass();
 }
 
-void AValkGameMode::PostLogin(APlayerController* const aNewPlayer)
+void AValkGameMode::HandleStartingNewPlayer_Implementation(APlayerController* const aNewPlayer)
 {
-	Super::PostLogin(aNewPlayer);
-
 	AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>();
-	if (playerState->GetTeamId() == EValkTeamId::None) {
-		AssignTeam(*playerState);
-	}
-}
+	// Direct gameplay-map PIE fallback; normal sessions receive their team in RoomGameMode.
+	ValkTeamAssignment::AssignTeam(*GetGameState<AGameStateBase>(), *playerState, myTeamCount);
 
-void AValkGameMode::AssignTeam(AValkPlayerState& aPlayerState) const
-{
-	if (aPlayerState.GetTeamId() != EValkTeamId::None) {
-		return;
-	}
-
-	if (myTeamCount == 1) {
-		aPlayerState.SetTeamId(EValkTeamId::TeamA);
-		return;
-	}
-
-	int32 teamAPlayerCount = 0;
-	int32 teamBPlayerCount = 0;
-	for (const APlayerState* const playerState : GetGameState<AGameStateBase>()->PlayerArray) {
-		const AValkPlayerState* const valkPlayerState = CastChecked<AValkPlayerState>(playerState);
-		if (valkPlayerState->GetTeamId() == EValkTeamId::TeamA) {
-			teamAPlayerCount++;
-		} else if (valkPlayerState->GetTeamId() == EValkTeamId::TeamB) {
-			teamBPlayerCount++;
-		}
-	}
-	aPlayerState.SetTeamId(teamAPlayerCount <= teamBPlayerCount ? EValkTeamId::TeamA : EValkTeamId::TeamB);
+	Super::HandleStartingNewPlayer_Implementation(aNewPlayer);
 }
 
 AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlayer)

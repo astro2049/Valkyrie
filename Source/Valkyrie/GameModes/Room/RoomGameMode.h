@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Valkyrie/GameModes/ValkGameMode.h"
+#include "GameFramework/GameModeBase.h"
 #include "RoomGameMode.generated.h"
 
 UCLASS()
-class VALKYRIE_API ARoomGameMode : public AValkGameMode
+class VALKYRIE_API ARoomGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
 	ARoomGameMode();
-	virtual void InitGame(const FString& aMapName, const FString& someOptions, FString& anErrorMessage) override;
+	virtual void PostLogin(APlayerController* aNewPlayer) override;
 	
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void StartGame(TSoftObjectPtr<UWorld> aLevel) const;
