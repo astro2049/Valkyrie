@@ -7,7 +7,6 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
-#include "ValkGameState.h"
 #include "Valkyrie/Common/ValkTeamAssignment.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/States/ValkPlayerState.h"
@@ -15,7 +14,6 @@
 AValkGameMode::AValkGameMode()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	GameStateClass = AValkGameState::StaticClass();
 	PlayerControllerClass = AValkPlayerController::StaticClass();
 	PlayerStateClass = AValkPlayerState::StaticClass();
 }
@@ -37,15 +35,13 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 		{EValkTeamId::TeamB, "TeamB"}
 	};
 
-	// calculate index in team
 	const AValkPlayerState* const playerState = aPlayer->GetPlayerState<AValkPlayerState>();
 	int32 indexInTeam = 0;
 	for (const APlayerState* const currentPlayerState : GetGameState<AGameStateBase>()->PlayerArray) {
 		if (currentPlayerState == playerState) {
 			break;
 		}
-
-		if (CastChecked<AValkPlayerState>(currentPlayerState)->GetTeamId() == playerState->GetTeamId()) {
+		if (playerState->GetTeamId() == CastChecked<AValkPlayerState>(currentPlayerState)->GetTeamId()) {
 			indexInTeam++;
 		}
 	}
@@ -54,11 +50,8 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), playerStartActors);
 	for (AActor* const playerStartActor : playerStartActors) {
 		APlayerStart* const playerStart = CastChecked<APlayerStart>(playerStartActor);
-		if (playerStart->PlayerStartTag.IsEqual(
-			// so PlayerStartTag should be like TeamA_0, TeamA_1...
-			FName(teamNameMap[playerState->GetTeamId()] + "_" + FString::FromInt(indexInTeam))
-		)) {
-			return playerStart;
+		if (playerStart->PlayerStartTag.IsEqual(FName(teamNameMap[playerState->GetTeamId()] + "_" + FString::FromInt(indexInTeam)))) {
+			return playerStart; // so PlayerStartTag should be like TeamA_0, TeamA_1...
 		}
 	}
 
@@ -67,7 +60,7 @@ AActor* AValkGameMode::ChoosePlayerStart_Implementation(AController* const aPlay
 
 void AValkGameMode::PlayerDied(AController* const, AController* const aVictimController)
 {
-	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
+	if (!GetGameState<AGameStateBase>()->HasMatchEnded()) {
 		FTimerDelegate respawnDelegate;
 		respawnDelegate.BindUObject(this, &AValkGameMode::RespawnPlayer, aVictimController);
 		FTimerHandle respawnTimerHandle;
@@ -82,38 +75,11 @@ void AValkGameMode::PlayerDied(AController* const, AController* const aVictimCon
 
 void AValkGameMode::RespawnPlayer(AController* const aController)
 {
-	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
+	if (!GetGameState<AGameStateBase>()->HasMatchEnded()) {
 		APawn* const oldPawn = aController->GetPawn();
 		aController->UnPossess();
 		oldPawn->Destroy();
 		RestartPlayer(aController);
 		CastChecked<AValkPlayerController>(aController)->Client_OnPlayerRespawned();
 	}
-}
-
-void AValkGameMode::FinishMatch()
-{
-	AValkGameState* const gameState = GetGameState<AValkGameState>();
-	if (!gameState->HasMatchEnded()) {
-		gameState->SetMatchEnded();
-		ReturnToMainMenuAfterDelay();
-	}
-}
-
-void AValkGameMode::ReturnToMainMenuAfterDelay()
-{
-	if (!GetWorldTimerManager().IsTimerActive(myReturnToMainMenuTimerHandle)) {
-		GetWorldTimerManager().SetTimer(
-			myReturnToMainMenuTimerHandle,
-			this,
-			&AValkGameMode::ReturnPlayersToMainMenu,
-			myPostMatchDelay,
-			false
-		);
-	}
-}
-
-void AValkGameMode::ReturnPlayersToMainMenu() const
-{
-	GetWorld()->ServerTravel(TEXT("/Game/Maps/Level_MainMenu"));
 }

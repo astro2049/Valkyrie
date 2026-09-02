@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "TimerManager.h"
 #include "ValkGameMode.generated.h"
 
 class AValkPlayerState;
@@ -21,19 +20,10 @@ public:
 	virtual void PlayerDied(AController* aKillerController, AController* aVictimController);
 
 protected:
-	void FinishMatch();
+	void RespawnPlayer(AController* aController);
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie", meta=(ClampMin="1", ClampMax="2"))
 	int32 myTeamCount{1};
-
-private:
-	void RespawnPlayer(AController* aController);
-	void ReturnToMainMenuAfterDelay();
-	void ReturnPlayersToMainMenu() const;
-	FTimerHandle myReturnToMainMenuTimerHandle;
-
-	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	float myPostMatchDelay{5.f};
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	float myRespawnDelay{3.f};
 };

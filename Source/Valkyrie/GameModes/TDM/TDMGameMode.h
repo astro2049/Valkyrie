@@ -19,9 +19,13 @@ protected:
 	virtual void PlayerDied(AController* aKillerController, AController* aVictimController) override;
 
 private:
-	void HandlePlayerKilled(AController* aVictimController, AController* aKillerController);
-	void EndTDMMatch(EValkTeamId aWinningTeamId);
+	void FinishMatch(EValkTeamId aTeamId);
+	void ReturnPlayersToMainMenu() const;
 
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	int32 myScoreLimit{10};
+
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	float myPostMatchDelay{5.f};
+	FTimerHandle myReturnToMainMenuTimerHandle;
 };

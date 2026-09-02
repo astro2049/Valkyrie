@@ -3,7 +3,6 @@
 #include "TDMGameMode.h"
 
 #include "TDMGameState.h"
-#include "Valkyrie/GameModes/ValkGameState.h"
 #include "Valkyrie/Player/Controllers/ValkPlayerController.h"
 #include "Valkyrie/Player/States/TDM/TDMPlayerState.h"
 
@@ -19,32 +18,38 @@ void ATDMGameMode::PlayerDied(AController* const aKillerController, AController*
 {
 	Super::PlayerDied(aKillerController, aVictimController);
 
-	if (!GetGameState<AValkGameState>()->HasMatchEnded()) {
-		HandlePlayerKilled(aVictimController, aKillerController);
-	}
-}
-
-void ATDMGameMode::HandlePlayerKilled(
-	AController* const aVictimController,
-	AController* const aKillerController
-)
-{
-	ATDMPlayerState* const victimPlayerState = aVictimController->GetPlayerState<ATDMPlayerState>();
-	victimPlayerState->AddDeath();
-	if (aKillerController) {
-		ATDMPlayerState* const killerPlayerState = aKillerController->GetPlayerState<ATDMPlayerState>();
-		if (victimPlayerState != killerPlayerState && victimPlayerState->GetTeamId() != killerPlayerState->GetTeamId()) {
-			killerPlayerState->AddKill();
-			const int32 teamKills = GetGameState<ATDMGameState>()->AddTeamKill(killerPlayerState->GetTeamId());
-			if (teamKills >= myScoreLimit) {
-				EndTDMMatch(killerPlayerState->GetTeamId());
+	if (!GetGameState<ATDMGameState>()->HasMatchEnded()) {
+		ATDMPlayerState* const victimPlayerState = aVictimController->GetPlayerState<ATDMPlayerState>();
+		victimPlayerState->AddDeath();
+		if (aKillerController) {
+			ATDMPlayerState* const killerPlayerState = aKillerController->GetPlayerState<ATDMPlayerState>();
+			if (victimPlayerState != killerPlayerState && victimPlayerState->GetTeamId() != killerPlayerState->GetTeamId()) {
+				killerPlayerState->AddKill();
+				const int32 teamKills = GetGameState<ATDMGameState>()->AddTeamKill(killerPlayerState->GetTeamId());
+				if (teamKills >= myScoreLimit) {
+					FinishMatch(killerPlayerState->GetTeamId());
+				}
 			}
 		}
 	}
 }
 
-void ATDMGameMode::EndTDMMatch(const EValkTeamId aWinningTeamId)
+void ATDMGameMode::FinishMatch(const EValkTeamId aTeamId)
 {
-	GetGameState<AValkGameState>()->SetWinningTeamId(aWinningTeamId);
-	FinishMatch();
+	ATDMGameState* tdmGameState = GetGameState<ATDMGameState>();
+	if (!tdmGameState->HasMatchEnded()) {
+		tdmGameState->SetMatchEnded(aTeamId);
+		GetWorldTimerManager().SetTimer(
+			myReturnToMainMenuTimerHandle,
+			this,
+			&ATDMGameMode::ReturnPlayersToMainMenu,
+			myPostMatchDelay,
+			false
+		);
+	}
+}
+
+void ATDMGameMode::ReturnPlayersToMainMenu() const
+{
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Level_MainMenu"));
 }

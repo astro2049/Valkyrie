@@ -11,16 +11,26 @@ void ATDMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 	DOREPLIFETIME(ATDMGameState, myTeamAKills);
 	DOREPLIFETIME(ATDMGameState, myTeamBKills);
+	DOREPLIFETIME(ATDMGameState, myMatchHasEnded);
+	DOREPLIFETIME(ATDMGameState, myWinningTeamId);
 }
 
 int32 ATDMGameState::AddTeamKill(const EValkTeamId aTeamId)
 {
 	check(aTeamId == EValkTeamId::TeamA || aTeamId == EValkTeamId::TeamB);
-	int32 teamKills;
+	int32 teamKills{-1};
 	if (aTeamId == EValkTeamId::TeamA) {
 		teamKills = ++myTeamAKills;
-	} else {
+	} else if (aTeamId == EValkTeamId::TeamB) {
 		teamKills = ++myTeamBKills;
 	}
 	return teamKills;
+}
+
+void ATDMGameState::SetMatchEnded(const EValkTeamId aTeamId)
+{
+	if (!myMatchHasEnded) {
+		myWinningTeamId = aTeamId;
+		myMatchHasEnded = true;
+	}
 }
