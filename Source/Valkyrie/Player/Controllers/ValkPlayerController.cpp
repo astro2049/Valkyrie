@@ -2,10 +2,10 @@
 
 #include "ValkPlayerController.h"
 
-#include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
+#include "Valkyrie/GameModes/ValkGameMode.h"
 #include "Valkyrie/UI/DamageIndicatorInterface.h"
 #include "Valkyrie/UI/UIMessageSubsystem.h"
 
@@ -15,22 +15,21 @@ void AValkPlayerController::BeginPlay()
 
 	// setup input and UI
 	if (IsLocalController()) {
-		// I. input
-		// I.1. add input mapping context
-		GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->AddMappingContext(myInputMappingContext, 0);
-		// I.2. set input mode to game only
-		bShowMouseCursor = false;
-		const FInputModeGameOnly inputMode;
-		SetInputMode(inputMode);
-
-		// II. UI
-		// II.1. HUD
+		// I. UI
+		// hud
 		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
 		myHUDWidget->AddToViewport();
-		// II.2. scoreboard
+		// scoreboard
 		myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
 		myScoreboardWidget->AddToViewport();
 		myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
+		// esc menu
+		myEscMenuWidget = CreateWidget<UUserWidget>(this, myEscMenuWidgetClass);
+		myEscMenuWidget->AddToViewport();
+		myEscMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+
+		// II. input
+		SetInputModeGameOnly();
 	}
 }
 
@@ -52,6 +51,57 @@ void AValkPlayerController::SetupInputComponent()
 			this,
 			&AValkPlayerController::HideScoreboard
 		);
+		enhancedInputComponent->BindAction(
+			myInputActionEscMenuOpen,
+			ETriggerEvent::Completed,
+			this,
+			&AValkPlayerController::OpenEscMenu
+		);
+		enhancedInputComponent->BindAction(
+			myInputActionEscMenuClose,
+			ETriggerEvent::Completed,
+			this,
+			&AValkPlayerController::CloseEscMenu
+		);
+	}
+}
+
+void AValkPlayerController::SetInputModeUIOnly()
+{
+	GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->RemoveMappingContext(myGameplayInputMappingContext);
+	GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->AddMappingContext(myUIInputMappingContext, 0);
+	bShowMouseCursor = true;
+	const FInputModeGameAndUI inputMode;
+	SetInputMode(inputMode);
+}
+
+void AValkPlayerController::SetInputModeGameOnly()
+{
+	GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->RemoveMappingContext(myUIInputMappingContext);
+	GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->AddMappingContext(myGameplayInputMappingContext, 0);
+	bShowMouseCursor = false;
+	const FInputModeGameOnly inputMode;
+	SetInputMode(inputMode);
+}
+
+void AValkPlayerController::OpenEscMenu()
+{
+	myEscMenuWidget->SetVisibility(ESlateVisibility::Visible);
+	SetInputModeUIOnly();
+}
+
+void AValkPlayerController::CloseEscMenu()
+{
+	myEscMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+	SetInputModeGameOnly();
+}
+
+void AValkPlayerController::ReturnToMainMenu()
+{
+	if (GetNetMode() < NM_Client) {
+		GetWorld()->GetAuthGameMode()->ReturnToMainMenuHost();
+	} else {
+		ClientReturnToMainMenuWithTextReason(FText::GetEmpty());
 	}
 }
 
@@ -65,16 +115,6 @@ void AValkPlayerController::Client_OnPlayerRespawned_Implementation()
 {
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);
-}
-
-void AValkPlayerController::ShowScoreboard()
-{
-	myScoreboardWidget->SetVisibility(ESlateVisibility::Visible);
-}
-
-void AValkPlayerController::HideScoreboard()
-{
-	myScoreboardWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void AValkPlayerController::Client_PlayHitRepresentations_Implementation()
