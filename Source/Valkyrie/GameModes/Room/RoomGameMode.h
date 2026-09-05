@@ -13,8 +13,9 @@ class VALKYRIE_API ARoomGameMode : public AGameModeBase
 
 public:
 	ARoomGameMode();
+	virtual void InitGameState() override;
 	virtual void PostLogin(APlayerController* aNewPlayer) override;
 	
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
-	void StartGame(TSoftObjectPtr<UWorld> aLevel) const;
+	void StartGame() const;
 };

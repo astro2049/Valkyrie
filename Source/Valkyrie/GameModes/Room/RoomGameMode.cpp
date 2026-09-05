@@ -2,7 +2,7 @@
 
 #include "RoomGameMode.h"
 
-#include "GameFramework/GameStateBase.h"
+#include "RoomGameState.h"
 #include "Valkyrie/Common/ValkTeamAssignment.h"
 #include "Valkyrie/GameModes/MainMenu/MapDataAsset.h"
 #include "Valkyrie/GameModes/MainMenu/ValkGameInstance.h"
@@ -11,20 +11,29 @@
 ARoomGameMode::ARoomGameMode()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	GameStateClass = ARoomGameState::StaticClass();
 	PlayerStateClass = AValkPlayerState::StaticClass();
 	bUseSeamlessTravel = true;
 }
 
+void ARoomGameMode::InitGameState()
+{
+	Super::InitGameState();
+
+	GetGameState<ARoomGameState>()->SetMap(GetGameInstance<UValkGameInstance>()->GetSelectedMapDataAsset());
+}
+
 void ARoomGameMode::PostLogin(APlayerController* const aNewPlayer)
 {
-	const UMapDataAsset* const mapDataAsset = GetGameInstance<UValkGameInstance>()->GetSelectedMapDataAsset();
 	AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>();
-	ValkTeamAssignment::AssignTeam(*GetGameState<AGameStateBase>(), *playerState, mapDataAsset->myTeamCount);
+	const UMapDataAsset* const mapDataAsset = GetGameState<ARoomGameState>()->GetMap();
+	ValkTeamAssignment::AssignTeam(*GetGameState<ARoomGameState>(), *playerState, mapDataAsset->myTeamCount);
 
 	Super::PostLogin(aNewPlayer);
 }
 
-void ARoomGameMode::StartGame(const TSoftObjectPtr<UWorld> aLevel) const
+void ARoomGameMode::StartGame() const
 {
-	GetWorld()->ServerTravel(aLevel.ToSoftObjectPath().GetLongPackageName());
+	const UMapDataAsset* const mapDataAsset = GetGameState<ARoomGameState>()->GetMap();
+	GetWorld()->ServerTravel(mapDataAsset->myLevel.ToSoftObjectPath().GetLongPackageName());
 }
