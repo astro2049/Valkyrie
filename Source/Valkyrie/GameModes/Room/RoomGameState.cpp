@@ -11,7 +11,7 @@ void ARoomGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ARoomGameState, myMap);
 }
 
-void ARoomGameState::SetMap(UMapDataAsset* const aMapDataAsset)
+void ARoomGameState::SetMap(UDataAsset_Map* const aMapDataAsset)
 {
 	myMap = aMapDataAsset;
 	myMapChanged.Broadcast();

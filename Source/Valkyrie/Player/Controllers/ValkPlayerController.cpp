@@ -6,7 +6,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "Valkyrie/GameModes/ValkGameMode.h"
-#include "Valkyrie/UI/DamageIndicatorInterface.h"
 #include "Valkyrie/UI/UIMessageSubsystem.h"
 
 void AValkPlayerController::BeginPlay()
@@ -17,7 +16,7 @@ void AValkPlayerController::BeginPlay()
 	if (IsLocalController()) {
 		// I. UI
 		// hud
-		myHUDWidget = CreateWidget<UUserWidget>(this, myHUDWidgetClass);
+		myHUDWidget = CreateWidget<UUI_HUD>(this, myHUDWidgetClass);
 		myHUDWidget->AddToViewport();
 		// scoreboard
 		myScoreboardWidget = CreateWidget<UUserWidget>(this, myScoreboardWidgetClass);
@@ -62,6 +61,12 @@ void AValkPlayerController::SetupInputComponent()
 			ETriggerEvent::Completed,
 			this,
 			&AValkPlayerController::CloseEscMenu
+		);
+		enhancedInputComponent->BindAction(
+			myInputActionToggleInputActionsMenu,
+			ETriggerEvent::Completed,
+			this,
+			&AValkPlayerController::ToggleInputActionsMenu
 		);
 	}
 }
@@ -124,5 +129,5 @@ void AValkPlayerController::Client_PlayHitRepresentations_Implementation()
 
 void AValkPlayerController::Client_PlayDamageRepresentations_Implementation(const FVector aDamageSourceLocation)
 {
-	IDamageIndicatorInterface::Execute_PlayDamageIndicator(myHUDWidget, aDamageSourceLocation);
+	myHUDWidget->ShowDamageIndicator(aDamageSourceLocation);
 }

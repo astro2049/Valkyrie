@@ -6,7 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "ValkGameInstance.generated.h"
 
-class UMapDataAsset;
+class UDataAsset_Map;
 
 UCLASS()
 class VALKYRIE_API UValkGameInstance : public UGameInstance
@@ -15,11 +15,11 @@ class VALKYRIE_API UValkGameInstance : public UGameInstance
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
-	void SetSelectedMapDataAsset(UMapDataAsset* const aMapDataAsset) { mySelectedMap = aMapDataAsset; }
+	void SetSelectedMapDataAsset(UDataAsset_Map* const aMapDataAsset) { mySelectedMap = aMapDataAsset; }
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
-	UMapDataAsset* GetSelectedMapDataAsset() const { return mySelectedMap; }
+	UDataAsset_Map* GetSelectedMapDataAsset() const { return mySelectedMap; }
 
 private:
 	UPROPERTY()
-	TObjectPtr<UMapDataAsset> mySelectedMap{nullptr};
+	TObjectPtr<UDataAsset_Map> mySelectedMap{nullptr};
 };

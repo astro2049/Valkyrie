@@ -4,7 +4,7 @@
 
 #include "RoomGameState.h"
 #include "Valkyrie/Common/ValkTeamAssignment.h"
-#include "Valkyrie/GameModes/MainMenu/MapDataAsset.h"
+#include "Valkyrie/Data/DataAsset_Map.h"
 #include "Valkyrie/GameModes/MainMenu/ValkGameInstance.h"
 #include "Valkyrie/Player/States/ValkPlayerState.h"
 
@@ -26,7 +26,7 @@ void ARoomGameMode::InitGameState()
 void ARoomGameMode::PostLogin(APlayerController* const aNewPlayer)
 {
 	AValkPlayerState* const playerState = aNewPlayer->GetPlayerState<AValkPlayerState>();
-	const UMapDataAsset* const mapDataAsset = GetGameState<ARoomGameState>()->GetMap();
+	const UDataAsset_Map* const mapDataAsset = GetGameState<ARoomGameState>()->GetMap();
 	ValkTeamAssignment::AssignTeam(*GetGameState<ARoomGameState>(), *playerState, mapDataAsset->myTeamCount);
 
 	Super::PostLogin(aNewPlayer);
@@ -34,6 +34,6 @@ void ARoomGameMode::PostLogin(APlayerController* const aNewPlayer)
 
 void ARoomGameMode::StartGame() const
 {
-	const UMapDataAsset* const mapDataAsset = GetGameState<ARoomGameState>()->GetMap();
+	const UDataAsset_Map* const mapDataAsset = GetGameState<ARoomGameState>()->GetMap();
 	GetWorld()->ServerTravel(mapDataAsset->myLevel.ToSoftObjectPath().GetLongPackageName());
 }

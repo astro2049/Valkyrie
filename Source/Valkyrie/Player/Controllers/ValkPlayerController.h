@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Valkyrie/UI/UI_HUD.h"
 #include "ValkPlayerController.generated.h"
 
 class UInputAction;
@@ -25,8 +26,8 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_PlayDamageRepresentations(FVector aDamageSourceLocation); // called from player character
 private:
-	virtual void BeginPlay() override; // bind input mapping context, add HUD and scoreboard to viewport
-	virtual void SetupInputComponent() override; // bind open/close scoreboard action
+	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
 
 	// I. input
 	void SetInputModeUIOnly();
@@ -35,13 +36,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputMappingContext> myGameplayInputMappingContext{nullptr}; // gameplay input mapping context
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TObjectPtr<UInputAction> myInputActionOpenScoreboard{nullptr}; // toggle scoreboard action
+	TObjectPtr<UInputAction> myInputActionOpenScoreboard{nullptr}; // toggle scoreboard
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TObjectPtr<UInputAction> myInputActionEscMenuOpen{nullptr}; // open scoreboard action
+	TObjectPtr<UInputAction> myInputActionEscMenuOpen{nullptr}; // open scoreboard
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TObjectPtr<UInputMappingContext> myUIInputMappingContext{nullptr}; // UI input mapping context
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TObjectPtr<UInputAction> myInputActionEscMenuClose{nullptr}; // close scoreboard action
+	TObjectPtr<UInputAction> myInputActionEscMenuClose{nullptr}; // close scoreboard
+	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
+	TObjectPtr<UInputAction> myInputActionToggleInputActionsMenu; // toggle input actions menu
 
 	// II. Widget Functions
 	void ShowScoreboard() { myScoreboardWidget->SetVisibility(ESlateVisibility::Visible); }
@@ -51,10 +54,11 @@ private:
 	void CloseEscMenu();
 	UFUNCTION(BlueprintCallable, Category="Valkyrie")
 	void ReturnToMainMenu();
+	void ToggleInputActionsMenu() {myHUDWidget->ToggleInputActionsMenu(); }
 
 	// III. Widget Members
 	UPROPERTY()
-	TObjectPtr<UUserWidget> myHUDWidget{nullptr}; // widget
+	TObjectPtr<UUI_HUD> myHUDWidget{nullptr}; // widget
 	UPROPERTY()
 	TObjectPtr<UUserWidget> myScoreboardWidget{nullptr};
 	UPROPERTY()
@@ -62,7 +66,7 @@ private:
 
 	// IV. Widget Classes
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
-	TSubclassOf<UUserWidget> myHUDWidgetClass; // class
+	TSubclassOf<UUI_HUD> myHUDWidgetClass; // class
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")
 	TSubclassOf<UUserWidget> myScoreboardWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category="Valkyrie")

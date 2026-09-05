@@ -6,7 +6,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "RoomGameState.generated.h"
 
-class UMapDataAsset;
+class UDataAsset_Map;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSelectedMapDataAssetChanged);
 
@@ -22,13 +22,13 @@ public:
 	FSelectedMapDataAssetChanged myMapChanged;
 	
 	UFUNCTION(BlueprintPure, Category="Valkyrie")
-	UMapDataAsset* GetMap() const { return myMap; }
-	void SetMap(UMapDataAsset* aMapDataAsset);
+	UDataAsset_Map* GetMap() const { return myMap; }
+	void SetMap(UDataAsset_Map* aMapDataAsset);
 
 private:
 	UFUNCTION()
 	void OnRep_Map();
 
 	UPROPERTY(ReplicatedUsing=OnRep_Map)
-	TObjectPtr<UMapDataAsset> myMap{nullptr};
+	TObjectPtr<UDataAsset_Map> myMap{nullptr};
 };

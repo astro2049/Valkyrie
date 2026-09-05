@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "MapDataAsset.generated.h"
+#include "DataAsset_Map.generated.h"
 
 class UTexture2D;
 class UWorld;
 
 UCLASS(BlueprintType)
-class VALKYRIE_API UMapDataAsset : public UDataAsset
+class VALKYRIE_API UDataAsset_Map : public UDataAsset
 {
 	GENERATED_BODY()
 
